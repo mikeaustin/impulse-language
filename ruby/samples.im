@@ -1,0 +1,30 @@
+#!/usr/bin/ruby impulse.rb
+
+print: "Hello, World!"
+
+7 - 5 + 3  == (7 - 5) + 3
+
+10 sin + 1 == 1 + 10 sin
+
+evens-squared = [1..10] map: |n| n even ? n * n
+
+[[0..4], [5..9]] zip: |n, m|
+  n * n < m ? [n * n, m * m]
+end
+
+[1..5] fold: |a, n| n even ? a * n, with: 1
+
+"foo" size == 3
+"foo" proto proto type  # should be <object>
+
+10 slots
+
+fact = |n| n > 1 ? n * fact [n - 1] : 1
+fact [5]
+
+f = |x, y| x + y
+f [2, 3]
+
+add = |x| |n| n + x
+add-1 = add [1]
+add-1 [5]
