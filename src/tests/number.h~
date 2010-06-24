@@ -1,0 +1,49 @@
+//
+// tests/number.h
+//
+// Copyright 2008-2010 Mike Austin
+// All rights reserved.
+//
+
+namespace impulse {
+
+	class NumberTest : public UnitTest {
+
+	 public:
+	 
+		void runTest()
+		{
+			cout << "Testing Number..." << endl;
+			cout << "------------------------------------------------------------" << endl;
+
+			Frame lobby;
+
+			{
+				Array args( 1 ); args[0] = 5;
+				ASSERT( Number::mul_( val( 3 ), args ) == 15 );
+			}
+
+			{
+				Array args;
+				ASSERT( Number::sin_( val( 10 ), args ) == ::sinf( 10.0f ) );
+			}
+			
+			{
+				Array args;
+				ASSERT( val( 10 ).send( sin, args, lobby ) == ::sinf( 10.0f ) );
+			}
+			
+			{
+				Array args;
+				Frame& message = *new Message( sin, args );
+				ASSERT( message.eval( val( 10 ), args, lobby ) == ::sinf( 10.0f ) );
+			}
+			
+			cout << "------------------------------------------------------------" << endl;
+			cout << endl;
+		}
+
+	};
+
+}
+
