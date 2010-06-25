@@ -1,5 +1,5 @@
 //
-// symbol.h
+// core/protos/symbol.h
 //
 // Copyright 2008-2010 Mike Austin
 // All rights reserved.
@@ -34,9 +34,12 @@ namespace impulse {
 
 	Symbol& mul = *new Symbol( "*" );
 	Symbol& add = *new Symbol( "+" );
+	Symbol& _sin = *new Symbol( "sin" );
 	Symbol& x   = *new Symbol( "x" );
-	//GCValue mul_( mul );
-	//GCValue add_( add );
+	GCValue mul_( mul );
+	GCValue add_( add );
+	GCValue x_( x );
+	GCValue sin( sin );
 
 }
 

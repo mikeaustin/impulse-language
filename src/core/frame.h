@@ -1,5 +1,5 @@
 //
-// frame.h
+// core/frame.h
 //
 // Copyright 2008-2010 Mike Austin
 // All rights reserved.
@@ -29,6 +29,9 @@ namespace impulse {
 
 		Value setSlot( const SymbolId symbolId, const Value value );
 		Value getSlot( const SymbolId symbolId );
+
+		Value setSlot( const Symbol& symbol, const Value value );
+		Value getSlot( const Symbol& symbol );
 
 		virtual Value eval( Value receiver, const Array& args, Value context );
 		static Value eval2( Frame* self, Value receiver, const Array& args, Value context );

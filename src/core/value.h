@@ -1,5 +1,5 @@
 //
-// value.h
+// core/value.h
 //
 // Copyright 2008-2010 Mike Austin
 // All rights reserved.
@@ -23,6 +23,7 @@ namespace impulse {
 	class Frame;
 	class Void;
 	class Symbol;
+	class val;
 
 	template <typename T>
 	class array {
@@ -55,8 +56,6 @@ namespace impulse {
  // class Atom
  //
 
-	class Frame;
-
 	class Atom {
 
 	 public:
@@ -84,6 +83,7 @@ namespace impulse {
 		Value eval( Value receiver, const Array& args, Value context );
 		//Value send( const Symbol& selector, const Array& args, Value context );
 		Value send( const SymbolId selectorId, const Array& args, Value context );
+		Value send( const Symbol& selector, const Array& args, Value context );
 	
 		Frame& getFrame() const;
 		float  getFloat() const { return _float; }
@@ -93,7 +93,9 @@ namespace impulse {
 		Frame& getProto();
 
 		string toString() const;
-	
+
+		operator float() { return getFloat(); }
+
 //	 protected:
 
 //		Frame* _frame;
@@ -117,6 +119,20 @@ namespace impulse {
 		~GCValue();
 		
 		Value& operator =( const Value& value );
+
+	};
+
+ //
+ // class val
+ //
+
+	class val : public Value {
+
+	 public:
+
+		val( const Value& value ) : Value( value ) { }
+
+	 	bool operator ==( const Value& value ) { return _float == value._float; }
 
 	};
 	

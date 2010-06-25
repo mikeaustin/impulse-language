@@ -1,5 +1,5 @@
 //
-// frame.cpp
+// core/frame.cpp
 //
 // Copyright 2008-2010 Mike Austin
 // All rights reserved.
@@ -33,6 +33,16 @@ namespace impulse {
 		}
 
 		return Void::instance();
+	}
+
+	inline Value Frame::setSlot( const Symbol& symbol, const Value value )
+	{
+		return setSlot( symbol.getId(), value );
+	}
+
+	inline Value Frame::getSlot( const Symbol& symbol )
+	{
+		return getSlot( symbol.getId() );
 	}
 
 	inline Value Frame::eval( Value receiver, const Array& args, Value context )
@@ -85,8 +95,9 @@ namespace impulse {
 
 	inline void Frame::incRef()
 	{
-		cout << "                                                  + " << toString( *this ) << endl;
-
+#ifdef DEBUG_GARBAGE
+		cout << "\t\t\t\t\t\t\t\t+ " << toString( *this ) << endl;
+#endif
 		++_refCount;
 	}
 
@@ -94,17 +105,19 @@ namespace impulse {
 	{
 		--_refCount;
 
-		cout << "                                                  - " << toString( *this );
-		
+#ifdef DEBUG_GARBAGE
+		cout << "\t\t\t\t\t\t\t\t- " << toString( *this );
+#endif		
 		if (_refCount == 0)
 		{
-			cout << "\r\t\t\t\t\t\t\t\tdeleting";
-
-			cout << endl;
-			
+#ifdef DEBUG_GARBAGE
+			cout << "\r\t\t\t\t\t\t\t\t\t\tdeleting" << endl;
+#endif
 			delete this;
 		}
+#ifdef DEBUG_GARBAGE
 		else cout << endl;
+#endif
 	}
 
 }

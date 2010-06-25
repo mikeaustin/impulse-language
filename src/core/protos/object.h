@@ -1,5 +1,5 @@
 //
-// object.h
+// core/protos/object.h
 //
 // Copyright 2008-2010 Mike Austin
 // All rights reserved.

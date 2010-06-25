@@ -1,5 +1,5 @@
 //
-// lambda.h
+// core/protos/lambda.h
 //
 // Copyright 2008-2010 Mike Austin
 // All rights reserved.

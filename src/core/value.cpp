@@ -1,5 +1,5 @@
 //
-// value.cpp
+// core/value.cpp
 //
 // Copyright 2008-2010 Mike Austin
 // All rights reserved.
@@ -39,6 +39,11 @@ namespace impulse {
 	inline Value Value::send( const SymbolId selectorId, const Array& args, Value context )
 	{
 		return getFrame().send( *this, selectorId, args, context );
+	}
+
+	inline Value Value::send( const Symbol& selector, const Array& args, Value context )
+	{
+		return getFrame().send( *this, selector.getId(), args, context );
 	}
 
 	inline Frame& Value::getFrame() const { return *_frame; }

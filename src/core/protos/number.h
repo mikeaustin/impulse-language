@@ -1,11 +1,12 @@
 //
-// number.h
+// core/protos/number.h
 //
 // Copyright 2008-2010 Mike Austin
 // All rights reserved.
 //
 
 #include <sstream>
+#include <cmath>
 
 #include "object.h"
 
@@ -28,10 +29,9 @@ namespace impulse {
 
 		Number() : Frame( Object::instance() )
 		{
-			cout << "Number::Number() " << endl;
-
 			setSlot( add.getId(), *new Method( add_, 1 ) );
 			setSlot( mul.getId(), *new Method( mul_, 1 ) );
+			setSlot( _sin, *new Method( sin, 0 ) );
 		}
 /*
 		virtual Value Xsend( Value receiver, const Symbol& selector, const Array& args, Value context )
@@ -77,6 +77,11 @@ namespace impulse {
 		{
 			return receiver.getFloat() * args[0].getFloat();
 		}
+
+		static Value sin( Value receiver, const Array& args )
+		{
+			return ::sinf( receiver.getFloat() );
+		}
 		
 	};
 
@@ -84,10 +89,7 @@ namespace impulse {
 	
 	 public:
 	 
-	 	NumberValue() : Frame( Number::instance() )
-	 	{
-			cout << "NumberValue::NumberValue()" << endl;
-	 	}
+	 	NumberValue() : Frame( Number::instance() ) { }
 
 		virtual string toString( Value receiver ) const
 		{
