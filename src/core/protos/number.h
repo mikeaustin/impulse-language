@@ -25,41 +25,24 @@ namespace impulse {
 
 	class Number : public Frame {
 
+		static const Frame* addArgTypes[];
+		static const Frame* powArgTypes[];
+
 	 public:
 
 		Number() : Frame( Object::instance() )
 		{
-			setSlot( add.getId(), *new Method( add_, 1 ) );
-			setSlot( mul.getId(), *new Method( mul_, 1 ) );
-			setSlot( _sin, *new Method( sin, 0 ) );
+			setSlot( Symbol::at( "+" ), *new Method( add_, 1, addArgTypes ) );
+			setSlot( Symbol::at( "-" ), *new Method( sub_, 1 ) );
+			setSlot( Symbol::at( "*" ), *new Method( mul_, 1 ) );
+			setSlot( Symbol::at( "/" ), *new Method( div_, 1 ) );
+			setSlot( Symbol::at( "%" ), *new Method( mod_, 1 ) );
+			setSlot( Symbol::at( "sin" ), *new Method( sin, 0 ) );
+			setSlot( Symbol::at( "cos" ), *new Method( cos, 0 ) );
+			setSlot( Symbol::at( "pow:" ), *new Method( pow_, 1, powArgTypes ) );
 		}
-/*
-		virtual Value Xsend( Value receiver, const Symbol& selector, const Array& args, Value context )
-		{
-			static MethodCache cache;
 
-			if (&selector == cache.selector)
-			{
-				return cache.method->eval( receiver, args, context );
-			}
-
-			SlotMap::iterator iter = _slots.find( &selector );
-
-			if (iter != _slots.end())
-			{
-				Value method = iter->second;
-
-				cache.selector = (Symbol*) &selector;
-				cache.method   = &method.getFrame();
-			}
-
-			return Frame::send( receiver, selector, args, context );
-		}
-*/
-		virtual string toString( Value receiver ) const
-		{
-			return "[Number]";
-		}
+		virtual string inspect( Value receiver ) const { return "<number>"; }
 
 		static Frame& instance()
 		{
@@ -68,19 +51,35 @@ namespace impulse {
 			return number.getFrame();
 		}
 
-		static Value add_( Value receiver, const Array& args )
-		{
-			return receiver.getFloat() + args[0].getFloat();
+#define OPERATOR_METHOD( function, op ) \
+		static Value function( Value receiver, const Array& args ) \
+		{ \
+			return receiver.getFloat() op args[0].getFloat(); \
 		}
-	
-		static Value mul_( Value receiver, const Array& args )
+
+		OPERATOR_METHOD( add_, + );
+		OPERATOR_METHOD( sub_, - );
+		OPERATOR_METHOD( mul_, * );
+		OPERATOR_METHOD( div_, / );
+
+		static Value mod_( Value receiver, const Array& args )
 		{
-			return receiver.getFloat() * args[0].getFloat();
+			return (long) receiver.getFloat() % (long) args[0].getFloat();
 		}
 
 		static Value sin( Value receiver, const Array& args )
 		{
-			return ::sinf( receiver.getFloat() );
+			return ::sin( receiver.getFloat() );
+		}
+
+		static Value cos( Value receiver, const Array& args )
+		{
+			return ::cos( receiver.getFloat() );
+		}
+
+		static Value pow_( Value receiver, const Array& args )
+		{
+			return ::pow( receiver.getFloat(), args[0].getFloat() );
 		}
 		
 	};
@@ -91,7 +90,7 @@ namespace impulse {
 	 
 	 	NumberValue() : Frame( Number::instance() ) { }
 
-		virtual string toString( Value receiver ) const
+		virtual string inspect( Value receiver ) const
 		{
 			ostringstream stream; stream << receiver.getFloat();
 			

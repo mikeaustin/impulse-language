@@ -25,12 +25,12 @@ namespace impulse {
 			
 			{
 				Array args( 1 ); args[0] = 5;
-				ASSERT( val( 3 ).send( mul, args, lobby ) == 15 );
+				ASSERT( val( 3 ).send( Symbol::at( "*" ), args, lobby ) == 15 );
 			}
 			
 			{
 				Array args( 1 ); args[0] = 5;
-				Frame& message = *new Message( mul, args );
+				Frame& message = *new Message( Symbol::at( "*" ), args );
 				ASSERT( message.eval( val( 3 ), args, lobby ) == 15 );
 			}
 			

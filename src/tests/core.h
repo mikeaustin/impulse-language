@@ -16,63 +16,71 @@ namespace impulse {
 			cout << "Testing Core..." << endl;
 			cout << "------------------------------------------------------------" << endl;
 
-			Frame lobby;
+			Lobby lobby;
 
 			{
 				ASSERT( val( 5.0f ) == val( 5.0f ) );
-				ASSERT( lobby.setSlot( x, 3 ) == 3 );
-				ASSERT( lobby.getSlot( x ) == 3 );
+				ASSERT( lobby.setSlot( Symbol::at( "x" ), 3 ) == 3 );
+				ASSERT( lobby.getSlot( Symbol::at( "x" ) ) == 3 );
 			}
 			
 			{
-				OUTPUT( lobby.setSlot( mul.getId(), mul ) );
-				ASSERT( mul._refCount == 2 );
+				OUTPUT( lobby.setSlot( Symbol::at( "*" ), Symbol::at( "*" ) ) );
+				ASSERT( Symbol::at( "*" )._refCount == 2 );
 				
-				OUTPUT( lobby.setSlot( mul.getId(), 5 ) );
-				ASSERT( mul._refCount == 1 );
+				OUTPUT( lobby.setSlot( Symbol::at( "*" ), 5 ) );
+				ASSERT( Symbol::at( "*" )._refCount == 1 );
 
-				lobby.setSlot( add.getId(), Void::instance() );
-				lobby.setSlot( add.getId(), *new Frame() );
+				lobby.setSlot( Symbol::at( "+" ), Void::instance() );
+				lobby.setSlot( Symbol::at( "+" ), *new Frame() );
 			}
 
 			{
 				Array args( 1 ); args[0] = 5;
 		
-				ASSERT( Value( 3 ).send( mul, args, lobby ) == 15 );
+				ASSERT( Value( 3 ).send( Symbol::at( "*" ), args, lobby ) == 15 );
 			}
 
 			{
 				Array args( 1 ); args[0] = 5;
 				
-				Message message( mul, args );
+				Message message( Symbol::at( "*" ), args );
 				Array msgArgs;
 
 				ASSERT( message.eval( val( 3 ), msgArgs, lobby ) == 15 );
 			}
 
 			{
-				lobby.setSlot( x, 3 );
+				lobby.setSlot( Symbol::at( "x" ), 3 );
 
-				Array args( 1 ); args[0] = 5;
+				Array args1;
+				Array args2( 1 ); args2[0] = 5;
 
 				vector<Value> messages;
 
-				messages.push_back( *new Message( x, args ) );
-				messages.push_back( *new Message( mul, args ) );
-				//messages.push_back( *new MulMessage( args ) );
+				messages.push_back( *new Message( Symbol::at( "x" ), args1 ) );
+				messages.push_back( *new Message( Symbol::at( "*" ), args2 ) );
+				//messages.push_back( *new MulMessage( args2 ) );
 				Frame& expression = *new Expression( messages );
-				Frame& block = *new Lambda( expression );
+				Frame& block = *new Lambda( args1, expression, lobby );
 
 				const Array exprArgs;
 
 				//cout << expression.eval( lobby, exprArgs, lobby ).getFloat() << endl;
-				ASSERT( (block._eval2)( &block, lobby, exprArgs, lobby ) == 15 );
+				ASSERT( block.eval( lobby, exprArgs, lobby ) == 15 );
 #ifndef DEBUG
-				for (int i = 0; i < 100000000; i++)
+				if (1)
 				{
-					//(expression._eval2)( &expression, lobby, exprArgs, lobby );
-					(block._eval2)( &block, lobby, exprArgs, lobby );
-					//block.eval( lobby, exprArgs, lobby );
+					for (int i = 0; i < 100000000; i++)
+					{
+						block.eval( lobby, exprArgs, lobby );
+					}
+				}
+
+				if (0)
+				{
+					ASSERT( (block._eval3)( &block, 1, lobby, exprArgs, lobby ) == 15 );
+					(block._eval3)( &block, 100000000, lobby, exprArgs, lobby );
 				}
 #endif
 			}

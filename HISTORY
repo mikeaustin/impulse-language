@@ -1,0 +1,39 @@
+//
+// LICENSE
+//
+// Copyright (c) 2008-2010, Mike L. Austin
+// All rights reserved.
+//
+
+2009-05-05 impulse-0.5-source.tgz
+
+  Initial release
+
+  * Support for basic expressions and math
+  * Prototype inheritance and slot lookups working
+  * Core runtime and parser framework complete
+
+2009-05-21 impulse-0.5.1-src-bin.tgz
+
+  * Added literal floating point numbers, ranges (1..5), arrays (1,2,3) and points (2@3)
+  * Added keyword message support, currently limited to one argument
+  + Added block closures (f = x -> x * x), currently limited to one argument
+  + Separated native types into objects and prototypes, added "proto" and "slots" methods
+  + Added file access modes (ReadOnly, ReadWrite, OverWrite and Append)
+  + Added support for running Impulse scripts from a file
+  + Created basic OpenGL prototype - supports Linux, Mac OS X and Windows via GLUT
+  + Added samples directory with samples for math, reflection, types and OpenGL
+  + Numerous bug fixes...
+ 
+2009-05-31 impulse-0.5.2-src-bin.tgz
+
+  + Optimized environment creation and block evaluation
+  + Added basic Matrix class and a few more OpenGL calls
+  + Blocks can now span several lines, closed by an "end"
+  + Added more samples to the samples directory
+  + Added common math message optimizations (*, /, +, -, abs, sin, cos)
+  + Keyword messages can now take any number of arguments
+  + Native methods can request to type check arguments
+  + Limited object creation functionality - "foo = object: -> x = 5"
+  + More optimizations and bug fixes...
+

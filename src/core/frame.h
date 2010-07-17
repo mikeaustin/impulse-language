@@ -20,75 +20,53 @@ namespace impulse {
  // class Frame
  //
 
+	typedef Value (*EvalFunc)( Frame* self, Value receiver, const Array& args, Value context );
+
 	class Frame {
 
 	 public:
 
-	 	Frame()               : _proto( NULL ), _refCount( 0 ) { _eval2 = &eval2; }
-	 	Frame( Frame& proto ) : _proto( &proto ), _refCount( 0 ) { }
+	 	Frame()               : _proto( NULL ), _refCount( 1 ) { }
+	 	Frame( Frame& proto ) : _proto( &proto ), _refCount( 1 ) { }
 
-		Value setSlot( const SymbolId symbolId, const Value value );
-		Value getSlot( const SymbolId symbolId );
+		virtual ~Frame() { }
+
+		virtual void initSlots() { }
 
 		Value setSlot( const Symbol& symbol, const Value value );
 		Value getSlot( const Symbol& symbol );
 
 		virtual Value eval( Value receiver, const Array& args, Value context );
-		static Value eval2( Frame* self, Value receiver, const Array& args, Value context );
-		Value (*_eval2)( Frame* self, Value receiver, const Array& args, Value context );
 		
-		Value send( Value receiver, const SymbolId selectorId, const Array& args, Value context );
+		Value send( Value receiver, const Symbol& selector, const Array& args, Value context );
 
-		virtual string toString( Value receiver ) const { return "[Frame]"; }
+		virtual string inspect( Value receiver ) const { return "<frame>"; }
 
 		Frame& getProto() const { return *_proto; }
+
+		void autorelease( Frame& frame ) { _releasePool.push_back( &frame ); }
 
 		void incRef();
 		void decRef();
 
+		struct Cache {
+
+		 	Cache() : selectorId( -1 ) { }
+		 	
+			SymbolId selectorId;
+			Frame*   frame;
+
+		};
+
 //	 private:
 
-		SlotMap _slots;
-		Frame*  _proto;
-		int     _refCount;
+		SlotMap  _publicSlots;
+		Frame*   _proto;
+		short    _refCount;
+		Value (*_eval3)( Frame*, const int, Value, const Array&, Value );
+		Cache    _cache;
 
-	};
-
- //
- // class Nil
- //
-
-	class Nil : public Frame {
-
-	 public:
-
-		static Frame& instance()
-		{
-			static Nil nil;
-
-			return nil;
-		}
-
-		virtual string toString( Value receiver ) const { return "[Nil]"; }
-
-	};
-
- //
- // class Void
- //
-
-	class Void : public Frame {
-
-	 public:
-
-		static Frame& instance()
-		{
-			static Void void_;
-
-			return void_;
-		}
-
-		virtual string toString( Value receiver ) const { return "[Void]"; }
+		static vector<Frame*> _releasePool;
 
 	};
 

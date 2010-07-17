@@ -20,37 +20,13 @@ namespace impulse {
 	class Atom;
 	class Value;
 	class GCValue;
+	class val;
+	
 	class Frame;
 	class Void;
 	class Symbol;
-	class val;
-
-	template <typename T>
-	class array {
-	
-	 public:
-
-		array()              : _size( 0 ) { }
-		array( size_t size ) : _size( size ) { }
-
-		unsigned int size() const { return _size; }
-
-		T& operator []( size_t index ) { return (T&) _array[0][index]; }
-		const T& operator []( size_t index ) const { return (T&) _array[0][index]; }
-		//T& operator []( size_t index ) { return _array[index]; }
-		//const T& operator []( size_t index ) const { return _array[index]; }
-
-	 private:
-	 
-		char   _array[sizeof(T)][5];
-		//T      _array[5];
-		size_t _size;
-	 
-	};
-
-	typedef unsigned short SymbolId;
-	//typedef vector<Value> Array;
-	typedef array<Value> Array;
+	class Array;
+	class Lobby;
 
  //
  // class Atom
@@ -60,11 +36,11 @@ namespace impulse {
 
 	 public:
 
-		Atom( Frame& frame, float value );
-		//Atom( float value );
+		Atom() { }
+		Atom( Frame& frame, double value )  : _frame( &frame ), _float( value ) { }
 
 		Frame* _frame;
-		float  _float;
+		double _float;
 	
 	};
 
@@ -77,31 +53,40 @@ namespace impulse {
 	 public:
 
 	 	Value();
+	 	Value( Atom atom );
 	 	Value( Frame& frame );
-		Value( float value );
+	 	Value( Void& frame );
+	 	Value( Lobby& frame );
+		Value( double value );
+		Value( string value );
+
+		Value setSlot( const Symbol& symbol, const Value value );
+		Value getSlot( const Symbol& symbol );
 
 		Value eval( Value receiver, const Array& args, Value context );
-		//Value send( const Symbol& selector, const Array& args, Value context );
-		Value send( const SymbolId selectorId, const Array& args, Value context );
 		Value send( const Symbol& selector, const Array& args, Value context );
 	
 		Frame& getFrame() const;
-		float  getFloat() const { return _float; }
-//		template <typename T>
-//		T& get() const { return *dynamic_cast<T*>( _frame ); }
+		double  getFloat() const { return _float; }
+		template <typename T>
+		T& get() const { return *static_cast<T*>( _frame ); }
 
-		Frame& getProto();
+		Frame& getProto() const;
 
-		string toString() const;
+		Value clone();
 
-		operator float() { return getFloat(); }
+		string inspect() const;
+
+		operator double() { return getFloat(); }
 
 //	 protected:
 
 //		Frame* _frame;
-//		float  _float;
+//		double _float;
 
 	};
+
+	ostream& operator <<( ostream& stream, Value value );
 
  //
  // class CGValue
@@ -113,7 +98,8 @@ namespace impulse {
 
 	 	GCValue();
 	 	GCValue( Frame& frame );
-		GCValue( float value );
+	 	GCValue( const Value& value );
+		GCValue( double value );
 		GCValue( const GCValue& value );
 		
 		~GCValue();
@@ -130,11 +116,14 @@ namespace impulse {
 
 	 public:
 
+		val()                     : Value() { }
 		val( const Value& value ) : Value( value ) { }
 
 	 	bool operator ==( const Value& value ) { return _float == value._float; }
 
 	};
+
+	typedef unsigned short SymbolId;
 	
 }
 

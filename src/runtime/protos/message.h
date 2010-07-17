@@ -8,7 +8,7 @@
 #ifndef IMPULSE_MESSAGE_H
 #define IMPULSE_MESSAGE_H
 
-namespace runtime {
+namespace impulse {
 
  //
  // class Message
@@ -19,56 +19,56 @@ namespace runtime {
 	 public:
 
 		Message( Symbol& selector, const Array& msgArgs )
-		 : _selector( selector ), _selectorId( selector.getId() ), _msgArgs( msgArgs ) { _eval2 = &eval2; }
+		 : _selector( selector ), _msgArgs( msgArgs ) { }
 
-		virtual string toString( Value receiver ) const { return "[Message]"; }
+		virtual string inspect( Value receiver ) const { return "<message>"; }
 
 		inline Value eval( Value receiver, const Array& args, Value context )
 		{
-			//ENTER( "Message::eval( receiver = " << receiver.toString() << ", _selector = " << _selector.toString() << " )" );
+			ENTER( "Message::eval( receiver = " << receiver.inspect() << ", _selector = " << _selector.inspect(_selector) << " )" );
 
 			Array msgArgs( _msgArgs.size() );
 			
 			switch (_msgArgs.size())
 			{
-				case 3: msgArgs[2] = _msgArgs[2].eval( receiver, args, context );
-				case 2: msgArgs[1] = _msgArgs[1].eval( receiver, args, context );
-				case 1: msgArgs[0] = _msgArgs[0].eval( receiver, args, context );
+				case 5: msgArgs[4] = _msgArgs[4].eval( context, args, context );
+				case 4: msgArgs[3] = _msgArgs[3].eval( context, args, context );
+				case 3: msgArgs[2] = _msgArgs[2].eval( context, args, context );
+				case 2: msgArgs[1] = _msgArgs[1].eval( context, args, context );
+				case 1: msgArgs[0] = _msgArgs[0].eval( context, args, context );
+				case 0: ;
 			}
 			
-			//Value result = receiver.send( _selector.get<Symbol>(), msgArgs, context );
 			//Value result = receiver.send( (Symbol&) _selector.getFrame(), msgArgs, context );
-			return receiver.send( _selector.getId(), msgArgs, context );
+			Value result = receiver.send( _selector, msgArgs, context );
+			
+			LEAVE( result.inspect() );
+			
+			return result;
 		}
 
-		inline static Value eval2( Frame* self_, Value receiver, const Array& args, Value context )
+		Array evalArgs( Value context )
 		{
-			//ENTER( "Message::eval( receiver = " << receiver.toString() << ", _selector = " << _selector.toString() << " )" );
+			Array msgArgs( _msgArgs.size() );
+			Array args;
 
-			Message* self = (Message*) self_;
-
-			Array msgArgs( self->_msgArgs.size() );
-			Array& _msgArgs = self->_msgArgs;
-
-			switch (self->_msgArgs.size())
+			switch (_msgArgs.size())
 			{
-				case 5: msgArgs[4] = _msgArgs[4].eval( receiver, args, context );
-				case 4: msgArgs[3] = _msgArgs[3].eval( receiver, args, context );
-				case 3: msgArgs[2] = _msgArgs[2].eval( receiver, args, context );
-				case 2: msgArgs[1] = _msgArgs[1].eval( receiver, args, context );
-				case 1: msgArgs[0] = _msgArgs[0].eval( receiver, args, context );
+				case 5: msgArgs[4] = _msgArgs[4].eval( context, args, context );
+				case 4: msgArgs[3] = _msgArgs[3].eval( context, args, context );
+				case 3: msgArgs[2] = _msgArgs[2].eval( context, args, context );
+				case 2: msgArgs[1] = _msgArgs[1].eval( context, args, context );
+				case 1: msgArgs[0] = _msgArgs[0].eval( context, args, context );
+				case 0: ;
 			}
-
-			//Value result = receiver.send( _selector.get<Symbol>(), msgArgs, context );
-			//Value result = receiver.send( (Symbol&) _selector.getFrame(), msgArgs, context );
-			return receiver.send( self->_selectorId, msgArgs, context );
+			
+			return msgArgs;
 		}
-	
+
 //	 protected:
 
-		Symbol&  _selector;
-		SymbolId _selectorId;
-		Array    _msgArgs;
+		Symbol& _selector;
+		Array   _msgArgs;
 
 	};
 
@@ -81,11 +81,11 @@ namespace runtime {
 	 public:
 
 		MulMessage( const Array& msgArgs )
-		 : Message( mul, msgArgs ) { _eval2 = &eval2; }
+		 : Message( Symbol::at( "*" ), msgArgs ) { }
 
 		virtual Value eval( Value receiver, const Array& args, Value context )
 		{
-			if (_msgArgs[0].getFloat() != numeric_limits<float>::max())
+			if (_msgArgs[0].getFloat() != numeric_limits<double>::max())
 			{
 				return receiver.getFloat() * _msgArgs[0].getFloat();
 			}
@@ -93,17 +93,102 @@ namespace runtime {
 			return Message::eval( receiver, args, context );
 		}
 
-		static inline Value eval2( Frame* self_, Value receiver, const Array& args, Value context )
+	};
+
+ //
+ // class AssignMessage
+ //
+
+	class AssignMessage : public Message {
+
+	 public:
+
+		AssignMessage( Symbol& name, const Array& msgArgs )
+		 : Message( Symbol::at( "=" ), msgArgs ), _name( name ) { }
+
+		virtual Value eval( Value receiver, const Array& args, Value context )
 		{
-			Message* self = (Message*) self_;
-			
-			//if (self->_msgArgs[0].getFloat() < numeric_limits<float>::max())
-			{
-				return receiver.getFloat() * self->_msgArgs[0].getFloat();
-			}
-			
-			return Message::eval2( self, receiver, args, context );
+			Value expr = _msgArgs[0].eval( receiver, args, context );
+
+			return receiver.setSlot( _name, expr );
 		}
+		
+	 private:
+	
+		Symbol& _name;
+
+	};
+
+ //
+ // class StringMessage
+ //
+
+	class StringMessage : public Message {
+
+	 public:
+
+		StringMessage( const Array& msgArgs )
+		 : Message( Symbol::at( "string" ), msgArgs ) { }
+
+		virtual Value eval( Value receiver, const Array& args, Value context )
+		{
+			String& string_ = *new String( _msgArgs[0].get<String>().getValue() );
+
+			autorelease( string_ );
+
+			return string_;
+		}
+
+	};
+
+ //
+ // class ArrayMessage
+ //
+
+	class ArrayMessage : public Message {
+
+	 public:
+
+		ArrayMessage( const Array& msgArgs )
+		 : Message( Symbol::at( "array" ), msgArgs ) { }
+
+		virtual Value eval( Value receiver, const Array& args, Value context )
+		{
+			Array msgArgs = evalArgs( context );
+
+			GCArray& values = *new ArrayValue( msgArgs );
+			//values._proto = &Array::instance();
+
+			autorelease( values );
+
+			return values;
+		}
+
+	};
+
+ //
+ // class BlockMessage
+ //
+
+	class BlockMessage : public Message {
+
+	 public:
+
+		BlockMessage( const Array& msgArgs, Frame& body )
+		 : Message( Symbol::at( "array" ), msgArgs ), _body( body ) { }
+
+		virtual Value eval( Value receiver, const Array& args, Value context )
+		{
+			Lambda& block = *new Lambda( _msgArgs, _body, context );
+
+			autorelease( block );
+			
+			return block;
+		}
+
+	 private:
+	 
+	 	Frame& _body;
 
 	};
 	

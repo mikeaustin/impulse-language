@@ -8,7 +8,7 @@
 #ifndef IMPULSE_EXPRESSION_H
 #define IMPULSE_EXPRESSION_H
 
-namespace runtime {
+namespace impulse {
 
  //
  // class Expression
@@ -19,48 +19,41 @@ namespace runtime {
 	 public:
 
 		Expression( vector<Value> messages )
-		 : _messages( messages ), _nextExpr( NULL ) { _eval2 = &eval2; }
+		 : _messages( messages ), _nextExpr( NULL ) { }
 
-		void setNextExpr( Expression& nextExpr ) { _nextExpr = &nextExpr; }
+		Expression( const Expression& expression )
+		 : _messages( expression._messages ), _nextExpr( expression._nextExpr ) { }
 
-		virtual string toString( Value receiver ) const { return "[Expression]"; }
+		Expression()
+		 : _nextExpr( NULL ) { }
 
-		inline Value eval( Value receiver, const Array& args, Value context )
+		Expression* setNextExpr( Expression& nextExpr ) { return _nextExpr = &nextExpr; }
+
+		virtual string inspect( Value receiver ) const { return "<expression>"; }
+
+		inline Value eval( Value receiver_, const Array& args, Value context )
 		{
-			ENTER( "Expression::eval( receiver = " << receiver.toString() << " )" );
+			ENTER( "Expression::eval( receiver = " << receiver_.inspect() << "," <<
+									" context = " << context.inspect() << " )" );
 
-			Value value;
-			
-			for (vector<Value>::iterator iter = _messages.begin(); iter != _messages.end(); ++iter)
+			Expression* expr = this;
+			Value receiver;
+
+			while (expr)
 			{
-				value = (*iter).eval( value, args, context );
-			}
-			
-			LEAVE( "" );
-			
-			return value;
-		}
+				receiver = context;
 
-		inline static Value eval2( Frame* self_, Value receiver, const Array& args, Value context )
-		{
-			ENTER( "Expression::eval( receiver = " << receiver.toString() << " )" );
-
-			Expression* self = (Expression*) self_;
-			Value value = receiver;
-
-			while (self)
-			{
-				for (vector<Value>::iterator iter = self->_messages.begin(); iter != self->_messages.end(); ++iter)
+				for (vector<Value>::iterator iter = expr->_messages.begin(); iter != expr->_messages.end(); ++iter)
 				{
-					value = (*iter).eval( value, args, context );
+					receiver = iter->eval( receiver, args, context );
 				}
 				
-				self = self->_nextExpr;
+				expr = expr->_nextExpr;
 			}
-						
-			LEAVE( "" );
 			
-			return value;
+			LEAVE( receiver.inspect() );
+			
+			return receiver;
 		}
 	
 	 private:
