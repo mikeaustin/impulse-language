@@ -5,9 +5,5 @@
 // All rights reserved.
 //
 
-//namespace impulse {
-
 #include "protos/parser.h"
-
-//}
 

@@ -5,6 +5,8 @@
 // All rights reserved.
 //
 
+#include <fstream>
+
 #include "impulse.h"
 #include "core/all.h"
 #include "runtime/all.h"
@@ -20,48 +22,53 @@ using namespace impulse;
 
 #include "parser/all.h"
 
-int main()
+int main( int argc, char* argv[] )
 {
-	cout << "------------------------------------------------------------" << endl;
-	cout << "Impulse 0.6 — Copyright 2008-2010 Mike Austin" << endl;
+	Lexer lexer( argc > 1 ? *new fstream( argv[1] ) : cin );
+	Parser parser( lexer );
 
-	cout << endl;
+	if (lexer.stream() == cin)
+	{
+		cout << "------------------------------------------------------------" << endl;
+		cout << "Impulse 0.6 — Copyright 2008-2010 Mike Austin" << endl;
+
+		cout << endl;
 	
-	cout << "sizeof( Value )    = " << sizeof( Value )    << endl;
-	cout << "sizeof( Frame )    = " << sizeof( Frame )    << endl;
-	cout << "sizeof( SymbolId ) = " << sizeof( SymbolId ) << endl;
-	cout << "sizeof( SlotMap )  = " << sizeof( SlotMap )  << endl;
-	cout << "sizeof( Array )    = " << sizeof( Array )    << endl;
+		cout << "sizeof( Value )    = " << sizeof( Value )    << endl;
+		cout << "sizeof( Frame )    = " << sizeof( Frame )    << endl;
+		cout << "sizeof( SymbolId ) = " << sizeof( SymbolId ) << endl;
+		cout << "sizeof( SlotMap )  = " << sizeof( SlotMap )  << endl;
+		cout << "sizeof( Array )    = " << sizeof( Array )    << endl;
 
-	cout << endl;
-
+		cout << endl;
+	}
+	
 	Object::instance().initSlots();
-	Array::instance().initSlots();
 	GCArray::instance().initSlots();
+	Number::instance().initSlots();
+	String::instance().initSlots();
+	Range::instance().initSlots();
 	Lambda::instance().initSlots();
 
 	//CoreTest().runTest();
-	NumberTest().runTest();
+	//NumberTest().runTest();
 
 	Value lobby = *new Lobby();
-
-	Lexer lexer( cin );
-	Parser parser( lexer );
 
 	Expression expr;
 	Array args;
 
-	while (!exitMainLoop)
+	do
 	{
-		cout << "] ";
+		if (lexer.stream() == cin) cout << "] ";
 		expr = parser.parseStatement( true );
 
 		Value result = expr.eval( lobby, args, lobby );
 
 		if (&result.getFrame() != &Void::instance())
 		{
-			cout << "= ";
-			cout << result.inspect() << endl;
+			if (lexer.stream() == cin) cout << "= ";
+			if (lexer.stream() == cin) cout << result.inspect() << endl;
 		}
 		
 		vector<Frame*>::iterator iter = Frame::_releasePool.begin();
@@ -72,6 +79,7 @@ int main()
 			iter = Frame::_releasePool.erase( iter );
 		}
 	}
+	while (!exitMainLoop);
 
 	return 0;
 }

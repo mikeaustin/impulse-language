@@ -1,4 +1,3 @@
-x = 3
-for i in range(100000000):
-  x * 5
+for n in range(100000000):
+  n * 5
 

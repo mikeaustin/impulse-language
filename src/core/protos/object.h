@@ -22,8 +22,8 @@ namespace impulse {
 		
 		void initSlots()
 		{
-			setSlot( Symbol::at( "proto" ), *new Method( proto, 0 ) );
-			setSlot( Symbol::at( "clone" ), *new Method( clone, 0 ) );
+			setSlot( Symbol::at( "proto" ), *new Method( "proto", proto, 0 ) );
+			setSlot( Symbol::at( "clone" ), *new Method( "clone", clone, 0 ) );
 		}
 
 		static Frame& instance()
@@ -35,17 +35,17 @@ namespace impulse {
 			//return object2;
 		}
 
-		static Value proto( Value receiver, const Array& args )
+		static Value proto( Value receiver, const Array& args, Value context )
 		{
 			return receiver.getProto();
 		}
 
-		static Value clone( Value receiver, const Array& args )
+		static Value clone( Value receiver, const Array& args, Value context )
 		{
 			return receiver.clone();
 		}
 
-		virtual string inspect( Value receiver ) const { return "<bject>"; }
+		virtual string inspect( Value receiver ) const { return "<object>"; }
 
 	};
 

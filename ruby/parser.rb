@@ -200,23 +200,23 @@ module Impulse
     end
 
     def access()
-      args = []
+        args = []
 
-      expect_type(:open_array)
+        expect_type(:open_array)
       
-      if @lexer.peek_token().type != :close_array
-        args << nested_expression()
+        if @lexer.peek_token().type != :close_array
+            args << nested_expression()
 
-        while @lexer.peek_token().value == :","
-          expect_value(:",")
+            while @lexer.peek_token().value == :","
+                expect_value(:",")
           
-          args << nested_expression()
+                args << nested_expression()
+            end
         end
-      end
 
-      expect_type(:close_array)
+        expect_type(:close_array)
 
-      return [MessageProto.new(:"eval_", args)]
+        return [MessageProto.new(:"eval_", args)]
     end
 
     def block()

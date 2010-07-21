@@ -1,0 +1,8 @@
+print: "Squares of 1 through 10"
+squares = (1..10) map: |n| n * n
+print: squares
+
+(1..100000000) each: |n|
+   n * 5
+end
+

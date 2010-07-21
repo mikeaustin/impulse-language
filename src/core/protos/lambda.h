@@ -8,7 +8,7 @@
 #ifndef IMPULSE_LAMBDA_H
 #define IMPULSE_LAMBDA_H
 
-#include "../../core/protos/object.h"
+#include "object.h"
 
 namespace impulse {
 
@@ -26,7 +26,7 @@ namespace impulse {
 
 		void initSlots()
 		{
-			setSlot( Symbol::at( "[]" ), *new Method( slice_, -1 ) );
+			setSlot( Symbol::at( "[]" ), *new Method( "[]", slice_, -1 ) );
 		}
 
 		virtual string inspect( Value receiver ) const { return "<block>"; }
@@ -56,7 +56,7 @@ namespace impulse {
 			return result;
 		}
 
-		static Value slice_( Value receiver, const Array& args )
+		static Value slice_( Value receiver, const Array& args, Value )
 		{
 			Lambda& self  = receiver.get<Lambda>();
 

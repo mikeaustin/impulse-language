@@ -1,12 +1,12 @@
 //
-// core/protos/nil.h
+// core/protos/nilvoid.h
 //
 // Copyright 2008-2010 Mike Austin
 // All rights reserved.
 //
 
-#ifndef IMPULSE_NIL_H
-#define IMPULSE_NIL_H
+#ifndef IMPULSE_NILVOID_H
+#define IMPULSE_NILVOID_H
 
 namespace impulse {
 

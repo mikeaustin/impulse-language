@@ -5,6 +5,9 @@
 // All rights reserved.
 //
 
+#ifndef IMPULSE_METHOD
+#define IMPULSE_METHOD
+
 namespace impulse {
 
  //
@@ -13,17 +16,19 @@ namespace impulse {
 
 	class Method : public Frame {
 
+		typedef Value (* const Function)(Value, const Array&, Value context);
+
 	 public:
 	 
-		Method( Value (* const func)(Value, const Array&), const unsigned int argsSize )
-		 : _func( func ), _argsSize( argsSize ), _argTypes( NULL ) { }
+		Method( const string name, Function function, const int argsSize )
+		 : _function( function ), _argsSize( argsSize ), _argTypes( NULL ) { }
 
-		Method( Value (* const func)(Value, const Array&), const unsigned int argsSize, const Frame* argTypes[] )
-		 : _func( func ), _argsSize( argsSize ), _argTypes( argTypes ) { }
+		Method( const string funcName, Function function, const int argsSize, const Frame* argTypes[] )
+		 : _function( function ), _argsSize( argsSize ), _argTypes( argTypes ), _funcName( funcName ) { }
 
-		virtual string inspect( Value receiver ) const { return "<method>"; }
+		virtual string inspect( Value receiver ) const { return "<method \'" + _funcName + ">"; }
 
-		inline Value eval( Value receiver, const Array& args, Value context )
+		Value eval( Value receiver, const Array& args, Value context )
 		{
 			ENTER( "Method::eval( this = " << inspect( *this ) << "," <<
 								" receiver = " << receiver.inspect() << " )" );
@@ -52,7 +57,7 @@ namespace impulse {
 				}
 			}
 
-			Value result = _func( receiver, args );
+			Value result = _function( receiver, args, context );
 
 			LEAVE( result );
 			
@@ -61,11 +66,14 @@ namespace impulse {
 	
 	 private:
 
-		Value (* const _func)(Value, const Array&);
-		unsigned int _argsSize;
-		const Frame** _argTypes;
+		const Function _function;
+		unsigned int   _argsSize;
+		const Frame**  _argTypes;
+		const string   _funcName;
 		
 	};
 
 }
+
+#endif
 

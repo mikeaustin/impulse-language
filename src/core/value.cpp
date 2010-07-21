@@ -81,7 +81,7 @@ namespace impulse {
 		else if (value._frame->_proto == &String::instance())
 			stream << value.get<String>().getValue();
 		else
-			stream << &value.get<Frame>();
+			stream << value.inspect();
 			
 		return stream;
 	}

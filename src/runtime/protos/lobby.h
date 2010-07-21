@@ -5,6 +5,9 @@
 // All rights reserved.
 //
 
+#ifndef IMPULSE_LOBBY_H
+#define IMPULSE_LOBBY_H
+
 #include "../../core/protos/object.h"
 
 namespace impulse {
@@ -19,9 +22,9 @@ namespace impulse {
 
 		Lobby() : Frame( Object::instance() )
 		{
-			setSlot( Symbol::at( "print:" ), *new Method( print_, 2 ) );
-			setSlot( Symbol::at( "help" ), *new Method( help, 0 ) );
-			setSlot( Symbol::at( "exit" ), *new Method( exit, 0 ) );
+			setSlot( Symbol::at( "print:" ), *new Method( "print:", print_, 1 ) );
+			setSlot( Symbol::at( "help" ),   *new Method( "help:",  help,   0 ) );
+			setSlot( Symbol::at( "exit" ),   *new Method( "exit",   exit,   0 ) );
 		}
 
 		virtual string inspect( Value receiver ) const { return "<lobby>"; }
@@ -33,22 +36,21 @@ namespace impulse {
 			return lobby.getFrame();
 		}
 
-		static Value print_( Value receiver, const Array& args )
+		static Value print_( Value receiver, const Array& args, Value context )
 		{
 			cout << args[0] << endl;
-			cout << args[1] << endl;
 			
 			return Value();
 		}
 
-		static Value help( Value receiver, const Array& args )
+		static Value help( Value receiver, const Array& args, Value context )
 		{
 			cout << "No help yet" << endl;
 			
 			return Value();
 		}
 
-		static Value exit( Value receiver, const Array& args )
+		static Value exit( Value receiver, const Array& args, Value context )
 		{
 			exitMainLoop = true;
 			
@@ -58,4 +60,6 @@ namespace impulse {
 	};
 
 }
+
+#endif
 

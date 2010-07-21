@@ -5,6 +5,9 @@
 // All rights reserved.
 //
 
+#ifndef IMPULSE_H
+#define IMPULSE_H
+
 #ifdef DEBUG
  #define ENTER( expr ) clog << &spaces[60 - indent] << "> " << expr << endl; indent += 4
  #define LEAVE( expr ) indent -= 4; clog << &spaces[60 - indent] << "< " << expr << endl
@@ -24,7 +27,7 @@ namespace impulse {
 	int        indent = 0;
 
 	const bool methodCaching = false;
-	const bool debugGarbage  = true;
+	const bool debugGarbage  = false;
 	
 	bool exitMainLoop = false;
 
@@ -38,4 +41,6 @@ namespace impulse {
 
     };
 }
+
+#endif
 

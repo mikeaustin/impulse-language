@@ -44,7 +44,7 @@ namespace impulse {
 
 		Frame& getProto() const { return *_proto; }
 
-		void autorelease( Frame& frame ) { _releasePool.push_back( &frame ); }
+		static void autorelease( Frame& frame ) { _releasePool.push_back( &frame ); }
 
 		void incRef();
 		void decRef();

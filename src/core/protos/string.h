@@ -5,6 +5,9 @@
 // All rights reserved.
 //
 
+#ifndef IMPULSE_STRING
+#define IMPULSE_STRING
+
 #include <sstream>
 
 #include "object.h"
@@ -19,10 +22,12 @@ namespace impulse {
 
 	 public:
 
-		String( Frame& proto ) : Frame( proto )
+		String( Frame& proto ) : Frame( proto ) { }
+		
+		void initSlots()
 		{
-			setSlot( Symbol::at( "size" ), *new Method( size_, 0 ) );
-			setSlot( Symbol::at( "++" ), *new Method( concat_, 1 ) );
+			setSlot( Symbol::at( "size" ), *new Method( "size", size,    0 ) );
+			setSlot( Symbol::at( "++" ),   *new Method( "++",   concat_, 1 ) );
 		}
 
 		String( string value ) : Frame( String::instance() ), _value( value ) { }
@@ -38,14 +43,14 @@ namespace impulse {
 			return string.getFrame();
 		}
 
-		static Value size_( Value receiver, const Array& args )
+		static Value size( Value receiver, const Array& args, Value context )
 		{
 			String& self = receiver.get<String>();
 			
 			return self._value.size();
 		}
 
-		static Value concat_( Value receiver, const Array& args )
+		static Value concat_( Value receiver, const Array& args, Value context )
 		{
 			String& self = (String&) receiver.getFrame();
 			String& other = (String&) args[0].getFrame();
@@ -60,4 +65,6 @@ namespace impulse {
 	};
 
 }
+
+#endif
 

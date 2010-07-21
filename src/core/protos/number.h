@@ -5,6 +5,9 @@
 // All rights reserved.
 //
 
+#ifndef IMPULSE_NUMBER_H
+#define IMPULSE_NUMBER_H
+
 #include <sstream>
 #include <cmath>
 
@@ -25,21 +28,24 @@ namespace impulse {
 
 	class Number : public Frame {
 
-		static const Frame* addArgTypes[];
-		static const Frame* powArgTypes[];
-
 	 public:
 
-		Number() : Frame( Object::instance() )
+		Number() : Frame( Object::instance() ) { }
+		
+		void initSlots()
 		{
-			setSlot( Symbol::at( "+" ), *new Method( add_, 1, addArgTypes ) );
-			setSlot( Symbol::at( "-" ), *new Method( sub_, 1 ) );
-			setSlot( Symbol::at( "*" ), *new Method( mul_, 1 ) );
-			setSlot( Symbol::at( "/" ), *new Method( div_, 1 ) );
-			setSlot( Symbol::at( "%" ), *new Method( mod_, 1 ) );
-			setSlot( Symbol::at( "sin" ), *new Method( sin, 0 ) );
-			setSlot( Symbol::at( "cos" ), *new Method( cos, 0 ) );
-			setSlot( Symbol::at( "pow:" ), *new Method( pow_, 1, powArgTypes ) );
+			static const Frame* addArgTypes[] = { &Number::instance() };
+			static const Frame* powArgTypes[] = { &Number::instance() };
+
+			setSlot( Symbol::at( "+" ),    *new Method( "+",    add_,   1, addArgTypes ) );
+			setSlot( Symbol::at( "-" ),    *new Method( "-",    sub_,   1 ) );
+			setSlot( Symbol::at( "*" ),    *new Method( "*",    mul_,   1 ) );
+			setSlot( Symbol::at( "/" ),    *new Method( "/",    div_,   1 ) );
+			setSlot( Symbol::at( "%" ),    *new Method( "%",    mod_,   1 ) );
+			setSlot( Symbol::at( "sin" ),  *new Method( "sin",  sin,    0 ) );
+			setSlot( Symbol::at( "cos" ),  *new Method( "cos",  cos,    0 ) );
+			setSlot( Symbol::at( "pow:" ), *new Method( "pow:", pow_,   1, powArgTypes ) );
+			setSlot( Symbol::at( ".." ),   *new Method( "..",   range_, 1 ) );
 		}
 
 		virtual string inspect( Value receiver ) const { return "<number>"; }
@@ -52,7 +58,7 @@ namespace impulse {
 		}
 
 #define OPERATOR_METHOD( function, op ) \
-		static Value function( Value receiver, const Array& args ) \
+		static Value function( Value receiver, const Array& args, Value context ) \
 		{ \
 			return receiver.getFloat() op args[0].getFloat(); \
 		}
@@ -62,24 +68,33 @@ namespace impulse {
 		OPERATOR_METHOD( mul_, * );
 		OPERATOR_METHOD( div_, / );
 
-		static Value mod_( Value receiver, const Array& args )
+		static Value mod_( Value receiver, const Array& args, Value context )
 		{
 			return (long) receiver.getFloat() % (long) args[0].getFloat();
 		}
 
-		static Value sin( Value receiver, const Array& args )
+		static Value sin( Value receiver, const Array& args, Value context )
 		{
 			return ::sin( receiver.getFloat() );
 		}
 
-		static Value cos( Value receiver, const Array& args )
+		static Value cos( Value receiver, const Array& args, Value context )
 		{
 			return ::cos( receiver.getFloat() );
 		}
 
-		static Value pow_( Value receiver, const Array& args )
+		static Value pow_( Value receiver, const Array& args, Value context )
 		{
 			return ::pow( receiver.getFloat(), args[0].getFloat() );
+		}
+
+		static Value range_( Value receiver, const Array& args, Value context )
+		{
+			Range& range = *new Range( receiver.getFloat(), args[0].getFloat() );
+			
+			autorelease( range );
+			
+			return range;
 		}
 		
 	};
@@ -109,4 +124,6 @@ namespace impulse {
 	};
 
 }
+
+#endif
 

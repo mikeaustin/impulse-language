@@ -5,6 +5,9 @@
 // All rights reserved.
 //
 
+#ifndef IMPULSE_SYMBOL
+#define IMPULSE_SYMBOL
+
 namespace impulse {
 
  //
@@ -52,4 +55,6 @@ namespace impulse {
 	map<string, Symbol*> Symbol::_slotMap;
 
 }
+
+#endif
 

@@ -25,7 +25,8 @@ namespace impulse {
 
 		inline Value eval( Value receiver, const Array& args, Value context )
 		{
-			ENTER( "Message::eval( receiver = " << receiver.inspect() << ", _selector = " << _selector.inspect(_selector) << " )" );
+			ENTER( "Message::eval( receiver = " << receiver.inspect() << "," <<
+								" _selector = " << _selector.inspect(_selector) << " )" );
 
 			Array msgArgs( _msgArgs.size() );
 			
@@ -92,6 +93,24 @@ namespace impulse {
 			
 			return Message::eval( receiver, args, context );
 		}
+
+	};
+
+	class ConstMulMessage : public Message {
+
+	 public:
+
+		ConstMulMessage( const double value, const Array& msgArgs )
+		 : Message( Symbol::at( "*" ), msgArgs ), _value( value ) { }
+
+		virtual Value eval( Value receiver, const Array& args, Value context )
+		{
+			return receiver.getFloat() * _value;
+		}
+
+	 private:
+	
+		double _value;
 
 	};
 

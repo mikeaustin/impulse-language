@@ -5,6 +5,9 @@
 // All rights reserved.
 //
 
+#ifndef IMPULSE_PARSER_H
+#define IMPULSE_PARSER_H
+
 #include "lexer.h"
 
 #include <cstdlib>
@@ -64,6 +67,16 @@ namespace impulse {
 				return expr;
 			}
 
+			if (_lexer.stream().peek() == EOF)
+			{
+				exitMainLoop = true;
+
+				vector<Value> code;
+				Expression expr( code );
+				
+				return expr;
+			}
+			
 			Expression expr( parseExpression() );
 
 			expect( Token::NEWLINE, "\\n" );
@@ -81,6 +94,7 @@ namespace impulse {
 			else if (token.type() == Token::LITERAL_STRING) concat( code, parseString() );
 			else if (token.type() == Token::IDENTIFIER)     concat( code, parseIdentifier() );
 			else if (token.type() == Token::KEYWORD)        concat( code, parseKeyword() );
+			else if (token.type() == Token::OPEN_PAREN)     concat( code, parseSubexpr() );
 			else if (token.type() == Token::OPEN_BRACKET)   concat( code, parseArray() );
 			else if (token.type() == Token::VERTICAL_BAR)   concat( code, parseBlock() );
 			else
@@ -96,6 +110,19 @@ namespace impulse {
 				concat( code, message );
 			}
 
+			return code;
+		}
+
+		const vector<Value> parseSubexpr()
+		{
+			vector<Value> code;
+			
+			expect( Token::OPEN_PAREN, "(" );
+
+			concat( code, parseExpression() );
+
+			expect( Token::CLOSE_PAREN, ")" );
+			
 			return code;
 		}
 
@@ -119,8 +146,9 @@ namespace impulse {
 			
 			Token token = _lexer.peekToken();
 
-			if (token.type() == Token::IDENTIFIER)    concat( code, parseIdentifier() );
-			else if (token.type() == Token::KEYWORD)  concat( code, parseKeyword() );
+			if (token.type() == Token::IDENTIFIER)        concat( code, parseIdentifier() );
+			else if (token.type() == Token::KEYWORD)      concat( code, parseKeyword() );
+			else if (token.type() == Token::OPEN_BRACKET) concat( code, parseSlice() );
 			
 			return code;
 		}
@@ -228,8 +256,18 @@ namespace impulse {
 			vector<Value>arg = parseExpression( &Parser::parseBinaryMessage );
 			args.push_back( arg.size() == 1 ? arg[0] : *new Expression( arg ) );
 
-			code.push_back( *new Message( selector, args ) );
-			
+			if (&selector == &Symbol::at( "*" ))
+			{
+				if (&args[0].getProto() == &Number::instance())
+					code.push_back( *new ConstMulMessage( args[0].getFloat(), args ) );
+				else
+					code.push_back( *new MulMessage( args ) );
+			}
+			else
+			{
+				code.push_back( *new Message( selector, args ) );
+			}
+						
 			return code;
 		}
 
@@ -331,4 +369,6 @@ namespace impulse {
 	};
 
 }
+
+#endif
 

@@ -40,7 +40,7 @@ EXAMPLES
     [1..10] map: |n| n even ? -> n * n
 
   # The ubiquitous factorial example
-    factorial = |n| n == 0 ? 1 : factorial [n - 1]
+    factorial = |n| n == 0 ? 1 : n * factorial [n - 1]
 
 COMPILING
 

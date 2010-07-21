@@ -5,11 +5,7 @@
 // All rights reserved.
 //
 
-//namespace impulse {
-
 #include "protos/message.h"
 #include "protos/expression.h"
 #include "protos/lobby.h"
-
-//}
 

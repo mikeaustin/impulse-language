@@ -5,6 +5,9 @@
 // All rights reserved.
 //
 
+#ifndef IMPULSE_LEXER_H
+#define IMPULSE_LEXER_H
+
 #include <sstream>
 #include <cstdlib>
 
@@ -16,10 +19,10 @@ namespace impulse {
 
 		enum Type
 		{
-			INVALID,
-			NEWLINE,
+			INVALID, NEWLINE, END_OF_FILE,
 			LITERAL_NUMBER, LITERAL_STRING, IDENTIFIER, KEYWORD, OPERATOR,
-			COMMA, ASSIGN, OPEN_BRACKET, CLOSE_BRACKET, VERTICAL_BAR
+			COMMA, PERIOD, VERTICAL_BAR, ASSIGN,
+			OPEN_PAREN, CLOSE_PAREN, OPEN_BRACKET, CLOSE_BRACKET
 		};
 	
 		Token( Type type, Value value ) : _type( type ), _value( value ) { }
@@ -41,14 +44,16 @@ namespace impulse {
 	
 	 public:
 
-		static const char* ops;
+		//static const char* ops;
 	
 		Lexer( istream& stream ) : _stream( stream ) { }
+
+		istream& stream() const { return _stream; }
 
 		bool isopera( int c )
 		{
 			char opstring[2] = { c, '\0' };
-			char operators[] = "+-*/%<>$";
+			char operators[] = "+-*/%<>$?.";
 
 			return strpbrk( opstring, operators );
 		}
@@ -62,16 +67,20 @@ namespace impulse {
 
 			int c = _stream.peek();
 			
-			if      (c == 10)           _token = readNewline();
-			else if (c == '=')          _token = read( Token::ASSIGN );
-			else if (c == ',')          _token = read( Token::COMMA );
-			else if (c == '[')          _token = read( Token::OPEN_BRACKET );
-			else if (c == ']')          _token = read( Token::CLOSE_BRACKET );
-			else if (c == '|')          _token = read( Token::VERTICAL_BAR );
-			else if (isdigit( c ))      _token = readNumber();
-			else if (c == '"')          _token = readString();
-			else if (isalpha( c ))      _token = readIdentifier();
-			else if (isopera( c ))  _token = readIdentifier();
+			if      (c == 10)       _token = read( Token::NEWLINE );
+			else if (c == EOF)      _token = read( Token::END_OF_FILE );
+			else if (c == '=')      _token = read( Token::ASSIGN );
+			else if (c == ',')      _token = read( Token::COMMA );
+			//else if (c == '.')      _token = read( Token::PERIOD );
+			else if (c == '(')      _token = read( Token::OPEN_PAREN );
+			else if (c == ')')      _token = read( Token::CLOSE_PAREN );
+			else if (c == '[')      _token = read( Token::OPEN_BRACKET );
+			else if (c == ']')      _token = read( Token::CLOSE_BRACKET );
+			else if (c == '|')      _token = read( Token::VERTICAL_BAR );
+			else if (isdigit( c ))  _token = readNumber();
+			else if (c == '"')      _token = readString();
+			else if (isalpha( c ))  _token = readIdentifier();
+			else if (isopera( c ))  _token = readOperator();
 			else
 			{
 				cerr << "*** Unexpected token " << (unsigned char) c;
@@ -98,13 +107,6 @@ namespace impulse {
 			buffer << (unsigned char) _stream.get();
 			
 			return Token( type, buffer.str() );
-		}
-		
-		Token readNewline()
-		{
-			_stream.get();
-			
-			return Token( Token::NEWLINE, string( "\\n" ) );
 		}
 
 		Token readNumber()
@@ -164,16 +166,9 @@ namespace impulse {
 			return Token( Token::IDENTIFIER, Symbol::at( buffer.str() ) );
 		}
 
-		Token XreadOperator()
+		Token readOperator()
 		{
-			stringstream buffer;
-
-			while (isopera( _stream.peek() ))
-			{
-				buffer << (unsigned char) _stream.get();
-			}
-			
-			return Token( Token::OPERATOR, Symbol::at( buffer.str() ) );
+			return readIdentifier();
 		}
 	
 	 private:
@@ -184,4 +179,6 @@ namespace impulse {
 	};
 
 }
+
+#endif
 

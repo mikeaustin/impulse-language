@@ -5,7 +5,9 @@
 // All rights reserved.
 //
 
-//#include "object.h"
+#ifndef IMPULSE_ARRAY
+#define IMPULSE_ARRAY
+
 #include <sstream>
 
 namespace impulse {
@@ -14,16 +16,13 @@ namespace impulse {
  // class Array
  //
 
-	class Array : public Frame {
+	class Array {
 	
 	 public:
 
 		Array( const Array& value );
-		Array( Frame& proto );
 		Array()              : _size( 0 ) { }
 		Array( size_t size ) : _size( size ) { }
-
-		void initSlots();
 
 		unsigned int size() const { return _size; }
 
@@ -36,8 +35,6 @@ namespace impulse {
 		{
 			return "<array>";
 		}
-
-		static Frame& instance();
 
 		string inspect() const
 		{
@@ -57,24 +54,20 @@ namespace impulse {
 			return stream.str();
 		}
 
-		static Value size_( Value receiver, const Array& args )
-		{
-			Array& self = receiver.get<Array>();
-			
-			return self._size;
-		}
-
-//	 private:
+	 private:
 
 		Atom   _array[5];
 		size_t _size;
 	 
 	};
 
+ //
+ // class GCArray
+ //
+
 	class GCArray : public Frame {
 
-		static const Frame* mapArgTypes[];
-	
+
 	 public:
 
 		GCArray();
@@ -99,14 +92,14 @@ namespace impulse {
 
 		static Frame& instance();
 
-		static Value size_( Value receiver, const Array& args )
+		static Value size_( Value receiver, const Array& args, Value context )
 		{
 			GCArray& self = receiver.get<GCArray>();
 			
 			return self._array.size();
 		}
 
-		static Value slice_( Value receiver, const Array& args )
+		static Value slice_( Value receiver, const Array& args, Value context )
 		{
 			GCArray& self  = receiver.get<GCArray>();
 			unsigned index = args[0].getFloat() - 1;
@@ -119,7 +112,7 @@ namespace impulse {
 			return Value();
 		}
 
-		static Value map_( Value receiver, const Array& args );
+		static Value map_( Value receiver, const Array& args, Value context );
 
 //	 private:
 
@@ -158,4 +151,6 @@ namespace impulse {
 	};
 
 }
+
+#endif
 

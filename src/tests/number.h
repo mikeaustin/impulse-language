@@ -20,7 +20,7 @@ namespace impulse {
 
 			{
 				Array args( 1 ); args[0] = 5;
-				ASSERT( Number::mul_( val( 3 ), args ) == 15 );
+				ASSERT( Number::mul_( val( 3 ), args, lobby ) == 15 );
 			}
 			
 			{
