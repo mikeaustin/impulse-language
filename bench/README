@@ -1,0 +1,9 @@
+for n in 100000000
+  n * 5
+end
+
+Ruby1.9		0m43.110s
+Python3		0m20.500s
+Impulse		0m9.970s
+Lua5		0m6.530s
+
