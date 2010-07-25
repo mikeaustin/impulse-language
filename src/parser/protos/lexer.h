@@ -19,9 +19,9 @@ namespace impulse {
 
 		enum Type
 		{
-			INVALID, NEWLINE, END_OF_FILE,
-			LITERAL_NUMBER, LITERAL_STRING, IDENTIFIER, KEYWORD, OPERATOR,
-			COMMA, PERIOD, VERTICAL_BAR, ASSIGN,
+			INVALID = 0, NEWLINE = 1, END_OF_FILE = 2,
+			LITERAL_NUMBER = 10, LITERAL_STRING = 11, IDENTIFIER = 12, KEYWORD = 13, OPERATOR = 14,
+			COMMA, PERIOD, COLON, VERTICAL_BAR, ASSIGN,
 			OPEN_PAREN, CLOSE_PAREN, OPEN_BRACKET, CLOSE_BRACKET
 		};
 	
@@ -31,7 +31,7 @@ namespace impulse {
 		Type type() { return _type; }
 		Value value() { return _value; }
 
-		string getString() { return _value.get<String>().getValue(); }
+		string getString() { return _value.get<Symbol>().getName(); }
 		Symbol& getSymbol() { return _value.get<Symbol>(); }
 
 	 private:
@@ -44,8 +44,6 @@ namespace impulse {
 	
 	 public:
 
-		//static const char* ops;
-	
 		Lexer( istream& stream ) : _stream( stream ) { }
 
 		istream& stream() const { return _stream; }
@@ -53,7 +51,7 @@ namespace impulse {
 		bool isopera( int c )
 		{
 			char opstring[2] = { c, '\0' };
-			char operators[] = "+-*/%<>$?.";
+			char operators[] = "+-*/%<>=$?.";
 
 			return strpbrk( opstring, operators );
 		}
@@ -69,7 +67,8 @@ namespace impulse {
 			
 			if      (c == 10)       _token = read( Token::NEWLINE );
 			else if (c == EOF)      _token = read( Token::END_OF_FILE );
-			else if (c == '=')      _token = read( Token::ASSIGN );
+			//else if (c == '=')      _token = read( Token::ASSIGN );
+			else if (c == ':')      _token = read( Token::COLON );
 			else if (c == ',')      _token = read( Token::COMMA );
 			//else if (c == '.')      _token = read( Token::PERIOD );
 			else if (c == '(')      _token = read( Token::OPEN_PAREN );

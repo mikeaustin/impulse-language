@@ -25,8 +25,9 @@ namespace impulse {
 	 		_slotMap[name] = this;
 	 	}
 	 
-		virtual string inspect( Value receiver ) const { return string("'") + _name; }
+		virtual string inspect( const Value receiver ) const { return string( "'" ) + _name; }
 
+		string getName() const { return _name; }
 		SymbolId getId() const { return _id; }
 
 		static Symbol& at( string name )

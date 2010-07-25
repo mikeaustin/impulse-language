@@ -25,7 +25,7 @@ namespace impulse {
 			return nil;
 		}
 
-		virtual string inspect( Value receiver ) const { return "nil"; }
+		virtual string inspect( const Value receiver ) const { return "nil"; }
 
 	};
 
@@ -44,7 +44,7 @@ namespace impulse {
 			return void_;
 		}
 
-		virtual string inspect( Value receiver ) const { return "void"; }
+		virtual string inspect( const Value receiver ) const { return "void"; }
 
 	};
 

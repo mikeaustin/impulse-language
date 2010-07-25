@@ -29,7 +29,7 @@ namespace impulse {
 			return iter->second;
 		}
 
-		return Void::instance();
+		return Value();
 	}
 
 	inline Value Frame::eval( Value receiver, const Array& args, Value context )
@@ -79,11 +79,11 @@ namespace impulse {
 			frame = frame->_proto;
 		}
 
-		cout << "*** Slot not found: " << receiver.inspect() << "." << selector.inspect( const_cast<Symbol&>( selector ) ) << endl;
+		cout << "*** Slot not found: " << receiver.inspect() << "." << selector.getName() << endl;
 
 		LEAVE( "" );
 
-		return Void::instance();
+		return Value();
 	}
 
 	inline void Frame::incRef()
@@ -117,8 +117,8 @@ namespace impulse {
  //
  // class Array
  //
-
-	Array::Array( const Array& value )
+/*
+	inline Array::Array( const Array& value )
 	{
 		_array[0] = value._array[0];
 		_array[1] = value._array[1];
@@ -128,6 +128,6 @@ namespace impulse {
 			
 		_size = value._size;
 	}
-
+*/
 }
 

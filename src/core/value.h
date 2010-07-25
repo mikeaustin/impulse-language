@@ -26,6 +26,7 @@ namespace impulse {
 	class Void;
 	class Symbol;
 	class Array;
+	class Block;
 	class Lobby;
 
  //
@@ -57,8 +58,14 @@ namespace impulse {
 	 	Value( Frame& frame );
 	 	Value( Void& frame );
 	 	Value( Lobby& frame );
-		Value( double value );
+
 		Value( string value );
+		Value( double value );
+		Value( size_t value );
+		Value( int value );
+		Value( long value );
+		Value( unsigned value );
+		Value( bool value );
 
 		Value setSlot( const Symbol& symbol, const Value value );
 		Value getSlot( const Symbol& symbol );
@@ -66,10 +73,11 @@ namespace impulse {
 		Value eval( Value receiver, const Array& args, Value context );
 		Value send( const Symbol& selector, const Array& args, Value context );
 	
-		Frame& getFrame() const;
+		Frame& getFrame() const { return *_frame; }
 		double  getFloat() const { return _float; }
+		bool getBool() const { return _float; }
 		template <typename T>
-		T& get() const { return *static_cast<T*>( _frame ); }
+		T& get() const { return *dynamic_cast<T*>( _frame ); }
 
 		Frame& getProto() const;
 
@@ -78,11 +86,6 @@ namespace impulse {
 		string inspect() const;
 
 		operator double() { return getFloat(); }
-
-//	 protected:
-
-//		Frame* _frame;
-//		double _float;
 
 	};
 
@@ -99,7 +102,7 @@ namespace impulse {
 	 	GCValue();
 	 	GCValue( Frame& frame );
 	 	GCValue( const Value& value );
-		GCValue( double value );
+		GCValue( const double value );
 		GCValue( const GCValue& value );
 		
 		~GCValue();

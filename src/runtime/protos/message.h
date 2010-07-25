@@ -21,7 +21,7 @@ namespace impulse {
 		Message( Symbol& selector, const Array& msgArgs )
 		 : _selector( selector ), _msgArgs( msgArgs ) { }
 
-		virtual string inspect( Value receiver ) const { return "<message>"; }
+		virtual string inspect( const Value receiver ) const { return "<message>"; }
 
 		inline Value eval( Value receiver, const Array& args, Value context )
 		{
@@ -29,18 +29,12 @@ namespace impulse {
 								" _selector = " << _selector.inspect(_selector) << " )" );
 
 			Array msgArgs( _msgArgs.size() );
-			
-			switch (_msgArgs.size())
+
+			for (unsigned int i = 0, argsSize = _msgArgs.size(); i < argsSize; ++i)
 			{
-				case 5: msgArgs[4] = _msgArgs[4].eval( context, args, context );
-				case 4: msgArgs[3] = _msgArgs[3].eval( context, args, context );
-				case 3: msgArgs[2] = _msgArgs[2].eval( context, args, context );
-				case 2: msgArgs[1] = _msgArgs[1].eval( context, args, context );
-				case 1: msgArgs[0] = _msgArgs[0].eval( context, args, context );
-				case 0: ;
+				msgArgs[i] = _msgArgs[i].eval( context, args, context );
 			}
-			
-			//Value result = receiver.send( (Symbol&) _selector.getFrame(), msgArgs, context );
+
 			Value result = receiver.send( _selector, msgArgs, context );
 			
 			LEAVE( result.inspect() );
@@ -53,14 +47,9 @@ namespace impulse {
 			Array msgArgs( _msgArgs.size() );
 			Array args;
 
-			switch (_msgArgs.size())
+			for (unsigned int i = 0, argsSize = _msgArgs.size(); i < argsSize; ++i)
 			{
-				case 5: msgArgs[4] = _msgArgs[4].eval( context, args, context );
-				case 4: msgArgs[3] = _msgArgs[3].eval( context, args, context );
-				case 3: msgArgs[2] = _msgArgs[2].eval( context, args, context );
-				case 2: msgArgs[1] = _msgArgs[1].eval( context, args, context );
-				case 1: msgArgs[0] = _msgArgs[0].eval( context, args, context );
-				case 0: ;
+				msgArgs[i] = _msgArgs[i].eval( context, args, context );
 			}
 			
 			return msgArgs;
@@ -176,7 +165,6 @@ namespace impulse {
 			Array msgArgs = evalArgs( context );
 
 			GCArray& values = *new ArrayValue( msgArgs );
-			//values._proto = &Array::instance();
 
 			autorelease( values );
 
@@ -198,7 +186,7 @@ namespace impulse {
 
 		virtual Value eval( Value receiver, const Array& args, Value context )
 		{
-			Lambda& block = *new Lambda( _msgArgs, _body, context );
+			Block& block = *new Block( _msgArgs, _body, context );
 
 			autorelease( block );
 			

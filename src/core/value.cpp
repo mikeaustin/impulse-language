@@ -21,8 +21,14 @@ namespace impulse {
 	inline Value::Value( Frame& value ) : Atom( value, numeric_limits<double>::max() ) { }
 	inline Value::Value( Void& value )  : Atom( value, 0 ) { }
 	inline Value::Value( Lobby& value ) : Atom( value, 0 ) { }
-	inline Value::Value( double value ) : Atom( NumberValue::instance(), value ) { }
-	inline Value::Value( string value ) : Atom( *new String( value ), numeric_limits<double>::max() ) { }
+
+	inline Value::Value( string value )   : Atom( *new String( value ), numeric_limits<double>::max() ) { }
+	inline Value::Value( bool value )     : Atom( BooleanValue::instance(), value ) { }
+	inline Value::Value( double value )   : Atom( NumberValue::instance(), value ) { }
+	inline Value::Value( int value )      : Atom( NumberValue::instance(), value ) { }
+	inline Value::Value( long value )     : Atom( NumberValue::instance(), value ) { }
+	inline Value::Value( unsigned value ) : Atom( NumberValue::instance(), value ) { }
+	inline Value::Value( size_t value )   : Atom( NumberValue::instance(), value ) { }
 
 	inline Value Value::setSlot( const Symbol& symbol, const Value value ) { return getFrame().setSlot( symbol, value ); }
 	inline Value Value::getSlot( const Symbol& symbol ) { return getFrame().getSlot( symbol ); }
@@ -55,11 +61,9 @@ namespace impulse {
 		return result;
 	}
 
-	inline Frame& Value::getFrame() const { return *_frame; }
-
 	inline Frame& Value::getProto() const { return _frame->getProto(); }
 
-	inline Value Value::clone()
+	Value Value::clone()
 	{
 		if (getFloat() < numeric_limits<double>::max())
 		{
@@ -105,7 +109,7 @@ namespace impulse {
 		if (_float == numeric_limits<double>::max())
 			_frame->incRef();
 	}
-	inline GCValue::GCValue( double value ) : Value( value ) { }
+	inline GCValue::GCValue( const double value ) : Value( value ) { }
 	inline GCValue::GCValue( const GCValue& value )
 	{
 		//cout << "GCValue::GCValue( const GCValue& value )" << endl;

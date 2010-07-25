@@ -29,7 +29,7 @@ namespace impulse {
 
 		Expression* setNextExpr( Expression& nextExpr ) { return _nextExpr = &nextExpr; }
 
-		virtual string inspect( Value receiver ) const { return "<expression>"; }
+		virtual string inspect( const Value receiver ) const { return "<expression>"; }
 
 		inline Value eval( Value receiver_, const Array& args, Value context )
 		{
@@ -50,7 +50,7 @@ namespace impulse {
 				
 				expr = expr->_nextExpr;
 			}
-			
+
 			LEAVE( receiver.inspect() );
 			
 			return receiver;

@@ -16,11 +16,12 @@ using namespace impulse;
 
 #include "core/value.cpp"
 #include "core/frame.cpp"
+#include "core/protos.cpp"
+
+#include "parser/all.h"
 
 #include "tests/core.h"
 #include "tests/number.h"
-
-#include "parser/all.h"
 
 int main( int argc, char* argv[] )
 {
@@ -45,18 +46,19 @@ int main( int argc, char* argv[] )
 	
 	Object::instance().initSlots();
 	GCArray::instance().initSlots();
+	Boolean::instance().initSlots();
 	Number::instance().initSlots();
 	String::instance().initSlots();
 	Range::instance().initSlots();
-	Lambda::instance().initSlots();
+	Block::instance().initSlots();
 
 	//CoreTest().runTest();
 	//NumberTest().runTest();
 
-	Value lobby = *new Lobby();
+	Value lobby = Lobby::instance();
 
 	Expression expr;
-	Array args;
+	const static Array args;
 
 	do
 	{

@@ -20,7 +20,7 @@ namespace impulse {
  // class Frame
  //
 
-	typedef Value (*EvalFunc)( Frame* self, Value receiver, const Array& args, Value context );
+	typedef Value (*EvalFunc)( Frame& self, Value receiver, const Array& args, Value context );
 
 	class Frame {
 
@@ -37,10 +37,9 @@ namespace impulse {
 		Value getSlot( const Symbol& symbol );
 
 		virtual Value eval( Value receiver, const Array& args, Value context );
-		
 		Value send( Value receiver, const Symbol& selector, const Array& args, Value context );
 
-		virtual string inspect( Value receiver ) const { return "<frame>"; }
+		virtual string inspect( const Value receiver ) const { return "<frame>"; }
 
 		Frame& getProto() const { return *_proto; }
 

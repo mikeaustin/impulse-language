@@ -25,12 +25,12 @@ namespace impulse {
 
 		void initSlots();
 
-		virtual string inspect( Value receiver ) const
+		virtual string inspect( const Value receiver ) const
 		{
 			Range& range = (Range&) receiver.getFrame();
 			
-			//if (&range == &Range::instance())
-			//	return "<range>";
+			if (&range == &Range::instance())
+				return "<range>";
 				
 			ostringstream stream;
 

@@ -20,7 +20,7 @@ namespace impulse {
 	
 	 public:
 
-		Array( const Array& value );
+		//Array( const Array& value );
 		Array()              : _size( 0 ) { }
 		Array( size_t size ) : _size( size ) { }
 
@@ -31,7 +31,7 @@ namespace impulse {
 		Value& operator []( size_t index ) { return (Value&) _array[index]; }
 		const Value& operator []( size_t index ) const { return (Value&) _array[index]; }
 
-		string inspect( Value receiver ) const
+		string inspect( const Value receiver ) const
 		{
 			return "<array>";
 		}
@@ -73,8 +73,6 @@ namespace impulse {
 		GCArray();
 		GCArray( const Array& value );
 		GCArray( Frame& proto );
-		//GCArray()              : _size( 0 ) { }
-		//GCArray( size_t size ) : _size( size ) { }
 
 		void initSlots();
 
@@ -85,7 +83,7 @@ namespace impulse {
 		Value& operator []( size_t index ) { return _array[index]; }
 		const Value& operator []( size_t index ) const { return _array[index]; }
 
-		string inspect( Value receiver ) const
+		string inspect( const Value receiver ) const
 		{
 			return "<array>";
 		}
@@ -117,8 +115,6 @@ namespace impulse {
 //	 private:
 
 		vector<GCValue> _array;
-		//GCValue _array[5];
-		//size_t  _size;
 	 
 	};
 
@@ -129,7 +125,7 @@ namespace impulse {
 	 	ArrayValue();
 	 	ArrayValue( const Array& value );
 
-		string inspect( Value receiver ) const
+		string inspect( const Value receiver ) const
 		{
 			GCArray& array = receiver.get<GCArray>();
 			ostringstream stream;

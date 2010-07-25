@@ -16,7 +16,7 @@ namespace impulse {
 			cout << "Testing Core..." << endl;
 			cout << "------------------------------------------------------------" << endl;
 
-			Lobby lobby;
+			Value lobby = Lobby::instance();
 
 			{
 				ASSERT( val( 5.0f ) == val( 5.0f ) );
@@ -26,10 +26,10 @@ namespace impulse {
 			
 			{
 				OUTPUT( lobby.setSlot( Symbol::at( "*" ), Symbol::at( "*" ) ) );
-				ASSERT( Symbol::at( "*" )._refCount == 2 );
+				ASSERT( Symbol::at( "*" )._refCount == 3 );
 				
 				OUTPUT( lobby.setSlot( Symbol::at( "*" ), 5 ) );
-				ASSERT( Symbol::at( "*" )._refCount == 1 );
+				ASSERT( Symbol::at( "*" )._refCount == 2 );
 
 				lobby.setSlot( Symbol::at( "+" ), Void::instance() );
 				lobby.setSlot( Symbol::at( "+" ), *new Frame() );
@@ -62,12 +62,11 @@ namespace impulse {
 				messages.push_back( *new Message( Symbol::at( "*" ), args2 ) );
 				//messages.push_back( *new MulMessage( args2 ) );
 				Frame& expression = *new Expression( messages );
-				Frame& block = *new Lambda( args1, expression, lobby );
+				Block& block = *new Block( args1, expression, lobby );
 
 				const Array exprArgs;
 
-				//cout << expression.eval( lobby, exprArgs, lobby ).getFloat() << endl;
-				ASSERT( block.eval( lobby, exprArgs, lobby ) == 15 );
+				ASSERT( block.eval_( lobby, exprArgs, lobby ) == 15 );
 #ifndef DEBUG
 				if (1)
 				{

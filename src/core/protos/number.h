@@ -37,18 +37,25 @@ namespace impulse {
 			static const Frame* addArgTypes[] = { &Number::instance() };
 			static const Frame* powArgTypes[] = { &Number::instance() };
 
-			setSlot( Symbol::at( "+" ),    *new Method( "+",    add_,   1, addArgTypes ) );
-			setSlot( Symbol::at( "-" ),    *new Method( "-",    sub_,   1 ) );
-			setSlot( Symbol::at( "*" ),    *new Method( "*",    mul_,   1 ) );
-			setSlot( Symbol::at( "/" ),    *new Method( "/",    div_,   1 ) );
-			setSlot( Symbol::at( "%" ),    *new Method( "%",    mod_,   1 ) );
-			setSlot( Symbol::at( "sin" ),  *new Method( "sin",  sin,    0 ) );
-			setSlot( Symbol::at( "cos" ),  *new Method( "cos",  cos,    0 ) );
-			setSlot( Symbol::at( "pow:" ), *new Method( "pow:", pow_,   1, powArgTypes ) );
-			setSlot( Symbol::at( ".." ),   *new Method( "..",   range_, 1 ) );
+			setSlot( Symbol::at( "+" ),    *new Method( "+",    *new Block( add_ ), 1, addArgTypes ) );
+			setSlot( Symbol::at( "-" ),    *new Method( "-",    *new Block( sub_ ), 1 ) );
+			setSlot( Symbol::at( "*" ),    *new Method( "*",    *new Block( mul_ ), 1 ) );
+			setSlot( Symbol::at( "/" ),    *new Method( "/",    *new Block( div_ ), 1 ) );
+			setSlot( Symbol::at( "%" ),    *new Method( "%",    *new Block( mod_ ), 1 ) );
+
+			setSlot( Symbol::at( "<" ),    *new Method( "<",    *new Block( lessThan_ ), 1 ) );
+			setSlot( Symbol::at( ">" ),    *new Method( ">",    *new Block( greaterThan_ ), 1 ) );
+			setSlot( Symbol::at( "<=" ),   *new Method( "<=",   *new Block( lessOrEqual_ ), 1 ) );
+			setSlot( Symbol::at( ">=" ),   *new Method( ">=",   *new Block( greaterOrEqual_ ), 1 ) );
+			setSlot( Symbol::at( "==" ),   *new Method( "==",   *new Block( equal_ ), 1 ) );
+
+			setSlot( Symbol::at( "sin" ),  *new Method( "sin",  *new Block( sin ), 0 ) );
+			setSlot( Symbol::at( "cos" ),  *new Method( "cos",  *new Block( cos ), 0 ) );
+			setSlot( Symbol::at( "pow:" ), *new Method( "pow:", *new Block( pow_ ), 1, powArgTypes ) );
+			setSlot( Symbol::at( ".." ),   *new Method( "..",   *new Block( range_ ), 1 ) );
 		}
 
-		virtual string inspect( Value receiver ) const { return "<number>"; }
+		virtual string inspect( const Value receiver ) const { return "<number>"; }
 
 		static Frame& instance()
 		{
@@ -57,16 +64,16 @@ namespace impulse {
 			return number.getFrame();
 		}
 
-#define OPERATOR_METHOD( function, op ) \
-		static Value function( Value receiver, const Array& args, Value context ) \
-		{ \
-			return receiver.getFloat() op args[0].getFloat(); \
-		}
-
 		OPERATOR_METHOD( add_, + );
 		OPERATOR_METHOD( sub_, - );
 		OPERATOR_METHOD( mul_, * );
 		OPERATOR_METHOD( div_, / );
+
+		OPERATOR_METHOD( lessThan_, < );
+		OPERATOR_METHOD( greaterThan_, > );
+		OPERATOR_METHOD( lessOrEqual_, <= );
+		OPERATOR_METHOD( greaterOrEqual_, >= );
+		OPERATOR_METHOD( equal_, == );
 
 		static Value mod_( Value receiver, const Array& args, Value context )
 		{
@@ -105,7 +112,7 @@ namespace impulse {
 	 
 	 	NumberValue() : Frame( Number::instance() ) { }
 
-		virtual string inspect( Value receiver ) const
+		virtual string inspect( const Value receiver ) const
 		{
 			ostringstream stream; stream << receiver.getFloat();
 			

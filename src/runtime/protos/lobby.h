@@ -20,14 +20,9 @@ namespace impulse {
 
 	 public:
 
-		Lobby() : Frame( Object::instance() )
-		{
-			setSlot( Symbol::at( "print:" ), *new Method( "print:", print_, 1 ) );
-			setSlot( Symbol::at( "help" ),   *new Method( "help:",  help,   0 ) );
-			setSlot( Symbol::at( "exit" ),   *new Method( "exit",   exit,   0 ) );
-		}
+		Lobby();
 
-		virtual string inspect( Value receiver ) const { return "<lobby>"; }
+		virtual string inspect( const Value receiver ) const { return "<lobby>"; }
 
 		static Frame& instance()
 		{
@@ -54,6 +49,13 @@ namespace impulse {
 		{
 			exitMainLoop = true;
 			
+			return Value();
+		}
+
+		static Value foo_with_( Value receiver, const Array& args, Value context )
+		{
+			cout << "foo" << endl;
+		
 			return Value();
 		}
 		

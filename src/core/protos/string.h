@@ -26,15 +26,21 @@ namespace impulse {
 		
 		void initSlots()
 		{
-			setSlot( Symbol::at( "size" ), *new Method( "size", size,    0 ) );
-			setSlot( Symbol::at( "++" ),   *new Method( "++",   concat_, 1 ) );
+			setSlot( Symbol::at( "size" ), *new Method( "size", *new Block( size ),    0 ) );
+			setSlot( Symbol::at( "++" ),   *new Method( "++",   *new Block( concat_ ), 1 ) );
 		}
 
 		String( string value ) : Frame( String::instance() ), _value( value ) { }
 
 		string getValue() { return _value; }
 
-		virtual string inspect( Value receiver ) const { return string( "\"" ) + _value + string( "\"" ); }
+		virtual string inspect( const Value receiver ) const
+		{
+			if (&receiver.getFrame() == &String::instance())
+				return "<string>";
+			
+			return string( "\"" ) + _value + string( "\"" );
+		}
 
 		static Frame& instance()
 		{
