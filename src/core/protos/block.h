@@ -23,8 +23,7 @@ namespace impulse {
 	 public:
 
 		Block( Frame& proto ) : Invokable( proto ), _function( NULL ), _body( Void::instance() ) { }
-		Block( const Array& args, Frame& body, Value context )
-		 : Invokable( Block::instance() ),
+		Block( const Array& args, Frame& body, Value context ) : Invokable( Block::instance() ),
 		   _args( args ), _function( NULL ), _body( body ), _context( context ) { _eval3 = &eval3; }
 		Block( Function function ) : Invokable( Block::instance() ),
 		 _function( function ), _body( Void::instance() ), _context() { _eval3 = &eval3; }
@@ -43,7 +42,52 @@ namespace impulse {
 			return block.getFrame();
 		}
 
-		Value eval_( Value receiver, const Array& args, Value context )
+		Value eval_( Value receiver, const Array& args, Value /* hide */ )
+		{
+			ENTER( "Block::eval_( receiver = " << receiver.inspect() << " )" );
+/* Move method arg checking here
+			if (args.size() != _args.size())
+			{
+				cerr << "*** Wrong number of arguments" << endl;
+				
+				return Value();
+			}
+*/
+			if (_function)
+			{
+				Value result = _function( receiver, args, _context );
+
+				LEAVE( "" );
+		
+				return result;
+			}
+
+			const unsigned int argsSize = _args.size();
+			const static Array bodyArgs;
+			
+			Frame& blockContext = *new Frame( _context.getFrame() );
+			blockContext._cache[0] = _context.getFrame()._cache[0];
+			//Frame& blockContext = _context.getFrame();
+
+			for (unsigned int i = 0; i < argsSize; ++i)
+			{
+				if (localsAccess)
+					blockContext._locals.push_back( args[i] );
+
+				blockContext.setSlot( (Symbol&) _args[i].getFrame(), args[i] );
+			}
+
+			//Value result = _body.eval( blockContext, bodyArgs, blockContext );
+			Value result = _body.eval( receiver, bodyArgs, blockContext );
+
+			blockContext.decRef();
+
+			LEAVE( "" );
+		
+			return result;
+		}
+
+		Value evalLoop_( Value receiver, const Array& args, Value context )
 		{
 			ENTER( "Block::eval_( receiver = " << receiver.inspect() << " )" );
 
@@ -61,24 +105,31 @@ namespace impulse {
 
 			for (unsigned int i = 0; i < argsSize; ++i)
 			{
-				context.setSlot( (Symbol&) _args[i].getFrame(), args[i] );
+				if (localsAccess)
+					_context.getFrame()._locals.push_back( args[i] );
+
+				_context.setSlot( (Symbol&) _args[i].getFrame(), args[i] );
 			}
 
-			Value result = _body.eval( context, bodyArgs, context );			
+			Value result = _body.eval( _context, bodyArgs, _context );
+
+			_context.getFrame()._locals.clear();
 
 			LEAVE( "" );
 		
 			return result;
 		}
 
-		static Value slice_( Value receiver, const Array& args, Value )
+		static Value slice_( Value receiver, const Array& args, Value context )
 		{
 			Block& self  = receiver.get<Block>();
 
 			//Value context = *new Frame( self._context.getFrame() );
-			Value context = self._context;
+			//Value context = self._context;
 
-			return self.eval_( receiver, args, context );
+			Value result = self.eval_( receiver, args, context );
+			
+			return result;
 		}
 
 		inline static Value eval3( Frame* self_, const int range, Value receiver, const Array& args, Value context )
@@ -108,7 +159,7 @@ namespace impulse {
 		Array    _args;
 		Function _function;
 		Frame&   _body;
-		Value    _context;
+		GCValue  _context;
 
 	};
 	

@@ -25,7 +25,7 @@ namespace impulse {
 
 		typedef const vector<Value> (Parser::*ParserFunc)();
 		
-		Parser( Lexer& lexer ) : _lexer( lexer ) { }
+		Parser( Lexer& lexer ) : _lexer( lexer ) { argsStack.push_back( Array() ); }
 
 	 //
 	 // Convenience methods
@@ -62,6 +62,8 @@ namespace impulse {
 	 
 	 	Lexer& _lexer;
 	 	int    _lastOp;
+
+		vector<Array> argsStack;
 	 	
 	};
 

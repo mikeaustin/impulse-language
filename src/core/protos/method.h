@@ -31,10 +31,11 @@ namespace impulse {
 
 	 private:
 
-		Block&   _function;
+		GCValue        _function;
 		const unsigned _argsSize;
 		const Frame**  _argTypes;
 		const string   _funcName;
+
 		map<const Frame**, Block*> _argTypes2;
 		
 	};

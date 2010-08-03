@@ -38,6 +38,28 @@ namespace impulse {
 			return Value();
 		}
 
+		static Value object_( Value receiver, const Array& args, Value context )
+		{
+			Block& block  = args[0].get<Block>();
+			Frame& object = *new Frame( Object::instance() );
+			
+			Array blockArgs;
+			block.eval_( object, blockArgs, object );
+			
+			return object;
+		}
+
+		static Value method_( Value receiver, const Array& args, Value context )
+		{
+			String& name  = args[0].get<String>();
+			Block& block  = args[1].get<Block>();
+			Frame& object = *new Method( "anon", block, 0 );
+			
+			receiver.setSlot( Symbol::at( name.getValue() ), object );
+			
+			return object;
+		}
+
 		static Value help( Value receiver, const Array& args, Value context )
 		{
 			cout << "No help yet" << endl;

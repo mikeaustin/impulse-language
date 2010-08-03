@@ -25,7 +25,8 @@ namespace impulse {
 	Value Range::each_( Value receiver, const Array& args, Value context )
 	{
 		Range& range  = receiver.get<Range>();
-		Invokable& block = dynamic_cast<Invokable&>( args[0].getFrame() );
+		//Invokable& block = dynamic_cast<Invokable&>( args[0].getFrame() );
+		Block& block = args[0].get<Block>();
 
 		Array blockArgs( 1 );
 		// Create another autorelease pool
@@ -34,7 +35,7 @@ namespace impulse {
 		{
 			blockArgs[0] = i;
 		
-			block.eval_( receiver, blockArgs, context );
+			block.evalLoop_( receiver, blockArgs, context );
 
 /*			vector<Frame*>::iterator iter = Frame::_releasePool.begin();
 			while (iter != Frame::_releasePool.end())
@@ -50,17 +51,17 @@ namespace impulse {
 
 	Value Range::map_( Value receiver, const Array& args, Value context )
 	{
-		Range& range  = receiver.get<Range>();
+		Range& range = receiver.get<Range>();
 		Block& block = args[0].get<Block>();
 
 		Array blockArgs( 1 );
-		GCArray& array = *new ArrayValue();
+		GCArray& array = *new ArrayValue( range._to - range._from + 1 );
 
 		for (int i = range._from; i <= range._to; ++i)
 		{
 			blockArgs[0] = i;
-		
-			Value value = block.eval_( receiver, blockArgs, context );
+
+			Value value = block.evalLoop_( receiver, blockArgs, context );
 			
 			if (&value.getFrame() != &Void::instance())
 				array._array.push_back( value );
@@ -76,7 +77,8 @@ namespace impulse {
  //
 
 	GCArray::GCArray() { }
-	GCArray::GCArray( Frame& proto ) : Frame( proto ) { }
+	GCArray::GCArray( size_t size ) : _array( size ) { }
+	GCArray::GCArray( Frame& proto, size_t size = 0 ) : Frame( proto ) { }
 
 	void GCArray::initSlots()
 	{
@@ -86,6 +88,7 @@ namespace impulse {
 		setSlot( Symbol::at( "size" ), *new Method( "size", *new Block( size_ ),  0 ) );
 		setSlot( Symbol::at( "[]" ),   *new Method( "[]",   *new Block( slice_ ), 1, sliceArgTypes ) );
 		setSlot( Symbol::at( "map:" ), *new Method( "map:", *new Block( map_ ),   1, mapArgTypes ) );
+		setSlot( Symbol::at( "zip:" ), *new Method( "zip:", *new Block( zip_ ),   1, mapArgTypes ) );
 	}
 
 	inline Frame& GCArray::instance()
@@ -97,11 +100,11 @@ namespace impulse {
 
 	Value GCArray::map_( Value receiver, const Array& args, Value context )
 	{
-		GCArray& self  = receiver.get<GCArray>();
-		Block& block = args[0].get<Block>();
+		GCArray& self = receiver.get<GCArray>();
+		Block& block  = args[0].get<Block>();
 
 		Array blockArgs( 1 );
-		GCArray& array = *new ArrayValue();
+		GCArray& array = *new ArrayValue( self._array.size() );
 
 		vector<GCValue>::iterator iter = self._array.begin();
 		
@@ -109,7 +112,7 @@ namespace impulse {
 		{
 			blockArgs[0] = *iter;
 			
-			Value value = block.eval_( receiver, blockArgs, context );
+			Value value = block.evalLoop_( receiver, blockArgs, context );
 			array._array.push_back( value );
 			
 			++iter;
@@ -118,11 +121,39 @@ namespace impulse {
 		return array;
 	}
 
+	Value GCArray::zip_( Value receiver, const Array& args, Value context )
+	{
+		GCArray& self = receiver.get<GCArray>();
+
+		Range& range1 = self[0].get<Range>();
+		Range& range2 = self[1].get<Range>();
+		Block& block  = args[0].get<Block>();
+
+		Array blockArgs( 2 );
+		GCArray& array = *new ArrayValue( range1.to() - range1.from() + 1 );
+
+		for (int i = range1.from(), j = range2.from(); i <= range1.to(); ++i, ++j)
+		{
+			blockArgs[0] = i;
+			blockArgs[1] = j;
+
+			Value value = block.evalLoop_( receiver, blockArgs, context );
+			
+			if (&value.getFrame() != &Void::instance())
+				array._array.push_back( value );
+		}
+
+		autorelease( array );
+	
+		return array;
+	}
+	
  //
  // class ArrayValue
  //
 
 	inline ArrayValue::ArrayValue()                     : GCArray( GCArray::instance() ) { }
+	inline ArrayValue::ArrayValue( size_t size )        : GCArray( GCArray::instance(), size ) { }
 	inline ArrayValue::ArrayValue( const Array& value ) : GCArray( GCArray::instance() )
  	{
  		for (unsigned int i = 0; i < value.size(); ++i)
@@ -184,7 +215,8 @@ namespace impulse {
 		}
 
 		//Value result = _function( receiver, args, context );
-		Value result = _function.eval_( receiver, args, context );
+		//Value result = _function.eval_( receiver, args, context );
+		Value result = _function.get<Block>().eval_( receiver, args, context );
 
 		LEAVE( result );
 		
@@ -202,7 +234,11 @@ namespace impulse {
 		static const Frame* fooNumberArgTypes[] = { &Number::instance(), &Number::instance() };
 		static const Frame* fooObjectArgTypes[] = { &Number::instance(), &Object::instance() };
 
+		setSlot( Symbol::at( "nil" ), Nil::instance() );
+
 		setSlot( Symbol::at( "print:" ), *new Method( "print:", *new Block( print_ ), 1 ) );
+		setSlot( Symbol::at( "object:" ), *new Method( "object:", *new Block( object_ ), 1 ) );
+		setSlot( Symbol::at( "method:" ), *new Method( "method:", *new Block( method_ ), 2 ) );
 		setSlot( Symbol::at( "help" ),   *new Method( "help:",  *new Block( help ),   0 ) );
 		setSlot( Symbol::at( "exit" ),   *new Method( "exit",   *new Block( exit ),   0 ) );
 
@@ -228,22 +264,46 @@ namespace impulse {
 
 	Value Boolean::ternary_( Value receiver, const Array& args, Value context )
 	{
+		const static Array exprArgs;
+
 		if (receiver.getBool() == true)
 		{
-			Block& block = args[0].get<Block>();
-			const static Array blockArgs;
+			Expression& expr = args[0].get<Expression>();
 			
-			return block.eval_( context, blockArgs, context );
+			return expr.eval( context, exprArgs, context );
 		}
 		else if (args.size() == 2)
 		{
-			Block& block = args[1].get<Block>();
-			const static Array blockArgs;
+			Expression& expr = args[1].get<Expression>();
 			
-			return block.eval_( context, blockArgs, context );
+			return expr.eval( context, exprArgs, context );
 		}
 		
 		return Value();
+	}
+
+	inline Value TernaryMessage::eval( Value receiver, const Array& args, Value context )
+	{
+		const static Array exprArgs;
+
+		if (&receiver.getProto() == &Boolean::instance())
+		{
+			if (receiver.getBool() == true)
+			{
+				Expression& expr = (Expression&) _msgArgs[0].getFrame();
+		
+				return expr.eval( context, exprArgs, context );
+			}
+			else if (_msgArgs.size() == 2)
+			{
+				Expression& expr = (Expression&) _msgArgs[1].getFrame();
+		
+				return expr.eval( context, exprArgs, context );
+			}
+			else return Value();
+		}
+		
+		return Message::eval( receiver, args, context );
 	}
 
 }

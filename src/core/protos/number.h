@@ -39,7 +39,7 @@ namespace impulse {
 
 			setSlot( Symbol::at( "+" ),    *new Method( "+",    *new Block( add_ ), 1, addArgTypes ) );
 			setSlot( Symbol::at( "-" ),    *new Method( "-",    *new Block( sub_ ), 1 ) );
-			setSlot( Symbol::at( "*" ),    *new Method( "*",    *new Block( mul_ ), 1 ) );
+			setSlot( Symbol::at( "*" ),    *new Method( "*",    *new Block( mul_ ), 1, addArgTypes ) );
 			setSlot( Symbol::at( "/" ),    *new Method( "/",    *new Block( div_ ), 1 ) );
 			setSlot( Symbol::at( "%" ),    *new Method( "%",    *new Block( mod_ ), 1 ) );
 
@@ -62,6 +62,12 @@ namespace impulse {
 			static GCValue number = *new Number();
 			
 			return number.getFrame();
+		}
+
+#define OPERATOR_METHOD( function, op ) \
+		static Value function( Value receiver, const Array& args, Value context ) \
+		{ \
+			return receiver.getFloat() op args[0].getFloat(); \
 		}
 
 		OPERATOR_METHOD( add_, + );

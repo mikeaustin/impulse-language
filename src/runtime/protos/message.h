@@ -63,21 +63,67 @@ namespace impulse {
 	};
 
  //
- // class MulMessage
+ // class <Operator>Message
  //
 
-	class MulMessage : public Message {
+#define OPERATOR_MESSAGE( message, op ) \
+	class message##Message : public Message { \
+	 public: \
+		message##Message( const Array& msgArgs ) \
+		 : Message( Symbol::at( #op ), msgArgs ) { } \
+		virtual Value eval( Value receiver, const Array& args, Value context ) { \
+			if (&receiver.getFrame() == &NumberValue::instance()) { \
+				Array msgArgs = evalArgs( context ); \
+				if (&msgArgs[0].getFrame() == &NumberValue::instance()) { \
+					return receiver.getFloat() op msgArgs[0].getFloat(); \
+				} \
+			} \
+			return Message::eval( receiver, args, context ); \
+		} \
+	}; \
+	class Const##message##Message : public Message { \
+	 public: \
+		Const##message##Message( const double value, const Array& msgArgs ) \
+		 : Message( Symbol::at( #op ), msgArgs ), _value( value ) { } \
+		virtual Value eval( Value receiver, const Array& args, Value context ) { \
+			if (&receiver.getFrame() == &NumberValue::instance()) { \
+				return receiver.getFloat() op _value; \
+			} \
+			return Message::eval( receiver, args, context ); \
+		} \
+	 private: \
+		double _value; \
+	}
+
+	OPERATOR_MESSAGE( Mul,   * );
+	OPERATOR_MESSAGE( Div,   / );
+	OPERATOR_MESSAGE( Add,   + );
+	OPERATOR_MESSAGE( Sub,   - );
+	
+	OPERATOR_MESSAGE( Equal, == );
+	OPERATOR_MESSAGE( LessThan, < );
+	OPERATOR_MESSAGE( LessEqual, <= );
+	OPERATOR_MESSAGE( GreaterThan, > );
+	OPERATOR_MESSAGE( GreaterEqual, >= );
+
+ //
+ // class ModMessage
+ //
+
+	class ModMessage : public Message {
 
 	 public:
 
-		MulMessage( const Array& msgArgs )
-		 : Message( Symbol::at( "*" ), msgArgs ) { }
+		ModMessage( const Array& msgArgs )
+		 : Message( Symbol::at( "%" ), msgArgs ) { }
 
 		virtual Value eval( Value receiver, const Array& args, Value context )
 		{
-			if (_msgArgs[0].getFloat() != numeric_limits<double>::max())
-			{
-				return receiver.getFloat() * _msgArgs[0].getFloat();
+			if (&receiver.getFrame() == &NumberValue::instance()) {
+				Array msgArgs = evalArgs( context );
+				if (&msgArgs[0].getFrame() == &NumberValue::instance()) {
+					return (int) receiver.getFloat() % (int) msgArgs[0].getFloat();
+				}
 			}
 			
 			return Message::eval( receiver, args, context );
@@ -85,21 +131,40 @@ namespace impulse {
 
 	};
 
-	class ConstMulMessage : public Message {
+	class ConstModMessage : public Message {
 
 	 public:
 
-		ConstMulMessage( const double value, const Array& msgArgs )
-		 : Message( Symbol::at( "*" ), msgArgs ), _value( value ) { }
+		ConstModMessage( const double value, const Array& msgArgs )
+		 : Message( Symbol::at( "%" ), msgArgs ), _value( value ) { }
 
 		virtual Value eval( Value receiver, const Array& args, Value context )
 		{
-			return receiver.getFloat() * _value;
+			if (&receiver.getFrame() == &NumberValue::instance()) {
+				return (int) receiver.getFloat() % (int) _value;
+			}
+			
+			return Message::eval( receiver, args, context );
 		}
 
 	 private:
 	
 		double _value;
+
+	};
+
+ //
+ // TernaryMessage
+ //
+	
+	class TernaryMessage : public Message {
+
+	 public:
+
+		TernaryMessage( const Array& msgArgs )
+		 : Message( Symbol::at( "?" ), msgArgs ) { }
+
+		Value eval( Value receiver, const Array& args, Value context );
 
 	};
 
@@ -186,7 +251,11 @@ namespace impulse {
 
 		virtual Value eval( Value receiver, const Array& args, Value context )
 		{
-			Block& block = *new Block( _msgArgs, _body, context );
+			Frame& blockContext = *new Frame( context.getFrame() );
+			
+			autorelease( blockContext );
+			
+			Block& block = *new Block( _msgArgs, _body, blockContext );
 
 			autorelease( block );
 			
@@ -196,6 +265,75 @@ namespace impulse {
 	 private:
 	 
 	 	Frame& _body;
+
+	};
+/*
+	class ExpressionMessage : public Message {
+
+	 public:
+
+		ExpressionMessage( const Array& msgArgs, Frame& expression )
+		 : Message( Symbol::at( "expression" ), msgArgs ), _expression( expression ) { }
+
+		virtual Value eval( Value receiver, const Array& args, Value context )
+		{
+			return _expression;
+		}
+
+	 private:
+	 
+	 	Frame& _expression;
+
+	};
+*/
+ //
+ // class LocalMessage
+ //
+
+	class LocalMessage : public Message {
+
+	 public:
+
+		LocalMessage( int index, const Array& msgArgs )
+		 : Message( Symbol::at( "local" ), msgArgs ), _index( index ) { }
+
+		virtual Value eval( Value receiver, const Array& args, Value context )
+		{
+			/*if (_index > context.getFrame()._locals.size() - 1)
+			{
+				cerr << "*** Local out of range" << endl;
+				
+				return Value();
+			}*/
+			
+			Value result = context.getFrame()._locals[_index];
+
+			return result;
+		}
+
+	 private:
+	 
+		unsigned int _index;
+
+	};
+
+	class SliceMessage : public Message {
+
+	 public:
+
+		SliceMessage( const Array& msgArgs )
+		 : Message( Symbol::at( "[]" ), msgArgs ) { }
+
+		virtual Value eval( Value receiver, const Array& args, Value context )
+		{
+			if (&receiver.getProto() == &Block::instance()) {
+				Array msgArgs = evalArgs( context );
+				
+				return Block::slice_( receiver, msgArgs, context );
+			}
+			
+			return Message::eval( receiver, args, context );
+		}
 
 	};
 	

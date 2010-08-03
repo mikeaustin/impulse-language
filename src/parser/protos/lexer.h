@@ -31,7 +31,14 @@ namespace impulse {
 		Type type() { return _type; }
 		Value value() { return _value; }
 
-		string getString() { return _value.get<Symbol>().getName(); }
+		string getString()
+		{
+			if (_type == IDENTIFIER || _type == OPERATOR)
+				return _value.get<Symbol>().getName();
+			else
+				return "";
+		}
+		
 		Symbol& getSymbol() { return _value.get<Symbol>(); }
 
 	 private:

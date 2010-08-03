@@ -7,6 +7,8 @@
 
 #include "parser.h"
 
+#include <algorithm>
+
 namespace impulse {
 
 	void concat( vector<Value>& vector1, const vector<Value>& vector2 )
@@ -194,10 +196,30 @@ namespace impulse {
 
 		Token ident = expect( Token::IDENTIFIER, "identifier" );
 
-		Symbol& selector = ident.getSymbol();
-		Array&  args     = *new Array();
+		Symbol& selector  = ident.getSymbol();
+		Array&  emptyArgs = *new Array();
 
-		code.push_back( *new Message( selector, args ) );
+		Array& args = argsStack[argsStack.size() - 1];
+
+		unsigned int index;
+		for (index = 0; index < args.size(); ++index)
+		{
+			if (&args[index].get<Symbol>() == &ident.getSymbol())
+			{
+				cout << "Found local " << ident.value() << endl;
+				
+				break;
+			}
+		}
+		
+		if (localsAccess && index != args.size())
+		{
+			code.push_back( *new LocalMessage( index, emptyArgs ) );
+		
+			return code;
+		}
+
+		code.push_back( *new Message( selector, emptyArgs ) );
 		
 		return code;
 	}
@@ -248,52 +270,49 @@ namespace impulse {
 
 		Symbol& name = expect( Token::OPERATOR, "operator" ).getSymbol();
 		Array&  args = *new Array();
-/*
-		if (precedence( name.getName() ) == 6)
-		{
-			Expression& expr = *new Expression( parseExpression() );
-			
-			args.push_back( expr );
-			code.push_back( *new Message( name, args ) );
 
-			_lastOp = 6;
-
-			return code;
-		}
-*/
 		if (&name == &Symbol::at( "?" ))
 		{
 			Expression& trueExpr = *new Expression( parseExpression() );
-			Array& blockArgs = *new Array();
-			
-			args.push_back( *new BlockMessage( blockArgs, trueExpr ) );
+			args.push_back( trueExpr );
 
 			if (option( Token::COLON, ":" ))
 			{
 				option( Token::NEWLINE, "\\n" );
 				
 				Expression& falseExpr = *new Expression( parseExpression() );
-
-				args.push_back( *new BlockMessage( blockArgs, falseExpr ) );
+				args.push_back( falseExpr );
 			}
 		
-			code.push_back( *new Message( name, args ) );
+			//code.push_back( *new Message( name, args ) );
+			code.push_back( *new TernaryMessage( args ) );
 
-			_lastOp = 3;
-			
 			return code;
 		}
 
-		vector<Value>arg = parseExpression( &Parser::parseBinaryMessage );
+		vector<Value> arg = parseExpression( &Parser::parseBinaryMessage );
 		args.push_back( arg.size() == 1 ? arg[0] : *new Expression( arg ) );
 
-		if (&name == &Symbol::at( "*" ))
-		{
-			if (&args[0].getProto() == &Number::instance())
-				code.push_back( *new ConstMulMessage( args[0].getFloat(), args ) );
-			else
-				code.push_back( *new MulMessage( args ) );
+#define OPERATOR_PARSER( _name_, _op_ ) \
+		(&name == &Symbol::at( #_op_ )) \
+		{ \
+			if (&args[0].getProto() == &Number::instance()) \
+				code.push_back( *new Const##_name_##Message( args[0].getFloat(), args ) ); \
+			else \
+				code.push_back( *new _name_##Message( args ) ); \
 		}
+
+		if OPERATOR_PARSER( Add, + )
+		else if OPERATOR_PARSER( Sub, - )
+		else if OPERATOR_PARSER( Mul, * )
+		else if OPERATOR_PARSER( Div, / )
+		else if OPERATOR_PARSER( Mod, % )
+		
+		else if OPERATOR_PARSER( Equal, == )
+		else if OPERATOR_PARSER( LessThan, < )
+		else if OPERATOR_PARSER( LessEqual, <= )
+		else if OPERATOR_PARSER( GreaterThan, > )
+		else if OPERATOR_PARSER( GreaterEqual, >= )
 		else
 		{
 			code.push_back( *new Message( name, args ) );
@@ -357,9 +376,14 @@ namespace impulse {
 				Symbol& symbol = expect( Token::IDENTIFIER, "identifier" ).getSymbol();
 
 				args.push_back( symbol );
+
+				//argsStack.push_back( &symbol );
 			}
 			while (option( Token::COMMA, "," ));
+
 		}
+
+		argsStack.push_back( args );
 
 		expect( Token::VERTICAL_BAR, string( "|" ) );
 
@@ -368,8 +392,7 @@ namespace impulse {
 			body = new Expression( parseStatement() );
 			Expression* body2 = body;
 			
-			while (_lexer.peekToken().type() == Token::IDENTIFIER
-				   && _lexer.peekToken().getString() != "end")
+			while (_lexer.peekToken().getString() != "end")
 			{
 				body2 = body2->setNextExpr( *new Expression( parseStatement() ) );
 			}
@@ -380,6 +403,8 @@ namespace impulse {
 		{
 			body = new Expression( parseExpression() );
 		}
+
+		argsStack.pop_back();
 
 		code.push_back( *new BlockMessage( args, *body ) );
 		
@@ -404,7 +429,8 @@ namespace impulse {
 
 		expect( Token::CLOSE_BRACKET, string( "]" ) );
 		
-		code.push_back( *new Message( Symbol::at( "[]" ), args ) );
+		//code.push_back( *new Message( Symbol::at( "[]" ), args ) );
+		code.push_back( *new SliceMessage( args ) );
 		
 		return code;
 	}

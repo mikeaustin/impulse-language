@@ -43,6 +43,12 @@ namespace impulse {
 			return object.getFrame();
 		}
 
+#define OPERATOR_METHOD( function, op ) \
+		static Value function( Value receiver, const Array& args, Value context ) \
+		{ \
+			return receiver.getFloat() op args[0].getFloat(); \
+		}
+
 		OPERATOR_METHOD( equal_, == );
 		OPERATOR_METHOD( notEqual_, != );
 

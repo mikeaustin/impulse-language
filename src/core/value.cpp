@@ -80,9 +80,9 @@ namespace impulse {
 
 	ostream& operator <<( ostream& stream, Value value )
 	{
-		if (value._frame->_proto == &Number::instance())
+		if (&value._frame->getProto() == &Number::instance())
 			stream << value.getFloat();
-		else if (value._frame->_proto == &String::instance())
+		else if (&value._frame->getProto() == &String::instance())
 			stream << value.get<String>().getValue();
 		else
 			stream << value.inspect();

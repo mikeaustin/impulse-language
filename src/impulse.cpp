@@ -11,9 +11,6 @@
 #include "core/all.h"
 #include "runtime/all.h"
 
-using namespace std;
-using namespace impulse;
-
 #include "core/value.cpp"
 #include "core/frame.cpp"
 #include "core/protos.cpp"
@@ -22,6 +19,11 @@ using namespace impulse;
 
 #include "tests/core.h"
 #include "tests/number.h"
+
+//#include "addons/opengl/opengl.h"
+
+using namespace std;
+using namespace impulse;
 
 int main( int argc, char* argv[] )
 {
@@ -56,6 +58,8 @@ int main( int argc, char* argv[] )
 	//NumberTest().runTest();
 
 	Value lobby = Lobby::instance();
+
+	//lobby.setSlot( Symbol::at( "gl" ), OpenGL::instance() );
 
 	Expression expr;
 	const static Array args;

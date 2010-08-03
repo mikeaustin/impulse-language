@@ -21,18 +21,13 @@
   "\x1b[32m\x1b[1mpass\x1b[0m" : "\x1b[31m\x1b[1mfail\x1b[0m") << " " << #code << endl
 #define OUTPUT( code ) code; cout << "---- " << #code << endl
 
-#define OPERATOR_METHOD( function, op ) \
-		static Value function( Value receiver, const Array& args, Value context ) \
-		{ \
-			return receiver.getFloat() op args[0].getFloat(); \
-		}
-
 namespace impulse {
 
 	const char spaces[] = "                                                            ";
 	int        indent = 0;
 
-	const bool methodCaching = false;
+	const bool methodCaching = true;
+	const bool localsAccess  = true;
 	const bool debugGarbage  = false;
 	
 	bool exitMainLoop = false;

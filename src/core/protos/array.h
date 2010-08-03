@@ -8,58 +8,7 @@
 #ifndef IMPULSE_ARRAY
 #define IMPULSE_ARRAY
 
-#include <sstream>
-
 namespace impulse {
-
- //
- // class Array
- //
-
-	class Array {
-	
-	 public:
-
-		//Array( const Array& value );
-		Array()              : _size( 0 ) { }
-		Array( size_t size ) : _size( size ) { }
-
-		unsigned int size() const { return _size; }
-
-		void push_back( Value value ) { _array[_size++] = value; }
-
-		Value& operator []( size_t index ) { return (Value&) _array[index]; }
-		const Value& operator []( size_t index ) const { return (Value&) _array[index]; }
-
-		string inspect( const Value receiver ) const
-		{
-			return "<array>";
-		}
-
-		string inspect() const
-		{
-			ostringstream stream;
-
-			stream << "[";
-			
-			for (unsigned int i = 0; i < _size; i++)
-			{
-				stream << Value( _array[i] ).inspect();
-				
-				if (i < _size - 1) stream << ", ";
-			}
-			
-			stream << "]";
-			
-			return stream.str();
-		}
-
-	 private:
-
-		Atom   _array[5];
-		size_t _size;
-	 
-	};
 
  //
  // class GCArray
@@ -71,8 +20,9 @@ namespace impulse {
 	 public:
 
 		GCArray();
+		GCArray( size_t size );
 		GCArray( const Array& value );
-		GCArray( Frame& proto );
+		GCArray( Frame& proto, size_t size );
 
 		void initSlots();
 
@@ -111,6 +61,7 @@ namespace impulse {
 		}
 
 		static Value map_( Value receiver, const Array& args, Value context );
+		static Value zip_( Value receiver, const Array& args, Value context );
 
 //	 private:
 
@@ -123,6 +74,7 @@ namespace impulse {
 	 public:
 	 
 	 	ArrayValue();
+		ArrayValue( size_t size );
 	 	ArrayValue( const Array& value );
 
 		string inspect( const Value receiver ) const
@@ -132,12 +84,14 @@ namespace impulse {
 
 			stream << "[";
 			
-			for (unsigned int i = 0; i < array._array.size(); i++)
+			for (unsigned int i = 0; i < array._array.size() && i < 10; i++)
 			{
 				stream << Value( array._array[i] ).inspect();
 				
 				if (i < array._array.size() - 1) stream << ", ";
 			}
+			
+			if (array._array.size() > 10) stream << "...";
 			
 			stream << "]";
 			

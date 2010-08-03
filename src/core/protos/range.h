@@ -16,6 +16,36 @@ namespace impulse {
  // class Range
  //
 
+	template <typename T>
+	class range {
+	 public:
+		class range_iterator : public iterator<random_access_iterator_tag, T>
+		{
+		 public:
+		 	range_iterator() { }
+		 	range_iterator( T value ) : _value( value ) { }
+		 	
+		 	const T& operator *() const { return _value; }
+			range_iterator& operator ++() { return _value++, *this; }
+			range_iterator& operator ++(int) { T value = _value; return ++_value, value; }
+			bool operator ==(range_iterator const& other) const { return _value == *other; }
+			bool operator !=(range_iterator const& other) const { return _value != *other; }
+	
+		 private:
+			T _value;
+		};
+
+		typedef range_iterator iterator;
+
+		range( T from, T to ) : _from( from ), _to( to ) { }
+
+		range_iterator begin() { return range_iterator( _from ); }
+		range_iterator end() { return range_iterator( _to + 1 ); }
+		
+	 private:
+		T _from, _to;
+	};
+
 	class Range : public Frame {
 
 	 public:
@@ -24,6 +54,9 @@ namespace impulse {
 		Range( int from, int to ) : Frame( Range::instance() ), _from( from ), _to( to ) { }
 
 		void initSlots();
+
+		int from() { return _from; }
+		int to() { return _to; }
 
 		virtual string inspect( const Value receiver ) const
 		{

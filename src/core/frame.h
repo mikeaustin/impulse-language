@@ -8,6 +8,7 @@
 #ifndef IMPULSE_FRAME_H
 #define IMPULSE_FRAME_H
 
+#include <sstream>
 #include <map>
 
 using namespace std;
@@ -15,6 +16,56 @@ using namespace std;
 namespace impulse {
 
 	typedef map<const SymbolId, GCValue> SlotMap;
+
+ //
+ // class Array
+ //
+
+	class Array {
+	
+	 public:
+
+		Array()              : _size( 0 ) { }
+		Array( size_t size ) : _size( size ) { }
+
+		unsigned int size() const { return _size; }
+
+		void push_back( Value value ) { _array[_size++] = value; }
+
+		void clear() { _size = 0; }
+
+		Value& operator []( size_t index ) { return (Value&) _array[index]; }
+		const Value& operator []( size_t index ) const { return (Value&) _array[index]; }
+
+		string inspect( const Value receiver ) const
+		{
+			return "<array>";
+		}
+
+		string inspect() const
+		{
+			ostringstream stream;
+
+			stream << "[";
+			
+			for (unsigned int i = 0; i < _size; i++)
+			{
+				stream << Value( _array[i] ).inspect();
+				
+				if (i < _size - 1) stream << ", ";
+			}
+			
+			stream << "]";
+			
+			return stream.str();
+		}
+
+	 private:
+
+		Atom   _array[5];
+		size_t _size;
+	 
+	};
 
  //
  // class Frame
@@ -27,9 +78,9 @@ namespace impulse {
 	 public:
 
 	 	Frame()               : _proto( NULL ), _refCount( 1 ) { }
-	 	Frame( Frame& proto ) : _proto( &proto ), _refCount( 1 ) { }
+	 	Frame( Frame& proto ) : _proto( &proto ), _refCount( 1 ) { _proto->incRef(); }
 
-		virtual ~Frame() { }
+		virtual ~Frame() { if (_proto) _proto->decRef(); }
 
 		virtual void initSlots() { }
 
@@ -39,7 +90,14 @@ namespace impulse {
 		virtual Value eval( Value receiver, const Array& args, Value context );
 		Value send( Value receiver, const Symbol& selector, const Array& args, Value context );
 
-		virtual string inspect( const Value receiver ) const { return "<frame>"; }
+		virtual string inspect( const Value receiver ) const
+		{
+			stringstream stream;
+			
+			stream << "<frame@" << this << ">";
+			
+			return stream.str();
+		}
 
 		Frame& getProto() const { return *_proto; }
 
@@ -53,7 +111,7 @@ namespace impulse {
 		 	Cache() : selectorId( -1 ) { }
 		 	
 			SymbolId selectorId;
-			Frame*   frame;
+			Atom	 value;
 
 		};
 
@@ -62,8 +120,9 @@ namespace impulse {
 		SlotMap  _publicSlots;
 		Frame*   _proto;
 		short    _refCount;
-		Value (*_eval3)( Frame*, const int, Value, const Array&, Value );
-		Cache    _cache;
+		Value  (*_eval3)( Frame*, const int, Value, const Array&, Value );
+		Cache    _cache[1];
+		vector<Value> _locals;
 
 		static vector<Frame*> _releasePool;
 
