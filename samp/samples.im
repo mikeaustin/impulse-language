@@ -1,0 +1,28 @@
+#
+# Mapping
+#
+
+squares = (1..10) map: |n| n % 2 == 0 ? n * n
+print: "squares =", squares
+
+
+#
+# Closures
+#
+
+add = |a| |b| a + b
+add-one = add [1]
+print: "add-one [10] =", add-one [10]
+
+
+#
+# Factorial
+#
+
+factorial = |n| n == 0 ? 1 : n * factorial [n - 1]
+print: "factorial [5] =", factorial [5]
+
+factorial = |n|
+   n == 0 ? 1 : n * factorial [n - 1]
+end
+
