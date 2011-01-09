@@ -1,9 +1,11 @@
 //
-// core/protos/range.h
+// core/protos.h
 //
 // Copyright 2008-2010 Mike Austin
 // All rights reserved.
 //
+
+#include <algorithm>
 
 namespace impulse {
 
@@ -85,10 +87,11 @@ namespace impulse {
 		static const Frame* mapArgTypes[] = { &Block::instance() };
 		static const Frame* sliceArgTypes[] = { &Number::instance() };
 	
-		setSlot( Symbol::at( "size" ), *new Method( "size", *new Block( size_ ),  0 ) );
-		setSlot( Symbol::at( "[]" ),   *new Method( "[]",   *new Block( slice_ ), 1, sliceArgTypes ) );
-		setSlot( Symbol::at( "map:" ), *new Method( "map:", *new Block( map_ ),   1, mapArgTypes ) );
-		setSlot( Symbol::at( "zip:" ), *new Method( "zip:", *new Block( zip_ ),   1, mapArgTypes ) );
+		setSlot( Symbol::at( "size" ),  *new Method( "size",  *new Block( size_ ),  0 ) );
+		setSlot( Symbol::at( "[]" ),    *new Method( "[]",    *new Block( slice_ ), 1, sliceArgTypes ) );
+		setSlot( Symbol::at( "each:" ), *new Method( "each:", *new Block( each_ ),  1, mapArgTypes ) );
+		setSlot( Symbol::at( "map:" ),  *new Method( "map:",  *new Block( map_ ),   1, mapArgTypes ) );
+		setSlot( Symbol::at( "zip:" ),  *new Method( "zip:",  *new Block( zip_ ),  -1 ) );
 	}
 
 	inline Frame& GCArray::instance()
@@ -96,6 +99,27 @@ namespace impulse {
 		static GCValue array = *new GCArray( Object::instance() );
 			
 		return array.getFrame();
+	}
+
+	Value GCArray::each_( Value receiver, const Array& args, Value context )
+	{
+		GCArray& self = receiver.get<GCArray>();
+		Block& block  = args[0].get<Block>();
+
+		Array blockArgs( 1 );
+
+		vector<GCValue>::iterator iter = self._array.begin();
+		
+		while (iter != self._array.end())
+		{
+			blockArgs[0] = *iter;
+			
+			block.evalLoop_( receiver, blockArgs, context );
+			
+			++iter;
+		}
+		
+		return Value();
 	}
 
 	Value GCArray::map_( Value receiver, const Array& args, Value context )
@@ -121,31 +145,59 @@ namespace impulse {
 		return array;
 	}
 
+	static bool hasNext( Enumerable::Iterator* iter )
+	{
+		return iter->hasNext();
+	}
+
+	static bool notHasNext( Enumerable::Iterator* iter )
+	{
+		return !iter->hasNext();
+	}
+  
 	Value GCArray::zip_( Value receiver, const Array& args, Value context )
 	{
 		GCArray& self = receiver.get<GCArray>();
-
-		Range& range1 = self[0].get<Range>();
-		Range& range2 = self[1].get<Range>();
 		Block& block  = args[0].get<Block>();
 
-		Array blockArgs( 2 );
-		GCArray& array = *new ArrayValue( range1.to() - range1.from() + 1 );
+		vector<Enumerable::Iterator*> iters( self.size() );
 
-		for (int i = range1.from(), j = range2.from(); i <= range1.to(); ++i, ++j)
+		for (unsigned int i = 0; i < self.size(); ++i)
+			iters[i] = &self[i].getDynamic<Enumerable>().iterator();
+
+		Array blockArgs( iters.size() );
+		GCArray& array = *new ArrayValue();
+
+		if (args.size() == 1)
 		{
-			blockArgs[0] = i;
-			blockArgs[1] = j;
-
-			Value value = block.evalLoop_( receiver, blockArgs, context );
+			while (find_if( iters.begin(), iters.end(), notHasNext ) == iters.end())
+			{
+				for (unsigned int i = 0; i < iters.size(); ++i)
+					blockArgs[i] = iters[i]->getValue();
 			
-			if (&value.getFrame() != &Void::instance())
-				array._array.push_back( value );
+				Value value = block.evalLoop_( receiver, blockArgs, context );
+			
+				if (&value.getFrame() != &Void::instance())
+					array._array.push_back( value );
+			}
+		}
+		else
+		{
+			Value fill = args[1];
+			
+			while (find_if( iters.begin(), iters.end(), hasNext ) != iters.end())
+			{
+				for (unsigned int i = 0; i < iters.size(); ++i)
+					blockArgs[i] = iters[i]->hasNext() ? iters[i]->getValue() : fill;
+			
+				Value value = block.evalLoop_( receiver, blockArgs, context );
+			
+				if (&value.getFrame() != &Void::instance())
+					array._array.push_back( value );
+			}
 		}
 
-		autorelease( array );
-	
-		return array;
+		return autorelease( array );
 	}
 	
  //
@@ -167,16 +219,30 @@ namespace impulse {
  //
 
 	Method::Method( const string funcName, Block& function, const int argsSize )
-	 : _function( function ), _argsSize( argsSize ), _argTypes( NULL ) { }
+	 : Frame( Method::instance() ),
+	   _function( function ), _argsSize( argsSize ), _argTypes( NULL ), _funcName( funcName ) { }
 
 	Method::Method( const string funcName, Block& function, const int argsSize, const Frame* argTypes[] )
-	 : _function( function ), _argsSize( argsSize ), _argTypes( argTypes ), _funcName( funcName ) { }
+	 : Frame( Method::instance() ),
+	   _function( function ), _argsSize( argsSize ), _argTypes( argTypes ), _funcName( funcName ) { }
 
 	void Method::addBlock( Block& block, const Frame* argTypes[] )
 	{
 		_argTypes2[argTypes] = &block;
 	}
 
+	Frame& Method::instance()
+	{
+		static GCValue method = *new Method( Object::instance() );
+			
+		return method.getFrame();
+	}
+
+	void Method::initSlots()
+	{
+		setSlot( Symbol::at( "arity" ), *new Method( "arity", *new Block( arity ), 0 ) );
+	}
+	
 	Value Method::eval( Value receiver, const Array& args, Value context )
 	{
 		ENTER( "Method::eval( this = " << inspect( *this ) << "," <<
@@ -225,18 +291,55 @@ namespace impulse {
 
 	void Object::initSlots()
 	{
+		static const Frame* blockArgTypes[] = { &Block::instance() };
+		
 		setSlot( Symbol::at( "proto" ), *new Method( "proto", *new Block( proto ), 0 ) );
 		setSlot( Symbol::at( "clone" ), *new Method( "clone", *new Block( clone ), 0 ) );
+		setSlot( Symbol::at( "async:" ), *new Method( "async:", *new Block( async_ ), 1, blockArgTypes ) );
+		setSlot( Symbol::at( "methods" ), *new Method( "methods", *new Block( methods ), 0 ) );
 	}
+
+	Future::Future( Block& block, Value receiver ) : Frame( Future::instance() ),
+	 _receiver( receiver ), _block( block ) { }
+
+	Frame& Future::instance()
+	{
+		static GCValue future = *new Future( Object::instance() );
+			
+		return future.getFrame();
+	}
+
+	void Future::initSlots()
+	{
+		setSlot( Symbol::at( "value" ), *new Method( "value", *new Block( value ), 0 ) );
+	}
+
+	Value Future::value( Value receiver, const Array& args, Value context )
+	{
+		Future& self = receiver.get<Future>();
+		Block& block = self._block.get<Block>();
+
+		Array blockArgs(1); blockArgs[0] = self._receiver;
+
+		self._result = block.eval_( receiver, blockArgs, Value() );
+
+		return self._result;
+	}
+
+ //
+ // Lobby
+ //  
 
 	Lobby::Lobby() : Frame( Object::instance() )
 	{
 		static const Frame* fooNumberArgTypes[] = { &Number::instance(), &Number::instance() };
 		static const Frame* fooObjectArgTypes[] = { &Number::instance(), &Object::instance() };
 
+		setSlot( Symbol::at( "lobby" ), *this );
+
 		setSlot( Symbol::at( "nil" ), Nil::instance() );
 
-		setSlot( Symbol::at( "print:" ), *new Method( "print:", *new Block( print_ ), 1 ) );
+		setSlot( Symbol::at( "print:" ), *new Method( "print:", *new Block( print_ ), -1 ) );
 		setSlot( Symbol::at( "object:" ), *new Method( "object:", *new Block( object_ ), 1 ) );
 		setSlot( Symbol::at( "method:" ), *new Method( "method:", *new Block( method_ ), 2 ) );
 		setSlot( Symbol::at( "help" ),   *new Method( "help:",  *new Block( help ),   0 ) );
@@ -247,6 +350,9 @@ namespace impulse {
 
 		setSlot( Symbol::at( "foo-a:" ), *new Method( "foo:", *new Block( foo_with_ ), 2, fooNumberArgTypes ) );
 		setSlot( Symbol::at( "foo-b:" ), *new Method( "foo:", *new Block( foo_with_ ), 2, fooObjectArgTypes ) );
+
+		setSlot( Symbol::at( "true" ), true );
+		setSlot( Symbol::at( "false" ), false );
 
 		setSlot( Symbol::at( "<object>" ), Object::instance() );
 	}

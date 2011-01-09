@@ -9,46 +9,34 @@
 #define IMPULSE_RANGE
 
 #include "object.h"
+#include "../traits/enumerable.h"
 
 namespace impulse {
 
  //
  // class Range
  //
+ 
+	class Range : public Enumerable, public Frame {
 
-	template <typename T>
-	class range {
 	 public:
-		class range_iterator : public iterator<random_access_iterator_tag, T>
-		{
-		 public:
-		 	range_iterator() { }
-		 	range_iterator( T value ) : _value( value ) { }
-		 	
-		 	const T& operator *() const { return _value; }
-			range_iterator& operator ++() { return _value++, *this; }
-			range_iterator& operator ++(int) { T value = _value; return ++_value, value; }
-			bool operator ==(range_iterator const& other) const { return _value == *other; }
-			bool operator !=(range_iterator const& other) const { return _value != *other; }
-	
-		 private:
-			T _value;
-		};
 
-		typedef range_iterator iterator;
-
-		range( T from, T to ) : _from( from ), _to( to ) { }
-
-		range_iterator begin() { return range_iterator( _from ); }
-		range_iterator end() { return range_iterator( _to + 1 ); }
+		class Iterator : public Enumerable::Iterator {
 		
-	 private:
-		T _from, _to;
-	};
+		 public:
 
-	class Range : public Frame {
+			Iterator( int from, int to )
+			 : _from( from ), _to( to ), _i( from ) { }
+		 
+			virtual bool hasNext() { return _i <= _to; };
+			virtual Value getValue() { if (_i <= _to) return _i++; return 0; }
 
-	 public:
+		 private:
+
+			int _from, _to;
+			int _i;
+			
+		};
 
 		Range( Frame& proto );
 		Range( int from, int to ) : Frame( Range::instance() ), _from( from ), _to( to ) { }
@@ -58,16 +46,22 @@ namespace impulse {
 		int from() { return _from; }
 		int to() { return _to; }
 
+		virtual Iterator& iterator()
+		{
+			return *new Iterator( _from, _to );
+		}
+
 		virtual string inspect( const Value receiver ) const
 		{
-			Range& range = (Range&) receiver.getFrame();
+			//Range& range = (Range&) receiver.getFrame();
+			Range& self = (Range&) receiver.get<Range>();
 			
-			if (&range == &Range::instance())
+			if (&self == &Range::instance())
 				return "<range>";
 				
 			ostringstream stream;
 
-			stream << range._from << ".." << range._to;
+			stream << self._from << ".." << self._to;
 			
 			return stream.str();
 
@@ -82,7 +76,8 @@ namespace impulse {
 
 		static Value size( Value receiver, const Array& args, Value context )
 		{
-			Range& self = (Range&) receiver.getFrame();
+			//Range& self = (Range&) receiver.getFrame();
+			Range& self = (Range&) receiver.get<Range>();
 			
 			return self._to - self._from + 1;
 		}

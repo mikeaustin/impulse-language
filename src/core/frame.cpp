@@ -16,6 +16,11 @@ namespace impulse {
 	inline Value Frame::setSlot( const Symbol& symbol, const Value value )
 	{
 		_publicSlots[symbol.getId()] = value;
+
+		if (methodCachingEnabled)
+		{		
+			_cache[0].selectorId = -1;
+		}
 		
 		return value;
 	}
@@ -49,7 +54,7 @@ namespace impulse {
 						   " args = "     << args.inspect() << " )" );
 
 
-		if (methodCaching && selector.getId() == _cache[0].selectorId)
+		if (methodCachingEnabled && selector.getId() == _cache[0].selectorId)
 		{
 			return Value( _cache[0].value ).eval( receiver, args, context );
 		}
@@ -65,7 +70,7 @@ namespace impulse {
 			{
 				Value value = iter->second;
 
-				if (methodCaching)
+				if (methodCachingEnabled)
 				{
 					static unsigned index = 0;
 
@@ -85,7 +90,7 @@ namespace impulse {
 			frame = frame->_proto;
 		}
 
-		cout << "*** Slot not found: " << receiver.inspect() << "." << selector.getName() << endl;
+		FAIL( "Slot not found: " << receiver.inspect() << "." << selector.getName() );
 
 		LEAVE( "" );
 

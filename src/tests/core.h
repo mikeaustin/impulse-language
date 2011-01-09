@@ -53,7 +53,7 @@ namespace impulse {
 			{
 				lobby.setSlot( Symbol::at( "x" ), 3 );
 
-				Array args1;
+				Array args1( 0 ); args1[0] = 1; // To keep gcc happy
 				Array args2( 1 ); args2[0] = 5;
 
 				vector<Value> messages;

@@ -8,16 +8,34 @@
 #ifndef IMPULSE_ARRAY
 #define IMPULSE_ARRAY
 
+#include "../traits/enumerable.h"
+
 namespace impulse {
 
  //
  // class GCArray
  //
 
-	class GCArray : public Frame {
-
+	class GCArray : public Enumerable, public Frame {
 
 	 public:
+
+		class Iterator : public Enumerable::Iterator {
+		
+		 public:
+
+			Iterator( vector<GCValue>& sequence )
+			 : _sequence( sequence ), _iterator( sequence.begin() ) { }
+		 
+			virtual bool hasNext() { return _iterator != _sequence.end(); };
+			virtual Value getValue() { return *_iterator++; }
+
+		 private:
+
+			vector<GCValue>&          _sequence;
+			vector<GCValue>::iterator _iterator;
+			
+		};
 
 		GCArray();
 		GCArray( size_t size );
@@ -32,6 +50,11 @@ namespace impulse {
 
 		Value& operator []( size_t index ) { return _array[index]; }
 		const Value& operator []( size_t index ) const { return _array[index]; }
+
+		virtual Iterator& iterator()
+		{
+			return *new Iterator( _array );
+		}
 
 		string inspect( const Value receiver ) const
 		{
@@ -60,6 +83,7 @@ namespace impulse {
 			return Value();
 		}
 
+		static Value each_( Value receiver, const Array& args, Value context );
 		static Value map_( Value receiver, const Array& args, Value context );
 		static Value zip_( Value receiver, const Array& args, Value context );
 

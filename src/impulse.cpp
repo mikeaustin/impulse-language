@@ -33,15 +33,16 @@ int main( int argc, char* argv[] )
 	if (lexer.stream() == cin)
 	{
 		cout << "------------------------------------------------------------" << endl;
-		cout << "Impulse 0.6 — Copyright 2008-2010 Mike Austin" << endl;
+		cout << "Impulse 0.1.6 — Copyright 2008-2011 Mike Austin" << endl;
 
 		cout << endl;
 	
-		cout << "sizeof( Value )    = " << sizeof( Value )    << endl;
-		cout << "sizeof( Frame )    = " << sizeof( Frame )    << endl;
-		cout << "sizeof( SymbolId ) = " << sizeof( SymbolId ) << endl;
-		cout << "sizeof( SlotMap )  = " << sizeof( SlotMap )  << endl;
-		cout << "sizeof( Array )    = " << sizeof( Array )    << endl;
+		cout << "sizeof (double)   = " << sizeof (double)   << endl;
+		cout << "sizeof (Value)    = " << sizeof (Value)    << endl;
+		cout << "sizeof (Frame)    = " << sizeof (Frame)    << endl;
+		cout << "sizeof (SymbolId) = " << sizeof (SymbolId) << endl;
+		cout << "sizeof (SlotMap)  = " << sizeof (SlotMap)  << endl;
+		cout << "sizeof (Array)    = " << sizeof (Array)    << endl;
 
 		cout << endl;
 	}
@@ -53,6 +54,8 @@ int main( int argc, char* argv[] )
 	String::instance().initSlots();
 	Range::instance().initSlots();
 	Block::instance().initSlots();
+	Method::instance().initSlots();
+	Future::instance().initSlots();
 
 	//CoreTest().runTest();
 	//NumberTest().runTest();
@@ -66,15 +69,22 @@ int main( int argc, char* argv[] )
 
 	do
 	{
-		if (lexer.stream() == cin) cout << "] ";
-		expr = parser.parseStatement( true );
-
-		Value result = expr.eval( lobby, args, lobby );
-
-		if (&result.getFrame() != &Void::instance())
+		try
 		{
-			if (lexer.stream() == cin) cout << "= ";
-			if (lexer.stream() == cin) cout << result.inspect() << endl;
+			if (lexer.stream() == cin) cout << "] ";
+			expr = parser.parseLine();
+
+			Value result = expr.eval( lobby, args, lobby );
+
+			if (&result.getFrame() != &Void::instance())
+			{
+				if (lexer.stream() == cin) cout << "= ";
+				if (lexer.stream() == cin) cout << result.inspect() << endl;
+			}
+		}
+		catch( string& error )
+		{
+			cout << error << endl;
 		}
 		
 		vector<Frame*>::iterator iter = Frame::_releasePool.begin();

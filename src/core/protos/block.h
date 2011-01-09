@@ -31,6 +31,7 @@ namespace impulse {
 		void initSlots()
 		{
 			setSlot( Symbol::at( "[]" ), *new Method( "[]", *new Block( slice_ ), -1 ) );
+			setSlot( Symbol::at( "arity" ), *new Method( "arity", *new Block( arity ), 0 ) );
 		}
 
 		virtual string inspect( const Value receiver ) const { return "<block>"; }
@@ -71,7 +72,7 @@ namespace impulse {
 
 			for (unsigned int i = 0; i < argsSize; ++i)
 			{
-				if (localsAccess)
+				if (localsAccessEnabled)
 					blockContext._locals.push_back( args[i] );
 
 				blockContext.setSlot( (Symbol&) _args[i].getFrame(), args[i] );
@@ -105,7 +106,7 @@ namespace impulse {
 
 			for (unsigned int i = 0; i < argsSize; ++i)
 			{
-				if (localsAccess)
+				if (localsAccessEnabled)
 					_context.getFrame()._locals.push_back( args[i] );
 
 				_context.setSlot( (Symbol&) _args[i].getFrame(), args[i] );
@@ -153,7 +154,14 @@ namespace impulse {
 			
 			return Value();
 		}
-	
+
+		static Value arity( Value receiver, const Array& args, Value context )
+		{
+			Block& self  = receiver.get<Block>();
+			
+			return self._args.size();
+		}
+		
 	 private:
 
 		Array    _args;

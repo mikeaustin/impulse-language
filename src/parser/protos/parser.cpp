@@ -11,39 +11,39 @@
 
 namespace impulse {
 
-	void concat( vector<Value>& vector1, const vector<Value>& vector2 )
-	{
-		vector1.insert( vector1.end(), vector2.begin(), vector2.end() );
-	}
-
  //
  // Convenience methods
  //
+
+	vector<Value>& operator <<( vector<Value>& vector1, const vector<Value>& vector2 )
+	{
+		vector1.insert( vector1.end(), vector2.begin(), vector2.end() );
+		
+		return vector1;
+	}
 
 	Token Parser::expect( const Token::Type type, const string value ) const
 	{
 		if (_lexer.peekToken().type() != type)
 		{
-			cerr << "*** Expected " << value << ", found " << _lexer.peekToken().value() << endl;
+			_lexer.flushLine();
 			
-			exit( 1 );
+			FAIL( "Expected " << value << ", found " << _lexer.nextToken().value().inspect() );
 		}
 		
 		return _lexer.nextToken();
 	}
 
-	bool Parser::option( const Token::Type type, const string value ) const
+	Token Parser::option( const Token::Type type, const string value ) const
 	{
 		if (_lexer.peekToken().type() == type)
 		{
-			_lexer.nextToken();
-			
-			return true;
+			return _lexer.nextToken();
 		}
 		
-		return false;
+		return Token();
 	}
-
+/*
 	int Parser::precedence( const string operator_ ) const
 	{
 		if (operator_ == "*") return 3;
@@ -61,14 +61,14 @@ namespace impulse {
 
 		return 0;
 	}
-
+*/
  //
  // Parsing methods
  //
 
-	const Expression Parser::parseStatement( bool allowEmpty )
+	const Expression Parser::parseLine()
 	{
-		if (allowEmpty && _lexer.peekToken().type() == Token::NEWLINE)
+		if (_lexer.peekToken().type() == Token::NEWLINE)
 		{
 			_lexer.nextToken();
 			
@@ -78,7 +78,12 @@ namespace impulse {
 			
 			return expr;
 		}
+		
+		return parseStatement();
+	}
 
+	const Expression Parser::parseStatement()
+	{
 		if (_lexer.stream().peek() == EOF)
 		{
 			exitMainLoop = true;
@@ -102,24 +107,27 @@ namespace impulse {
 		
 		Token token = _lexer.peekToken();
 
-		if      (token.type() == Token::LITERAL_NUMBER) concat( code, parseNumber() );
-		else if (token.type() == Token::LITERAL_STRING) concat( code, parseString() );
-		else if (token.type() == Token::IDENTIFIER)     concat( code, parseIdentifier() );
-		else if (token.type() == Token::KEYWORD)        concat( code, parseKeyword() );
-		else if (token.type() == Token::OPEN_PAREN)     concat( code, parseSubexpr() );
-		else if (token.type() == Token::OPEN_BRACKET)   concat( code, parseArray() );
-		else if (token.type() == Token::VERTICAL_BAR)   concat( code, parseBlock() );
-		else
+		switch (token.type())
 		{
-			cerr << "*** Expected expression, found \\n" << endl;
-
-			exit( 1 );
+			case Token::LITERAL_NUMBER:	code << parseNumber(); break;
+			case Token::LITERAL_STRING:	code << parseString(); break;
+			case Token::IDENTIFIER:		code << parseIdentifier(); break;
+			case Token::KEYWORD:		code << parseKeyword(); break;
+			case Token::OPEN_PAREN:		code << parseSubexpr(); break;
+			case Token::OPEN_BRACKET:	code << parseArray(); break;
+			case Token::VERTICAL_BAR:	code << parseBlock(); break;
+			default:
+			{
+				_lexer.flushLine();
+				
+				FAIL( "Expected expression, found \\n" );
+			}
 		}
-
+		
 		vector<Value> message;
 		while ((message = (this->*parseMessage)()).size() > 0)
 		{
-			concat( code, message );
+			code << message;
 		}
 
 		return code;
@@ -131,7 +139,7 @@ namespace impulse {
 		
 		expect( Token::OPEN_PAREN, "(" );
 
-		concat( code, parseExpression() );
+		code << parseExpression();
 
 		expect( Token::CLOSE_PAREN, ")" );
 		
@@ -144,10 +152,14 @@ namespace impulse {
 		
 		Token token = _lexer.peekToken();
 
-		if (token.type() == Token::IDENTIFIER)        concat( code, parseSimpleIdentifier() );
-		else if (token.type() == Token::KEYWORD)      concat( code, parseKeyword() );
-		else if (token.type() == Token::OPERATOR)     concat( code, parseOperator() );
-		else if (token.type() == Token::OPEN_BRACKET) concat( code, parseSlice() );
+		switch( token.type() )
+		{
+			case Token::IDENTIFIER:		code << parseSimpleIdentifier(); break;
+			case Token::KEYWORD:		code << parseKeyword(); break;
+			case Token::OPERATOR:		code << parseOperator(); break;
+			case Token::OPEN_BRACKET:	code << parseSlice(); break;
+			default:					;
+		}
 		
 		return code;
 	}
@@ -158,9 +170,13 @@ namespace impulse {
 		
 		Token token = _lexer.peekToken();
 
-		if (token.type() == Token::IDENTIFIER)        concat( code, parseIdentifier() );
-		else if (token.type() == Token::KEYWORD)      concat( code, parseKeyword() );
-		else if (token.type() == Token::OPEN_BRACKET) concat( code, parseSlice() );
+		switch (token.type())
+		{
+			case Token::IDENTIFIER:		code << parseIdentifier(); break;
+			case Token::KEYWORD:		code << parseKeyword(); break;
+			case Token::OPEN_BRACKET:	code << parseSlice(); break;
+			default:					;
+		}
 		
 		return code;
 	}
@@ -199,20 +215,20 @@ namespace impulse {
 		Symbol& selector  = ident.getSymbol();
 		Array&  emptyArgs = *new Array();
 
-		Array& args = argsStack[argsStack.size() - 1];
+		Array& args = localArgsStack[localArgsStack.size() - 1];
 
 		unsigned int index;
 		for (index = 0; index < args.size(); ++index)
 		{
 			if (&args[index].get<Symbol>() == &ident.getSymbol())
 			{
-				cout << "Found local " << ident.value() << endl;
+				//cout << "Found local " << ident.value() << endl;
 				
 				break;
 			}
 		}
 		
-		if (localsAccess && index != args.size())
+		if (localsAccessEnabled && index != args.size())
 		{
 			code.push_back( *new LocalMessage( index, emptyArgs ) );
 		
@@ -230,9 +246,10 @@ namespace impulse {
 
 		code = parseSimpleIdentifier();
 
-		if (_lexer.peekToken().type() == Token::OPERATOR &&
-			_lexer.peekToken().getString() == "=")
+		if (_lexer.peekToken().type() == Token::ASSIGN)
+		{
 			code = parseAssign( code[0].get<Message>()._selector );
+		}
 	
 		return code;
 	}
@@ -253,7 +270,7 @@ namespace impulse {
 		{
 			_lexer.nextToken();
 
-			Token keyword = expect( Token::KEYWORD, "keyword" );
+			Token keyword = option( Token::KEYWORD, "keyword" );
 			arg = parseExpression();
 
 			args.push_back( arg.size() == 1 ? arg[0] : *new Expression( arg ) );
@@ -293,27 +310,7 @@ namespace impulse {
 		vector<Value> arg = parseExpression( &Parser::parseBinaryMessage );
 		args.push_back( arg.size() == 1 ? arg[0] : *new Expression( arg ) );
 
-#define OPERATOR_PARSER( _name_, _op_ ) \
-		(&name == &Symbol::at( #_op_ )) \
-		{ \
-			if (&args[0].getProto() == &Number::instance()) \
-				code.push_back( *new Const##_name_##Message( args[0].getFloat(), args ) ); \
-			else \
-				code.push_back( *new _name_##Message( args ) ); \
-		}
-
-		if OPERATOR_PARSER( Add, + )
-		else if OPERATOR_PARSER( Sub, - )
-		else if OPERATOR_PARSER( Mul, * )
-		else if OPERATOR_PARSER( Div, / )
-		else if OPERATOR_PARSER( Mod, % )
-		
-		else if OPERATOR_PARSER( Equal, == )
-		else if OPERATOR_PARSER( LessThan, < )
-		else if OPERATOR_PARSER( LessEqual, <= )
-		else if OPERATOR_PARSER( GreaterThan, > )
-		else if OPERATOR_PARSER( GreaterEqual, >= )
-		else
+		if (!optimizeOperator( code, name, args ))
 		{
 			code.push_back( *new Message( name, args ) );
 		}
@@ -325,7 +322,7 @@ namespace impulse {
 	{
 		vector<Value> code;
 
-		expect( Token::OPERATOR, "=" );
+		expect( Token::ASSIGN, "=" );
 
 		Array&  args     = *new Array();
 		vector<Value> arg = parseExpression();
@@ -376,27 +373,35 @@ namespace impulse {
 				Symbol& symbol = expect( Token::IDENTIFIER, "identifier" ).getSymbol();
 
 				args.push_back( symbol );
-
-				//argsStack.push_back( &symbol );
 			}
 			while (option( Token::COMMA, "," ));
 
 		}
 
-		argsStack.push_back( args );
+		localArgsStack.push_back( args );
 
 		expect( Token::VERTICAL_BAR, string( "|" ) );
 
 		if (option( Token::NEWLINE, "\\n" ))
 		{
-			body = new Expression( parseStatement() );
-			Expression* body2 = body;
-			
-			while (_lexer.peekToken().getString() != "end")
+			if (_lexer.peekToken().getString() != "end")
 			{
-				body2 = body2->setNextExpr( *new Expression( parseStatement() ) );
+				body = new Expression( parseStatement() );
+				Expression* body2 = body;
+			
+				while (_lexer.peekToken().getString() != "end")
+				{
+					body2 = body2->setNextExpr( *new Expression( parseStatement() ) );
+				}
 			}
-
+			else
+			{
+				vector<Value> empty;
+				empty.push_back( Value() );
+				
+				body = new Expression( empty );
+			}
+			
 			expect( Token::IDENTIFIER, "end" );
 		}
 		else
@@ -404,7 +409,7 @@ namespace impulse {
 			body = new Expression( parseExpression() );
 		}
 
-		argsStack.pop_back();
+		localArgsStack.pop_back();
 
 		code.push_back( *new BlockMessage( args, *body ) );
 		
@@ -433,6 +438,38 @@ namespace impulse {
 		code.push_back( *new SliceMessage( args ) );
 		
 		return code;
+	}
+
+ //
+ // Optimization methods
+ //
+
+#define OPERATOR_PARSER( _name_, _op_ ) \
+	if (&name == &Symbol::at( #_op_ )) \
+	{ \
+		if (&args[0].getProto() == &Number::instance()) \
+			code.push_back( *new Const##_name_##Message( args[0].getFloat(), args ) ); \
+		else \
+			code.push_back( *new _name_##Message( args ) ); \
+	} else
+
+	bool Parser::optimizeOperator( vector<Value>& code, Symbol& name, Array& args )
+	{
+		OPERATOR_PARSER( Add, + )
+		OPERATOR_PARSER( Sub, - )
+		OPERATOR_PARSER( Mul, * )
+		OPERATOR_PARSER( Div, / )
+		OPERATOR_PARSER( Mod, % )
+		OPERATOR_PARSER( Equal, == )
+		OPERATOR_PARSER( LessThan, < )
+		OPERATOR_PARSER( LessEqual, <= )
+		OPERATOR_PARSER( GreaterThan, > )
+		OPERATOR_PARSER( GreaterEqual, >= )
+		{
+			return false;
+		}
+		
+		return true;
 	}
 
 }

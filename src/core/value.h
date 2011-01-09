@@ -78,6 +78,8 @@ namespace impulse {
 		bool getBool() const { return _float; }
 		template <typename T>
 		T& get() const { return *static_cast<T*>( _frame ); }
+		template <typename T>
+		T& getDynamic() const { return *dynamic_cast<T*>( _frame ); }
 
 		Frame& getProto() const;
 

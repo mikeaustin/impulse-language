@@ -25,21 +25,22 @@ namespace impulse {
 
 		typedef const vector<Value> (Parser::*ParserFunc)();
 		
-		Parser( Lexer& lexer ) : _lexer( lexer ) { argsStack.push_back( Array() ); }
+		Parser( Lexer& lexer ) : _lexer( lexer ) { localArgsStack.push_back( Array() ); }
 
 	 //
 	 // Convenience methods
 	 //
 	 
 		Token expect( const Token::Type type, const string value ) const;
-		bool option( const Token::Type type, const string value ) const;
+		Token option( const Token::Type type, const string value ) const;
 		int precedence( const string operator_ ) const;
 
 	 //
 	 // Parsing methods
 	 //
 
-		const Expression parseStatement( bool allowEmpty = false );
+		const Expression parseLine();
+		const Expression parseStatement();
 		const vector<Value> parseExpression( ParserFunc parseMessage = &Parser::parseMessage );
 		const vector<Value> parseSubexpr();
 
@@ -57,13 +58,19 @@ namespace impulse {
 		const vector<Value> parseArray();
 		const vector<Value> parseBlock();
 		const vector<Value> parseSlice();
+
+	//
+	// Optimization methods
+	//
+
+		bool optimizeOperator( vector<Value>& code, Symbol& name, Array& args );
 		
 	 private:
 	 
 	 	Lexer& _lexer;
 	 	int    _lastOp;
 
-		vector<Array> argsStack;
+		vector<Array> localArgsStack;
 	 	
 	};
 

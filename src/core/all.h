@@ -20,4 +20,5 @@
 #include "protos/block.h"
 #include "protos/number.h"
 #include "protos/string.h"
+#include "protos/vector.h"
 

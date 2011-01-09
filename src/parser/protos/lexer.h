@@ -41,6 +41,8 @@ namespace impulse {
 		
 		Symbol& getSymbol() { return _value.get<Symbol>(); }
 
+		operator bool() { return _type != INVALID; }
+
 	 private:
 	
 		Type  _type;
@@ -55,6 +57,14 @@ namespace impulse {
 
 		istream& stream() const { return _stream; }
 
+		void flushLine()
+		{
+			while (_stream.peek() != 10)
+				_stream.get();
+				
+			_stream.get();
+		}
+
 		bool isopera( int c )
 		{
 			char opstring[2] = { c, '\0' };
@@ -68,7 +78,11 @@ namespace impulse {
 			if (_token.type() != Token::INVALID)
 				return _token;
 
-			while (isspace( _stream.peek() ) && _stream.peek() != 10) _stream.get();
+			while (isspace( _stream.peek() ) && _stream.peek() != 10)
+				_stream.get();
+
+			if (_stream.peek() == '#') while (_stream.peek() != 10)
+				_stream.get();
 
 			int c = _stream.peek();
 			
@@ -89,9 +103,9 @@ namespace impulse {
 			else if (isopera( c ))  _token = readOperator();
 			else
 			{
-				cerr << "*** Unexpected token " << (unsigned char) c;
+				flushLine();
 				
-				exit( 1 );
+				FAIL( "Unexpected token " << (unsigned char) c );
 			}
 			
 			return _token;
@@ -159,6 +173,11 @@ namespace impulse {
 
 			if (!alphanum)
 			{
+				if (buffer.str() == "=")
+				{
+					return Token( Token::ASSIGN, Symbol::at( buffer.str() ) );
+				}
+				
 				return Token( Token::OPERATOR, Symbol::at( buffer.str() ) );
 			}
 

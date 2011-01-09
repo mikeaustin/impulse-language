@@ -33,7 +33,12 @@ namespace impulse {
 
 		static Value print_( Value receiver, const Array& args, Value context )
 		{
-			cout << args[0] << endl;
+			for (unsigned int i = 0; i < args.size(); i++)
+			{
+				cout << args[i] << " ";
+			}
+			
+			cout << endl;
 			
 			return Value();
 		}
@@ -44,7 +49,9 @@ namespace impulse {
 			Frame& object = *new Frame( Object::instance() );
 			
 			Array blockArgs;
-			block.eval_( object, blockArgs, object );
+			block.eval_( object, blockArgs, context );
+
+			autorelease( object );
 			
 			return object;
 		}
