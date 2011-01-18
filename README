@@ -37,7 +37,7 @@ FEATURES
 EXAMPLES
 
   # Get a list of even numbers between 1 and 10
-    [1..10] map: |n| n even ? -> n * n
+    [1..10] map: |n| n even ? n * n
 
   # The ubiquitous factorial example
     factorial = |n| n == 0 ? 1 : n * factorial [n - 1]
