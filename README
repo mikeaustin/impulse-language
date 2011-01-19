@@ -2,15 +2,14 @@ ___         __              ___   ___
  |  |\  /| |__| |   | |    |___  |___
 _|_ | \/ | |    |___| |___  ___| |___
 
-A small, dynamic, prototypical language with planned support for multi-methods
-and predicate dispatching.  http://mike-austin.com/impulse
+A small, dynamic, object-oriented language.  http://mike-austin.com/impulse
 _______________________________________________________________________________
 
-Impulse is a small, dynamic object-oriented language that aims to have simple
-syntax and semantics. It also aims to be lightweight, reflective and open, and
-easily embeddable.  It borrows syntax and semantics from other languages such
-as Ruby, Smalltalk, Dylan, Io, Lua and JavaScript along with ideas from
-functional languages like Haskell and ML.
+Impulse is a small, dynamic, prototyped-based object-oriented language that
+aims to have simple syntax and semantics. It also aims to be lightweight,
+reflective and open, and easily embeddable.  It borrows syntax and semantics
+from other languages such as Ruby, Smalltalk, Dylan, Io, Lua and JavaScript
+along with ideas from functional languages like Haskell and ML.
 
 A core goal is too keep the language, both the implementation and the syntax,
 small and lightweight.  Impulse tries to factor special syntax such as pattern
@@ -85,5 +84,4 @@ RELATED
 CONTACT
 
   You can reach me with any questions or comments at mike AT mike-austin DOT com
-
 
