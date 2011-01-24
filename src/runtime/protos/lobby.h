@@ -45,26 +45,20 @@ namespace impulse {
 
 		static Value object_( Value receiver, const Array& args, Value context )
 		{
-			Block& block  = args[0].get<Block>();
+			String& name  = args[0].get<String>();
+			Block& block  = args[1].get<Block>();
 			Frame& object = *new Frame( Object::instance() );
 			
 			Array blockArgs;
-			block.eval_( object, blockArgs, context );
+			blockArgs.push_back( object );
 
-			autorelease( object );
-			
-			return object;
-		}
+			block.eval_( receiver, blockArgs, context );
 
-		static Value method_( Value receiver, const Array& args, Value context )
-		{
-			String& name  = args[0].get<String>();
-			Block& block  = args[1].get<Block>();
-			Frame& object = *new Method( "anon", block, 0 );
-			
 			receiver.setSlot( Symbol::at( name.getValue() ), object );
+
+			//autorelease( object );
 			
-			return object;
+			return Value();
 		}
 
 		static Value help( Value receiver, const Array& args, Value context )

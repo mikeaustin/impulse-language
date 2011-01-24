@@ -19,7 +19,7 @@ namespace impulse {
 
 		if (methodCachingEnabled)
 		{		
-			_cache[0].selectorId = -1;
+			_cache[0].selectorId = (SymbolId) -1;
 		}
 		
 		return value;

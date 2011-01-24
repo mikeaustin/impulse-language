@@ -25,8 +25,9 @@ namespace impulse {
 
 		inline Value eval( Value receiver, const Array& args, Value context )
 		{
-			ENTER( "Message::eval( receiver = " << receiver.inspect() << "," <<
-								" _selector = " << _selector.inspect(_selector) << " )" );
+			ENTER( "Message::eval( receiver = " << receiver.inspect() <<
+							   ", _selector = " << _selector.inspect(_selector) <<
+								  " context = " << context.inspect() << " )" );
 
 			Array msgArgs( _msgArgs.size() );
 
@@ -326,10 +327,13 @@ namespace impulse {
 
 		virtual Value eval( Value receiver, const Array& args, Value context )
 		{
+			//cout << "SlideMessage::eval( receiver = " << receiver << ", " << "context = " << context.inspect() << " )" << endl;
+
 			if (&receiver.getProto() == &Block::instance()) {
 				Array msgArgs = evalArgs( context );
 				
-				return Block::slice_( receiver, msgArgs, context );
+				//return Block::slice_( receiver, msgArgs, context );
+				return Block::slice_( receiver, msgArgs, args[0] );
 			}
 			
 			return Message::eval( receiver, args, context );
@@ -337,6 +341,20 @@ namespace impulse {
 
 	};
 	
+	class SelfMessage : public Message {
+	
+	 public:
+	
+		SelfMessage()
+		 : Message( Symbol::at( "self" ), Array() ) { }
+		 
+		virtual Value eval( Value receiver, const Array& args, Value context )
+		{
+			return args[0];
+		}
+
+	};
+
 }
 
 #endif

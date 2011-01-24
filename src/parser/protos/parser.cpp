@@ -212,6 +212,13 @@ namespace impulse {
 
 		Token ident = expect( Token::IDENTIFIER, "identifier" );
 
+		if (ident.getString() == "self")
+		{
+			code.push_back( *new SelfMessage() );
+			
+			return code;
+		}
+
 		Symbol& selector  = ident.getSymbol();
 		Array&  emptyArgs = *new Array();
 

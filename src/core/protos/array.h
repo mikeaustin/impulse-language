@@ -73,7 +73,7 @@ namespace impulse {
 		static Value slice_( Value receiver, const Array& args, Value context )
 		{
 			GCArray& self  = receiver.get<GCArray>();
-			unsigned index = args[0].getFloat() - 1;
+			unsigned index = (unsigned) args[0].getFloat() - 1;
 			
 			if (index >= 0 && index < self._array.size())
 			{

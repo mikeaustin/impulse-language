@@ -108,7 +108,7 @@ namespace impulse {
 
 		struct Cache {
 
-		 	Cache() : selectorId( -1 ) { }
+		 	Cache() : selectorId( (SymbolId) -1 ) { }
 		 	
 			SymbolId selectorId;
 			Atom	 value;

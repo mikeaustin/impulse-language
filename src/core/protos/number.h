@@ -103,7 +103,7 @@ namespace impulse {
 
 		static Value range_( Value receiver, const Array& args, Value context )
 		{
-			Range& range = *new Range( receiver.getFloat(), args[0].getFloat() );
+			Range& range = *new Range( (unsigned) receiver.getFloat(), (unsigned) args[0].getFloat() );
 			
 			autorelease( range );
 			

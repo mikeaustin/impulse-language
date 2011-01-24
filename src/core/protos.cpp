@@ -282,12 +282,17 @@ namespace impulse {
 
 		//Value result = _function( receiver, args, context );
 		//Value result = _function.eval_( receiver, args, context );
-		Value result = _function.get<Block>().eval_( receiver, args, context );
+		//Value result = _function.get<Block>().eval_( receiver, args, context );
+		Value result = _function.get<Block>().eval_( receiver, args, receiver );
 
 		LEAVE( result );
 		
 		return result;
 	}
+
+ //
+ // Object
+ //
 
 	void Object::initSlots()
 	{
@@ -296,7 +301,19 @@ namespace impulse {
 		setSlot( Symbol::at( "proto" ), *new Method( "proto", *new Block( proto ), 0 ) );
 		setSlot( Symbol::at( "clone" ), *new Method( "clone", *new Block( clone ), 0 ) );
 		setSlot( Symbol::at( "async:" ), *new Method( "async:", *new Block( async_ ), 1, blockArgTypes ) );
+		setSlot( Symbol::at( "method:" ), *new Method( "method:", *new Block( method_ ), 2 ) );
 		setSlot( Symbol::at( "methods" ), *new Method( "methods", *new Block( methods ), 0 ) );
+	}
+
+	Value Object::method_( Value receiver, const Array& args, Value context )
+	{
+		String& name  = args[0].get<String>();
+		Block& block  = args[1].get<Block>();
+		Frame& object = *new Method( name.getValue(), block, block.arity() );
+		
+		receiver.setSlot( Symbol::at( name.getValue() ), object );
+		
+		return Value();
 	}
 
 	Future::Future( Block& block, Value receiver ) : Frame( Future::instance() ),
@@ -339,11 +356,11 @@ namespace impulse {
 
 		setSlot( Symbol::at( "nil" ), Nil::instance() );
 
-		setSlot( Symbol::at( "print:" ), *new Method( "print:", *new Block( print_ ), -1 ) );
-		setSlot( Symbol::at( "object:" ), *new Method( "object:", *new Block( object_ ), 1 ) );
-		setSlot( Symbol::at( "method:" ), *new Method( "method:", *new Block( method_ ), 2 ) );
-		setSlot( Symbol::at( "help" ),   *new Method( "help:",  *new Block( help ),   0 ) );
-		setSlot( Symbol::at( "exit" ),   *new Method( "exit",   *new Block( exit ),   0 ) );
+		setSlot( Symbol::at( "print:" ),  *new Method( "print:",  *new Block( print_ ), -1 ) );
+		setSlot( Symbol::at( "object:" ), *new Method( "object:", *new Block( object_ ), 2 ) );
+		//setSlot( Symbol::at( "method:" ), *new Method( "method:", *new Block( method_ ), 2 ) );
+		setSlot( Symbol::at( "help" ),    *new Method( "help",    *new Block( help ),    0 ) );
+		setSlot( Symbol::at( "exit" ),    *new Method( "exit",    *new Block( exit ),    0 ) );
 
 		//Method& foo = *new Method( "foo:",  *new Block( foo_with_ ), 2, fooNumberArgTypes );
 		//foo.addBlock( *new Block( foo_$number$_with_$object$_, 2, fooObjectArgTypes ) );

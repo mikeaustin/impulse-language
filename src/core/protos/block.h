@@ -43,7 +43,12 @@ namespace impulse {
 			return block.getFrame();
 		}
 
-		Value eval_( Value receiver, const Array& args, Value /* hide */ )
+		int arity()
+		{
+			return _args.size();
+		}
+
+		Value eval_( Value receiver, const Array& args, Value context /* hide */ )
 		{
 			ENTER( "Block::eval_( receiver = " << receiver.inspect() << " )" );
 /* Move method arg checking here
@@ -64,7 +69,8 @@ namespace impulse {
 			}
 
 			const unsigned int argsSize = _args.size();
-			const static Array bodyArgs;
+			static Array bodyArgs;
+			bodyArgs.push_back( context );
 			
 			Frame& blockContext = *new Frame( _context.getFrame() );
 			blockContext._cache[0] = _context.getFrame()._cache[0];
@@ -75,7 +81,7 @@ namespace impulse {
 				if (localsAccessEnabled)
 					blockContext._locals.push_back( args[i] );
 
-				blockContext.setSlot( (Symbol&) _args[i].getFrame(), args[i] );
+				blockContext.setSlot( _args[i].get<Symbol>(), args[i] );
 			}
 
 			//Value result = _body.eval( blockContext, bodyArgs, blockContext );

@@ -42,8 +42,6 @@ object <object>
 
    method inspect
       self slots each: |name, value|
-         stdout << name << " = " << value << "\n"
-         print: name + " = " + value + "\n"
          print: name ~ " = " ~ value ~ "\n"
       end
    end
@@ -54,7 +52,7 @@ object <object>
       if function ?
          return function eval: args, context: self
       else
-         stderr << "No such slot: " << name
+         print "No such slot: ", name
       end
    end
 
@@ -70,16 +68,15 @@ end
 
 object <sequence>
 
-   method each: |block|
+   method each: block
       # subclass responsibility
    end
 
-   method map: |block|
-      local array = <array> clone
+   method map: block
+      local array = []
  
       self each: |item|
-         array << block eval: item
-         array append: block [item]
+         array << block [item]
       end
 
       return array
@@ -89,8 +86,8 @@ object <sequence>
       self fold: block, with: nil
    end
 
-   method fold: block, with: value
-      local value = value nil? self[0]
+   method fold: block, value
+      local value = value void ? self[0]
 
       self each: |item|
          value = block eval: value, item
@@ -253,7 +250,7 @@ object <vector> : <sequence>
 
    operator *= vector
       [0..self.bytes size] each: |index|
-         self.bytesr[index] *= vector.bytes[index]
+         self.bytes[index] *= vector.bytes[index]
       end
    end
 
@@ -310,5 +307,4 @@ object <bytes>
    end
 
 end
-
 

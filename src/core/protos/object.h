@@ -76,6 +76,8 @@ namespace impulse {
 			return autorelease( *new Future( args[0].get<Block>(), receiver ) );
 		}
 
+		static Value method_( Value receiver, const Array& args, Value context );
+
 		static Value methods( Value receiver, const Array& args, Value context )
 		{
 			Object& self = receiver.get<Object>();

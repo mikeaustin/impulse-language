@@ -61,11 +61,13 @@ int main( int argc, char* argv[] )
 	//NumberTest().runTest();
 
 	Value lobby = Lobby::instance();
+	Value locals = *new Frame( lobby.getFrame() );
 
 	//lobby.setSlot( Symbol::at( "gl" ), OpenGL::instance() );
 
 	Expression expr;
-	const static Array args;
+	static Array args;
+	args.push_back( lobby );
 
 	do
 	{
@@ -74,7 +76,7 @@ int main( int argc, char* argv[] )
 			if (lexer.stream() == cin) cout << "] ";
 			expr = parser.parseLine();
 
-			Value result = expr.eval( lobby, args, lobby );
+			Value result = expr.eval( locals, args, locals );
 
 			if (&result.getFrame() != &Void::instance())
 			{

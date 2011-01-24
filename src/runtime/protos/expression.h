@@ -31,7 +31,7 @@ namespace impulse {
 
 		virtual string inspect( const Value receiver ) const { return "<expression>"; }
 
-		inline Value eval( Value receiver_, const Array& args, Value context )
+		inline Value eval( Value receiver_ /* hide */, const Array& args, Value context )
 		{
 			ENTER( "Expression::eval( receiver = " << receiver_.inspect() << "," <<
 									" context = " << context.inspect() << " )" );
