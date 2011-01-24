@@ -61,7 +61,7 @@ namespace impulse {
 
 		Value( string value );
 		Value( double value );
-		Value( size_t value );
+		//Value( size_t value );
 		Value( int value );
 		Value( long value );
 		Value( unsigned value );

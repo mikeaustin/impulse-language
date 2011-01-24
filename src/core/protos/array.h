@@ -67,7 +67,7 @@ namespace impulse {
 		{
 			GCArray& self = receiver.get<GCArray>();
 			
-			return self._array.size();
+			return (unsigned) self._array.size();
 		}
 
 		static Value slice_( Value receiver, const Array& args, Value context )

@@ -53,7 +53,7 @@ namespace impulse {
 		{
 			String& self = receiver.get<String>();
 			
-			return self._value.size();
+			return (unsigned) self._value.size();
 		}
 
 		static Value concat_( Value receiver, const Array& args, Value context )

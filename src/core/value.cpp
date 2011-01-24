@@ -28,7 +28,7 @@ namespace impulse {
 	inline Value::Value( int value )      : Atom( NumberValue::instance(), value ) { }
 	inline Value::Value( long value )     : Atom( NumberValue::instance(), value ) { }
 	inline Value::Value( unsigned value ) : Atom( NumberValue::instance(), value ) { }
-	inline Value::Value( size_t value )   : Atom( NumberValue::instance(), value ) { }
+	//inline Value::Value( size_t value )   : Atom( NumberValue::instance(), value ) { }
 
 	inline Value Value::setSlot( const Symbol& symbol, const Value value ) { return getFrame().setSlot( symbol, value ); }
 	inline Value Value::getSlot( const Symbol& symbol ) { return getFrame().getSlot( symbol ); }
