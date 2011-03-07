@@ -23,20 +23,11 @@ namespace impulse {
 
 	 public:
 	
-		void *operator new( std::size_t size )
-		{
-			Frame* frame = (Frame *) ::operator new( size );
-
-			if (_releasePoolStack.size() > 0)
-				_releasePoolStack.back().push_back( frame );
-			else
-				std::cerr << "No release pool available." << std::endl;
-			
-			return frame;
-		}
+		void *operator new( std::size_t size );
 	
-		Frame()               : _proto( NULL ), _slots( NULL ), _count( 1 ) { }
-	 	Frame( Frame& proto ) : _proto( &proto ), _slots( NULL ), _count( 1 ) { }
+		Frame();
+	 	Frame( Frame& proto );
+		~Frame();
 
 		Value setSlot( const Symbol symbol, const Value value );
 		Value getSlot( const Symbol symbol );
@@ -44,18 +35,19 @@ namespace impulse {
 		Value setSlot( const string name, const Value value );
 		Value getSlot( const string name );
 
-		Frame& getProto() { return *_proto; }
+		Frame&   getProto() { return *_protoFrame; }
+		SlotMap& getSlots() { if (_publicSlots == NULL) _publicSlots = new SlotMap();
+							  return *_publicSlots; }
 
-		SlotMap& getSlots() { if (_slots == NULL) _slots = new SlotMap(); return *_slots; }
+		virtual Value apply( Value receiver, Array& args ) { return receiver; }
 
-		virtual string inspect( const Value receiver ) const
-		{
-			std::stringstream stream;
-			
-			stream << "<frame@" << this << ">";
-			
-			return stream.str();
-		}
+		virtual string inspect( const Value receiver ) const;
+
+	 //
+	 // Garbage Collection
+	 //
+
+		long referenceCount() { return _referenceCount; }
 
 		void incrementReference();
 		void decrementReference();
@@ -64,47 +56,21 @@ namespace impulse {
 		
 		 public:
 		 
-			ReleasePool()
-			{
-				std::cout << "Pushing new release pool..." << std::endl;
-				
-				Frame::_releasePoolStack.push_back( std::vector<Frame*>() );
-			}
+			ReleasePool();
+			~ReleasePool();
 
-			~ReleasePool()
-			{
-				std::cout << "Poping old release pool..." << std::endl;
-				
-				std::vector<Frame*> pool = _releasePoolStack.back();
-				std::vector<Frame*>::iterator iter = pool.begin();
-				
-				while (iter != pool.end())
-				{
-					(*iter)->decrementReference();
-				
-					iter = pool.erase( iter );
-				}
-				
-				_releasePoolStack.pop_back();
-			}
-
-			long size()
-			{
-				return _releasePoolStack.back().size();
-			}
+			long size()  { return _releasePoolStack.back().size(); }
+			long depth() { return _releasePoolStack.size(); }
 			
 		};
 
 	 private:
 
-		// TODO: Change this to a GCValue
-		Frame*   _proto;
-		SlotMap* _slots;
-		short    _count;
+		Frame*   _protoFrame;
+		SlotMap* _publicSlots;
+		short    _referenceCount;
 
 		static std::vector< std::vector<Frame*> > _releasePoolStack;
-
-		//long padding[1024];
 
 	};
 	

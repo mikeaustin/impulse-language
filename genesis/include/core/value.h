@@ -13,6 +13,7 @@
 namespace impulse {
 
 	class Frame;
+	class Array;
 
  //
  // class Atom
@@ -51,6 +52,8 @@ namespace impulse {
 
 		double getFloat() const { return _float; }
 		Frame& getFrame() const { return *_frame; }
+
+		Value apply( Array& args );
 
 		string inspect() const;
 	 
