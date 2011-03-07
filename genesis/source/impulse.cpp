@@ -64,10 +64,12 @@ int main( int argc, char* argv[] )
 #endif
 
 #ifdef BENCH
+	Array args;
+	
 	for ( volatile int i = 0; i < 1000000000; i++ )
 	{
-		Value( 10 ).value();
-		block.value();
+		//Value( 10 ).apply( 10, args );
+		//block.apply( 10, args );
 	}
 	
 	std::cout << "Benchmark results:" << std::endl;
