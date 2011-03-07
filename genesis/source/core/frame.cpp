@@ -14,13 +14,14 @@ namespace impulse {
  // class Frame
  //
 
-	// TODO: Is returning void faster?
+	// TODO: Are IDs actually faster than pointers?
 	inline Value Frame::setSlot( const Symbol symbol, const Value value )
 	{
+		// TODO: Why doesn't insert work the same as []?
 		//_slots.at( symbol.getId() ) = value;
-		//_slots[symbol.getId()] = value;
+		getSlots()[symbol.getId()] = value;
 		//_slots.insert( _slots.find( symbol.getId() ), std::make_pair(symbol.getId(), value) );
-		getSlots().insert( std::make_pair( symbol.getId(), value ) );
+		//getSlots().insert( std::make_pair( symbol.getId(), value ) );
 
 		return value;
 	}
@@ -47,20 +48,20 @@ namespace impulse {
 		return getSlot( SymbolProto::at( name ) );
 	}
 
-	inline void Frame::incRef()
+	inline void Frame::incrementReference()
 	{
 		//if (debugGarbage) TRACE( "\t\t\t\t\t\t\t\t+ " << inspect( *this ) );
-		//if (debugGarbage) TRACE( "+ " << inspect( *this ) );
+		TRACE( "+ " << inspect( *this ) );
 	
 		++_count;
 	}
 
-	inline void Frame::decRef()
+	inline void Frame::decrementReference()
 	{
 		--_count;
 
 		//if (debugGarbage) TRACE( "\t\t\t\t\t\t\t\t- " << inspect( *this ) << (_refCount == 0 ? " free" : "") );
-		//if (debugGarbage) TRACE( "- " << inspect( *this ) );
+		TRACE( "- " << inspect( *this ) );
 
 		if (_count < 0) TRACE( "deleting freed object " << inspect( *this ) );
 

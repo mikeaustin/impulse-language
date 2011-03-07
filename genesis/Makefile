@@ -4,3 +4,6 @@ all:
 	@#g++ -Wall -ansi -pedantic -O3 -march=core2 impulse.cpp
 	$(CXX) -Wall -ansi -pedantic -fno-strict-aliasing -O3 -funroll-loops $(LIBS) -Iinclude -o impulse source/impulse.cpp
 
+debug:
+	$(CXX) -Wall -ansi -pedantic -g -pg -DDEBUG -Iinclude -o impulse source/impulse.cpp
+

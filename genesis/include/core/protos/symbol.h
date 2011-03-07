@@ -22,24 +22,20 @@ namespace impulse {
 
 	 public:
 
-	 	SymbolProto( string name ) : _name( name ), _id( _nextId++ )
-	 	{
-	 		_symbolMap[name] = this;
-	 	}
-	 
 		string getName() { return _name; }
 
-		SymbolId getId() { return 0; }
+		SymbolId getId() { return _id; }
 		
 		static const Symbol at( const string name )
 		{
+			//TRACE( "SymbolProto::at( " << name << " )" );
 			SymbolMap::iterator iter = _symbolMap.find( name );
 			
 			if (iter != _symbolMap.end())
 			{
 				return *(*iter).second;
 			}
-			
+
 			return *new SymbolProto( name );
 		}
 
@@ -55,6 +51,11 @@ namespace impulse {
 		}
 
 	 private:
+
+	 	SymbolProto( string name ) : _name( name ), _id( _nextId++ )
+	 	{
+	 		_symbolMap[name] = this;
+	 	}
 
 		string    _name;
 		SymbolId  _id;

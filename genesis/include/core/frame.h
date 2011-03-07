@@ -17,7 +17,7 @@
 namespace impulse {
 
 	typedef unsigned short SymbolId;
-	typedef std::map<const SymbolId, Value> SlotMap;
+	typedef std::map<const SymbolId, GCValue> SlotMap;
 
 	class Frame {
 
@@ -46,7 +46,7 @@ namespace impulse {
 
 		Frame& getProto() { return *_proto; }
 
-		SlotMap& getSlots() { if (!_slots) _slots = new SlotMap(); return *_slots; }
+		SlotMap& getSlots() { if (_slots == NULL) _slots = new SlotMap(); return *_slots; }
 
 		virtual string inspect( const Value receiver ) const
 		{
@@ -57,8 +57,8 @@ namespace impulse {
 			return stream.str();
 		}
 
-		void incRef();
-		void decRef();
+		void incrementReference();
+		void decrementReference();
 
 		class ReleasePool {
 		
@@ -80,7 +80,7 @@ namespace impulse {
 				
 				while (iter != pool.end())
 				{
-					(*iter)->decRef();
+					(*iter)->decrementReference();
 				
 					iter = pool.erase( iter );
 				}

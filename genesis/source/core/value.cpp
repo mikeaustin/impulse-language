@@ -11,6 +11,8 @@
 #include "core/protos/number.h"
 #include "core/protos/symbol.h"
 
+#include <limits>
+
 namespace impulse {
 
  //
@@ -19,10 +21,8 @@ namespace impulse {
 
 	inline Value::Value()               : Atom( VoidProto::instance(), 0 ) { }
 	inline Value::Value( Atom value )   : Atom( value ) { }
-	//inline Value::Value( Frame& value ) : Atom( value, numeric_limits<double>::max() ) { }
-	inline Value::Value( Frame& frame ) : Atom( frame, 0 ) { }
-
-	inline Value::Value( double value )	 : Atom( NumberValue::instance(), value ) { }
+	inline Value::Value( Frame& frame ) : Atom( frame, std::numeric_limits<double>::max() ) { }
+	inline Value::Value( double value )	: Atom( NumberValue::instance(), value ) { }
 
 	inline Value Value::setSlot( const Symbol symbol, const Value value )
 	{
@@ -52,19 +52,40 @@ namespace impulse {
 
 	inline GCValue::GCValue()               : Value() { }
 	inline GCValue::GCValue( Atom value )   : Value( value ) { }
-	//inline Value::Value( Frame& value ) : Atom( value, numeric_limits<double>::max() ) { }
+	inline GCValue::GCValue( double value ) : Value( value ) { }
 	inline GCValue::GCValue( Frame& frame ) : Value( frame )
 	{
-		_frame->incRef();
+		if ( getFloat() == std::numeric_limits<double>::max() )
+			_frame->incrementReference();
 	}
 
 	inline GCValue::~GCValue()
 	{
 		//cout << "GCValue::~GCValue()" << endl;
 
-		//if (_float == numeric_limits<double>::max())
-			_frame->decRef();
+		if (_float == std::numeric_limits<double>::max())
+			_frame->decrementReference();
 	}
+
+ 	inline Value& GCValue::operator =( const Value& value )
+ 	{
+		//cout << "GCValue::operator =( const Value& value )" << endl;
+		if ( _frame != value._frame )
+		{
+			if (value._float == std::numeric_limits<double>::max())
+				value.getFrame().incrementReference();
+
+			if (_float == std::numeric_limits<double>::max())
+				getFrame().decrementReference();
+		}
+
+	 	_frame = value._frame;
+	 	_float = value.getFloat();
+	 	
+	 	//LEAVE( "" );
+	 	
+ 		return *this;
+ 	}
 
 
 	std::ostream& operator <<( std::ostream& stream, Value value )

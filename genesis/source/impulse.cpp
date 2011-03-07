@@ -54,22 +54,31 @@ int main( int argc, char* argv[] )
 	NumberProto::initSlots();
 
 	Frame lobby;
-	
+
 	lobby.setSlot( "foo", 10 );
+	lobby.setSlot( "bar", 20 );
+
+	// TODO: Make instance() hidden to users so that it is can't be collected?
+	//GCValue test( VoidProto::instance() );
+	GCValue test2();
+
+	const Symbol foo = SymbolProto::at( "foo" );
 	
-	for (volatile int i = 0; i < 3; i++)
+	for ( volatile int i = 0 ; i < 3 ; i++ )
 	{
 		Frame::ReleasePool releasePool;
 
 		std::cout << "..." << std::endl;
 		
-		for (volatile int j = 0; j < 3; j++)
+		for ( volatile int j = 0 ; j < 3 ; j++ )
 		{
 			//std::cout << lobby.getSlot( "foo" ).getFrame().getProto().getSlot( "foo" ) << std::endl;
 			//lobby.getSlot( "foo" ).getFrame().getProto().getSlot( "x" );
-			lobby.setSlot( "foo", *new Frame() );
+			lobby.setSlot( foo, foo );
+			lobby.setSlot( "bar", *new Frame() );
 		}
 		
+		std::cout << lobby.getSlot( foo ) << std::endl;
 		std::cout << "Release pool size = " << releasePool.size() << std::endl;
 	}
 

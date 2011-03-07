@@ -41,7 +41,6 @@ namespace impulse {
 	 	Value();
 	 	Value( Atom atom );
 	 	Value( Frame& frame );
-	 	
 		Value( double value );
 
 		Value setSlot( const Symbol symbol, const Value value );
@@ -68,7 +67,10 @@ namespace impulse {
 	 	GCValue();
 	 	GCValue( Atom atom );
 	 	GCValue( Frame& frame );
+		GCValue( double value );
 		~GCValue();
+
+ 		Value& operator =( const Value& value );
 	
 	};
 

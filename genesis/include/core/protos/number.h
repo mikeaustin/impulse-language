@@ -35,7 +35,7 @@ namespace impulse {
 
 		static void initSlots()
 		{
-			instance().setSlot( "x", 20 );
+			//instance().setSlot( "x", 20 );
 		}
 
 		virtual string inspect( const Value receiver ) const
