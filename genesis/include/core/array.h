@@ -48,28 +48,25 @@ namespace impulse {
  // class Array
  //
 
-	class Array {
+	class Array : public Frame {
 
 		static const size_t maxSize = 5;
 
 	 public:
 
-		Array()              : _size( 0 ) { }
-		Array( size_t size ) : _size( size ) { }
-
-		void push_back( Value value ) { _array[_size] = value; if (_size < maxSize) ++_size; }
-		void pop_back() { if (_size > 0) _size--; }
-
+		Array() : _size( 0 ) { }
+		Array( Value arg0 ) : _size( 1 ), _0( arg0 ) { }
+		Array( Value arg0, Value arg1 ) : _size( 1 ), _0( arg0 ), _1( arg1 ) { }
 		size_t size() const { return _size; }
 
-		Value& operator []( Index index ) { return (Value&) _array[index.index()]; }
-		const Value& operator []( Index index ) const { return (Value&) _array[index.index()]; }
+		Value& operator []( Index index ) { return (Value&) *(&_0 + index.index()); }
+		const Value& operator []( Index index ) const { return (Value&) *(&_0 + index.index()); }
  
 	 private:
 
 		size_t _size;
-		Atom   _array[maxSize];
-
+		Atom _0, _1, _2, _3, _4;
+		
 	};
 
 }

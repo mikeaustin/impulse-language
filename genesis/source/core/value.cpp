@@ -44,15 +44,15 @@ namespace impulse {
 		return getSlot( SymbolProto::at( name ) );
 	}
 
-	inline Value Value::apply( Array& args )
+	inline Value Value::apply( Value receiver, const Array& args )
 	{
 		// Optimization to return *this immediately if possible
 		// If it's not garbage collected, it doesn't override value()
 		
-		if ( getFloat() != std::numeric_limits<double>::max() )
-			return *this;
+		if ( getFloat() < std::numeric_limits<double>::max() )
+			return receiver;
 		else
-			return getFrame().apply( *this, args );
+			return getFrame().apply( receiver, args );
 	}
 
 	string Value::inspect() const { return getFrame().inspect( *this ); }
@@ -66,7 +66,7 @@ namespace impulse {
 	inline GCValue::GCValue( double value ) : Value( value ) { }
 	inline GCValue::GCValue( Frame& frame ) : Value( frame )
 	{
-		if ( getFloat() == std::numeric_limits<double>::max() )
+		if (getFloat() == std::numeric_limits<double>::max())
 			_frame->incrementReference();
 	}
 
@@ -81,7 +81,7 @@ namespace impulse {
  	inline Value& GCValue::operator =( const Value& value )
  	{
 		//cout << "GCValue::operator =( const Value& value )" << endl;
-		if ( _frame != value._frame )
+		if (_frame != value._frame)
 		{
 			if (value._float == std::numeric_limits<double>::max())
 				value.getFrame().incrementReference();

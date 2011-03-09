@@ -53,7 +53,11 @@ namespace impulse {
 		double getFloat() const { return _float; }
 		Frame& getFrame() const { return *_frame; }
 
-		Value apply( Array& args );
+		template <typename T> T& get() const { return *static_cast<T*>( _frame ); }
+		template <typename T> T& getDynamic() const { return *dynamic_cast<T*>( _frame ); }
+
+		Value apply( Value receiver, const Array& args );
+		Value apply( const Array& args ) { return apply( *this, args ); }
 
 		string inspect() const;
 	 

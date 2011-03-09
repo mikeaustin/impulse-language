@@ -35,11 +35,11 @@ namespace impulse {
 
 	inline Frame::~Frame()
 	{
-		if ( _protoFrame ) getProto().decrementReference();
-		if ( _publicSlots ) delete _publicSlots;
+		if (_protoFrame) getProto().decrementReference();
+		if (_publicSlots) delete _publicSlots;
 	}
 
-	inline string Frame::inspect( const Value receiver ) const
+	inline string Frame::inspect( const Value self ) const
 	{
 		std::stringstream stream;
 		

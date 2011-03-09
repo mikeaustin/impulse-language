@@ -39,9 +39,9 @@ namespace impulse {
 			return *new SymbolProto( name );
 		}
 
-		virtual string inspect( const Value receiver ) const
+		virtual string inspect( const Value self ) const
 		{
-			SymbolProto& symbol = *dynamic_cast<SymbolProto*>( &receiver.getFrame() );
+			SymbolProto& symbol = *dynamic_cast<SymbolProto*>( &self.getFrame() );
 			
 			std::ostringstream stream;
 			

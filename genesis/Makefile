@@ -17,5 +17,5 @@ bench:
 
 debug:
 	@clear
-	$(CXX) -Wall -ansi -pedantic -g -pg -DDEBUG -Iinclude -o impulse source/impulse.cpp
+	$(CXX) -Wall -ansi -pedantic -g -pg -DTEST -DDEBUG -Iinclude -o impulse source/impulse.cpp
 

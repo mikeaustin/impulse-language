@@ -31,7 +31,7 @@ namespace impulse {
 			return void_;
 		}
 
-		virtual string inspect( const Value receiver ) const { return "void"; }
+		virtual string inspect( const Value self ) const { return "void"; }
 
 	};
 

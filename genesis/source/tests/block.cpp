@@ -5,6 +5,8 @@
 // All rights reserved.
 //
 
+#include "core/protos/block.h"
+
 namespace impulse {
 
  //
@@ -20,9 +22,9 @@ namespace impulse {
 			testBlock();
 		}
 
-		static Value foo( Value receiver, const Array& args, Value context )
+		static Value foo( Value self, const Array& args, Value locals )
 		{
-			return args[Index::_0].getFloat() * 2;
+			return self.getFloat() * args[Index::_0].getFloat();
 		}
 		
 		void testBlock()
@@ -32,11 +34,22 @@ namespace impulse {
 			cout << "\nTesting Block..." << endl;
 			cout << "------------------------------------------------------------" << endl;
 
-			Value block = *new BlockProto( foo, 1 );
-			Array args; args.push_back( 150 );
+			Frame lobby;
 
-			ASSERT( Value( 10 ).apply( args ).getFloat() == 10 );
-			ASSERT( block.apply( args ).getFloat() == 300 );
+			BlockProto& block = *new BlockProto( foo, *new Array( SymbolProto::at( "x" ) ), lobby );
+
+			ASSERT( block.arity() == 1 );
+			ASSERT( block.value( 5, *new Array( 2 ) ).getFloat() == 10 );
+
+
+			std::vector<Value> code;
+			code.push_back( *new MessageProto( SymbolProto::at( "foo" ), *new Array( 10 ) ) );
+
+			BlockProto& block2 = *new BlockProto( code, *new Array( SymbolProto::at( "x" ) ), lobby );
+
+			ASSERT( block2.arity() == 1 );
+			ASSERT( BlockProto::value_( block2, *new Array( 5, *new Array( 2 ) ), lobby ).getFloat() == 20 );
+			ASSERT( block2.value( block2, *new Array( 5, *new Array( 2 ) ) ).getFloat() == 20 );
 
 			cout << "------------------------------------------------------------" << endl;
 		}

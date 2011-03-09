@@ -22,6 +22,7 @@ using std::string;
 #include "core/protos/block.h"
 
 #include "core/protos/symbol.cpp"
+#include "runtime/protos/message.h"
 
 #ifdef TEST
 	#include "tests/core.cpp"
@@ -51,7 +52,7 @@ int main( int argc, char* argv[] )
 		std::cout << "sizeof (Frame)    = " << sizeof (Frame)    << std::endl;
 		std::cout << "sizeof (SymbolId) = " << sizeof (SymbolId) << std::endl;
 		std::cout << "sizeof (SlotMap)  = " << sizeof (SlotMap)  << std::endl;
-		//std::cout << "sizeof (Array)    = " << sizeof (Array)    << std::endl;
+		std::cout << "sizeof (Array)    = " << sizeof (Array)    << std::endl;
 	}
 
 	Frame::ReleasePool releasePool;
@@ -75,6 +76,21 @@ int main( int argc, char* argv[] )
 	std::cout << "Benchmark results:" << std::endl;
 #endif
 
+	Frame lobby;
+
+	/*std::vector<Value> code;
+	code.push_back( *new MessageProto( SymbolProto::at( "foo" ), Array( 10 ) ) );
+	
+	Value receiver = lobby;
+	Array arguments;
+	
+	std::vector<Value>::iterator message = code.begin();
+
+	while (message != code.end())
+	{
+		receiver = (*message++).apply( arguments );
+	}*/
+	
 	return 0;
 }
 

@@ -9,6 +9,7 @@
 #define IMPULSE_NUMBER_H
 
 #include "core/frame.h"
+#include "core/array.h"
 
 namespace impulse {
 
@@ -38,9 +39,14 @@ namespace impulse {
 			//instance().setSlot( "x", 20 );
 		}
 
-		virtual string inspect( const Value receiver ) const
+		virtual string inspect( const Value self ) const
 		{
 			return "<number>";
+		}
+
+		static Value pow_( Value self, const Array& args, Value locals )
+		{
+			return self.getFloat() * args[Index::_0].getFloat();
 		}
 
 	};
@@ -62,11 +68,11 @@ namespace impulse {
 			return number;
 		}
 
-		virtual string inspect( const Value receiver ) const
+		virtual string inspect( const Value self ) const
 		{
 			std::ostringstream stream;
 			
-			stream << receiver.getFloat();
+			stream << self.getFloat();
 			
 			return stream.str();
 		}
