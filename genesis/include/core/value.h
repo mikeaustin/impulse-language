@@ -77,6 +77,9 @@ namespace impulse {
 		GCValue( double value );
 		~GCValue();
 
+		inline GCValue( const GCValue& value );
+		inline GCValue( const Value& value );
+
  		Value& operator =( const Value& value );
 	
 	};

@@ -27,7 +27,7 @@ namespace impulse {
 	
 		Frame();
 	 	Frame( Frame& proto );
-		~Frame();
+		virtual ~Frame();
 
 		Value setSlot( const Symbol symbol, const Value value );
 		Value getSlot( const Symbol symbol );

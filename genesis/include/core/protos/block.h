@@ -24,11 +24,11 @@ namespace impulse {
 
 	 public:
 
-		BlockProto( Function function, Array argnames, Value locals )
+		BlockProto( Function function, std::vector<GCValue> argnames, Value locals )
 		 : _function( function ), _argnames( argnames ), _locals( locals ) { }
 
-		BlockProto( std::vector<Value> code, Array argnames, Value locals )
-		 : _code( code ), _function( value_ ), _argnames( argnames), _locals( locals ) { }
+		BlockProto( std::vector<GCValue> code, std::vector<GCValue> argnames, Value locals )
+		 : _code( code ), _function( value_ ), _argnames( argnames ), _locals( locals ) { }
 
 		inline Value value( Value self, const Array& args )
 		{
@@ -40,6 +40,11 @@ namespace impulse {
 
 		inline short arity() { return _argnames.size(); }
 
+		virtual string inspect( const Value self ) const
+		{
+			return "<block>";
+		}
+
 		static Value value_( Value self, const Array& args, Value locals )
 		{
 			BlockProto& block = self.get<BlockProto>();
@@ -48,14 +53,14 @@ namespace impulse {
 
 			switch (args.size())
 			{
-				case 5:  block._locals.setSlot( block._argnames[Index::_4].get<SymbolProto>(), args[Index::_4] );
-				case 4:  block._locals.setSlot( block._argnames[Index::_3].get<SymbolProto>(), args[Index::_3] );
-				case 3:  block._locals.setSlot( block._argnames[Index::_2].get<SymbolProto>(), args[Index::_2] );
-				case 2:  block._locals.setSlot( block._argnames[Index::_1].get<SymbolProto>(), args[Index::_1] );
-				case 1:  block._locals.setSlot( block._argnames[Index::_0].get<SymbolProto>(), args[Index::_0] );
+				case 5:  block._locals.setSlot( block._argnames[4].get<SymbolProto>(), args[Index::_4] );
+				case 4:  block._locals.setSlot( block._argnames[3].get<SymbolProto>(), args[Index::_3] );
+				case 3:  block._locals.setSlot( block._argnames[2].get<SymbolProto>(), args[Index::_2] );
+				case 2:  block._locals.setSlot( block._argnames[1].get<SymbolProto>(), args[Index::_1] );
+				case 1:  block._locals.setSlot( block._argnames[0].get<SymbolProto>(), args[Index::_0] );
 			}
 
-			std::vector<Value>::iterator message = block._code.begin();
+			std::vector<GCValue>::iterator message = block._code.begin();
 
 			while (message != block._code.end())
 			{
@@ -67,10 +72,10 @@ namespace impulse {
 
 	 private:
 	 
-		std::vector<Value> _code;
-		Function _function;
-		Array    _argnames;
-		GCValue  _locals;
+		std::vector<GCValue> _code;
+		Function  _function;
+		std::vector<GCValue> _argnames;
+		GCValue   _locals;
 
 	};
 

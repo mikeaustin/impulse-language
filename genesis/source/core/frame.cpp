@@ -35,8 +35,12 @@ namespace impulse {
 
 	inline Frame::~Frame()
 	{
+		//ENTER( "Frame::~Frame()" );
+		
 		if (_protoFrame) getProto().decrementReference();
 		if (_publicSlots) delete _publicSlots;
+
+		//LEAVE( "Frame::~Frame()" );
 	}
 
 	inline string Frame::inspect( const Value self ) const
@@ -84,9 +88,10 @@ namespace impulse {
 	inline void Frame::incrementReference()
 	{
 		//if (debugGarbage) TRACE( "\t\t\t\t\t\t\t\t+ " << inspect( *this ) );
-		TRACE( "+ " << inspect( *this ) );
 	
 		++_referenceCount;
+
+		TRACE( "\t\t\t\t\t\t\t\t+ " << inspect( *this ) << " : " << _referenceCount );
 	}
 
 	inline void Frame::decrementReference()
@@ -94,16 +99,14 @@ namespace impulse {
 		--_referenceCount;
 
 		//if (debugGarbage) TRACE( "\t\t\t\t\t\t\t\t- " << inspect( *this ) << (_refCount == 0 ? " free" : "") );
-		TRACE( "- " << inspect( *this ) );
+		TRACE( "\t\t\t\t\t\t\t\t- " << inspect( *this ) << " : " << _referenceCount <<  (_referenceCount == 0 ? " (freeing)" : "") );
 
-		if (_referenceCount < 0) TRACE( "deleting freed object " << inspect( *this ) );
+		if (_referenceCount < 0) TRACE( "deleting freed object " << this );
 
 		if (_referenceCount == 0)
 		{
 			//if (debugGarbage) TRACE( "freeing " << inspect( *this ) );
 
-			TRACE( "freeing " << inspect( *this ) );
-			
 			delete this;
 		}
 	}

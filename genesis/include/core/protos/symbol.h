@@ -16,7 +16,7 @@ namespace impulse {
  // class SymbolProto
  //
 
-	typedef std::map<string, SymbolProto*> SymbolMap;
+	typedef std::map<string, Value> SymbolMap;
  
 	class SymbolProto : public Frame {
 
@@ -33,7 +33,9 @@ namespace impulse {
 			
 			if (iter != _symbolMap.end())
 			{
-				return *(*iter).second;
+				//(*iter).second.get<SymbolProto>().incrementReference();
+				
+				return (*iter).second.get<SymbolProto>();
 			}
 
 			return *new SymbolProto( name );
@@ -54,7 +56,7 @@ namespace impulse {
 
 	 	SymbolProto( string name ) : _name( name ), _id( _nextId++ )
 	 	{
-	 		_symbolMap[name] = this;
+	 		_symbolMap[name] = Value( *this );
 	 	}
 
 		string    _name;

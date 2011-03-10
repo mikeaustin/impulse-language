@@ -72,32 +72,42 @@ namespace impulse {
 
 	inline GCValue::~GCValue()
 	{
-		//cout << "GCValue::~GCValue()" << endl;
-
 		if (_float == std::numeric_limits<double>::max())
 			_frame->decrementReference();
 	}
 
+	inline GCValue::GCValue( const GCValue& value ) {
+		_frame = value._frame;
+		_float = value.getFloat();
+		
+		if (getFloat() == std::numeric_limits<double>::max())
+			_frame->incrementReference();
+	}
+
+	inline GCValue::GCValue( const Value& value ) {
+		_frame = value._frame;
+		_float = value.getFloat();
+		
+		if (getFloat() == std::numeric_limits<double>::max())
+			_frame->incrementReference();
+	}
+
  	inline Value& GCValue::operator =( const Value& value )
  	{
-		//cout << "GCValue::operator =( const Value& value )" << endl;
-		if (_frame != value._frame)
+		if (_frame != value._frame && _float != value._float)
 		{
-			if (value._float == std::numeric_limits<double>::max())
+			if (value.getFloat() == std::numeric_limits<double>::max())
 				value.getFrame().incrementReference();
 
-			if (_float == std::numeric_limits<double>::max())
+			if (getFloat() == std::numeric_limits<double>::max())
 				getFrame().decrementReference();
 		}
 
 	 	_frame = value._frame;
 	 	_float = value.getFloat();
 	 	
-	 	//LEAVE( "" );
-	 	
  		return *this;
  	}
-
 
 	std::ostream& operator <<( std::ostream& stream, Value value )
 	{

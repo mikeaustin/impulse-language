@@ -41,6 +41,10 @@ namespace impulse {
 
 				ASSERT( value.getFloat() == std::numeric_limits<double>::max() );
 				ASSERT( value.getFrame().referenceCount() == 2 );
+
+				std::vector<GCValue> vector; vector.push_back( value );
+				
+				ASSERT( value.getFrame().referenceCount() == 3 );
 				
 				value = Value();
 

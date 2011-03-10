@@ -24,7 +24,7 @@ namespace impulse {
 
 		static Frame& instance()
 		{
-			TRACE( "VoidProto::instance()" );
+			//TRACE( "VoidProto::instance()" );
 			
 			static VoidProto void_;
 

@@ -22,24 +22,24 @@ namespace impulse {
 
 	 public:
 
-		MessageProto( Symbol name, Array args ) : _name( name ), _args( args ) { }
+		MessageProto( Symbol name, ArrayProto& args ) : _name( name ), _args( args ) { }
 
 		virtual Value apply( Value receiver, const Array& args )
 		{
 			std::cout << "Message::apply()" << std::endl;
 			std::cout << _name << std::endl;
-			std::cout << _args[Index::_0] << std::endl;
+			std::cout << _args.get<ArrayProto>()[0] << std::endl;
 
-			if (_name.getName() == "foo")
-				return _args[Index::_0].getFloat() * 2;
+			if (_name.get<SymbolProto>().getName() == "foo")
+				return _args.get<ArrayProto>()[0].getFloat() * 2;
 				
 			return Value();
 		}
 		
 	 private:
 
-		Symbol _name;
-		Array  _args;
+		GCValue _name;
+		GCValue _args;
 
 	};
 

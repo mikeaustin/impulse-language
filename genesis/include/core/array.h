@@ -48,7 +48,7 @@ namespace impulse {
  // class Array
  //
 
-	class Array : public Frame {
+	class Array {
 
 		static const size_t maxSize = 5;
 
@@ -57,16 +57,47 @@ namespace impulse {
 		Array() : _size( 0 ) { }
 		Array( Value arg0 ) : _size( 1 ), _0( arg0 ) { }
 		Array( Value arg0, Value arg1 ) : _size( 1 ), _0( arg0 ), _1( arg1 ) { }
+
 		size_t size() const { return _size; }
 
 		Value& operator []( Index index ) { return (Value&) *(&_0 + index.index()); }
 		const Value& operator []( Index index ) const { return (Value&) *(&_0 + index.index()); }
+
+		virtual string inspect( const Value self ) const
+		{
+			return "<args>";
+		}
  
 	 private:
 
 		size_t _size;
 		Atom _0, _1, _2, _3, _4;
 		
+	};
+
+	class ArrayProto : public Frame {
+	
+	 public:
+	 
+		ArrayProto( Value arg0 ) : _vector( 1 ) { _vector[0] = arg0; }
+		ArrayProto( Value arg0, Value arg1 ) : _vector( 2 ) { _vector[0] = arg0; _vector[1] = arg1; }
+		//ArrayProto( Value arg0 ) { _vector.push_back( arg0 ); }
+		//ArrayProto( Value arg0, Value arg1 ) { _vector.push_back( arg0 ); _vector.push_back( arg1 ); }
+
+		size_t size() { return _vector.size(); }
+
+		Value& operator []( size_t index ) { return _vector[index]; }
+		const Value& operator []( size_t index ) const { return _vector[index]; }
+
+		virtual string inspect( const Value self ) const
+		{
+			return "<array>";
+		}
+		
+	 private:
+	 
+		std::vector<GCValue> _vector;
+	
 	};
 
 }

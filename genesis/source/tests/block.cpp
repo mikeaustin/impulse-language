@@ -34,22 +34,23 @@ namespace impulse {
 			cout << "\nTesting Block..." << endl;
 			cout << "------------------------------------------------------------" << endl;
 
-			Frame lobby;
+			Frame& lobby = *new Frame();
 
-			BlockProto& block = *new BlockProto( foo, *new Array( SymbolProto::at( "x" ) ), lobby );
+			vector<GCValue> argnames; argnames.push_back( SymbolProto::at( "x" ) );
+			BlockProto& block = *new BlockProto( foo, argnames, 5 );
 
 			ASSERT( block.arity() == 1 );
 			ASSERT( block.value( 5, *new Array( 2 ) ).getFloat() == 10 );
 
 
-			std::vector<Value> code;
-			code.push_back( *new MessageProto( SymbolProto::at( "foo" ), *new Array( 10 ) ) );
+			vector<GCValue> code;
+			code.push_back( *new MessageProto( SymbolProto::at( "foo" ), *new ArrayProto( 10 ) ) );
 
-			BlockProto& block2 = *new BlockProto( code, *new Array( SymbolProto::at( "x" ) ), lobby );
+			BlockProto& block2 = *new BlockProto( code, argnames, lobby );
 
 			ASSERT( block2.arity() == 1 );
-			ASSERT( BlockProto::value_( block2, *new Array( 5, *new Array( 2 ) ), lobby ).getFloat() == 20 );
-			ASSERT( block2.value( block2, *new Array( 5, *new Array( 2 ) ) ).getFloat() == 20 );
+			ASSERT( BlockProto::value_( block2, *new Array( 5, *new ArrayProto( 2 ) ), lobby ).getFloat() == 20 );
+			ASSERT( block2.value( block2, *new Array( 5, *new ArrayProto( 2 ) ) ).getFloat() == 20 );
 
 			cout << "------------------------------------------------------------" << endl;
 		}
