@@ -52,6 +52,15 @@ namespace impulse {
 		return stream.str();
 	}
 
+	inline string Frame::inspect( const Value self, string name ) const
+	{
+		std::stringstream stream;
+		
+		stream << "<" << name << "@" << this << ">";
+		
+		return stream.str();
+	}
+
 	inline Value Frame::setSlot( const Symbol symbol, const Value value )
 	{
 		// TODO: Why doesn't insert work the same as []?

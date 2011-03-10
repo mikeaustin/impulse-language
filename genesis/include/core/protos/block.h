@@ -42,7 +42,7 @@ namespace impulse {
 
 		virtual string inspect( const Value self ) const
 		{
-			return "<block>";
+			return Frame::inspect( self, "block" );
 		}
 
 		static Value value_( Value self, const Array& args, Value locals )

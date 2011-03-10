@@ -79,10 +79,10 @@ namespace impulse {
 	
 	 public:
 	 
-		ArrayProto( Value arg0 ) : _vector( 1 ) { _vector[0] = arg0; }
-		ArrayProto( Value arg0, Value arg1 ) : _vector( 2 ) { _vector[0] = arg0; _vector[1] = arg1; }
-		//ArrayProto( Value arg0 ) { _vector.push_back( arg0 ); }
-		//ArrayProto( Value arg0, Value arg1 ) { _vector.push_back( arg0 ); _vector.push_back( arg1 ); }
+		//ArrayProto( Value arg0 ) : _vector( 1 ) { _vector[0] = arg0; }
+		//ArrayProto( Value arg0, Value arg1 ) : _vector( 2 ) { _vector[0] = arg0; _vector[1] = arg1; }
+		ArrayProto( Value arg0 ) { _vector.push_back( arg0 ); }
+		ArrayProto( Value arg0, Value arg1 ) { _vector.push_back( arg0 ); _vector.push_back( arg1 ); }
 
 		size_t size() { return _vector.size(); }
 
@@ -91,7 +91,7 @@ namespace impulse {
 
 		virtual string inspect( const Value self ) const
 		{
-			return "<array>";
+			return Frame::inspect( self, "array" );
 		}
 		
 	 private:

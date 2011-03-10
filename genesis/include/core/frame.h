@@ -44,6 +44,7 @@ namespace impulse {
 		Value perform( Symbol selector, Array& args ) { return Value(); }
 
 		virtual string inspect( const Value self ) const;
+		string inspect( const Value self, const string name ) const;
 
 	 //
 	 // Garbage Collection

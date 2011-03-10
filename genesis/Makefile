@@ -17,10 +17,10 @@ bench:
 
 debug:
 	@clear
-	$(CXX) -Wall -ansi -pedantic -g -pg -DTEST -DDEBUG -Iinclude -o impulse source/impulse.cpp
+	$(CXX) -Wall -ansi -pedantic -g -DTEST -DDEBUG -Iinclude -o impulse source/impulse.cpp
 
 test-debug:
 	@clear
-	$(CXX) -Wall -ansi -pedantic -g -pg $(LIBS) -DTEST -DDEBUG -Iinclude -o impulse source/impulse.cpp
+	$(CXX) -Wall -ansi -pedantic -g $(LIBS) -DTEST -DDEBUG -Iinclude -o impulse source/impulse.cpp
 	@./impulse
 

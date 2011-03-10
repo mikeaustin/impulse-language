@@ -41,7 +41,7 @@ namespace impulse {
 
 		virtual string inspect( const Value self ) const
 		{
-			return "<number>";
+			return Frame::inspect( self, "number" );
 		}
 
 		static Value pow_( Value self, const Array& args, Value locals )

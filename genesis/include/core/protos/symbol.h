@@ -45,11 +45,9 @@ namespace impulse {
 		{
 			SymbolProto& symbol = *dynamic_cast<SymbolProto*>( &self.getFrame() );
 			
-			std::ostringstream stream;
-			
-			stream << "<symbol:" << symbol.getName() << "@" << this << ">";
-			
-			return stream.str();
+			std::ostringstream stream; stream << "symbol:" << symbol.getName();
+
+			return Frame::inspect( self, stream.str() );
 		}
 
 	 private:
