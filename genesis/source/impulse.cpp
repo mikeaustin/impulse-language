@@ -25,8 +25,8 @@ using std::string;
 #include "runtime/protos/message.h"
 
 #ifdef TEST
-	#include "tests/core.cpp"
-	#include "tests/block.cpp"
+	#include "../tests/core.cpp"
+	#include "../tests/block.cpp"
 #endif
 
 namespace impulse {
@@ -78,8 +78,9 @@ int main( int argc, char* argv[] )
 
 	Frame lobby;
 
-	/*std::vector<Value> code;
-	code.push_back( *new MessageProto( SymbolProto::at( "foo" ), Array( 10 ) ) );
+	std::vector<Value> code;
+	code.push_back( *new SelfMessage() );
+	code.push_back( *new MessageProto( SymbolProto::at( "foo" ), *new ArrayProto( 10 ) ) );
 	
 	Value receiver = lobby;
 	Array arguments;
@@ -89,7 +90,7 @@ int main( int argc, char* argv[] )
 	while (message != code.end())
 	{
 		receiver = (*message++).apply( arguments );
-	}*/
+	}
 	
 	return 0;
 }

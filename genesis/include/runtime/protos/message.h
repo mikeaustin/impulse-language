@@ -14,6 +14,11 @@
 
 namespace impulse {
 
+	template <typename T>
+	class Value<T> : public Value {
+	
+	};
+
  //
  // class MessageProto
  //
@@ -42,6 +47,14 @@ namespace impulse {
 		GCValue _args;
 
 	};
+
+ //
+ // class SelfMessage
+ //
+ 
+ 	class SelfMessage : public Frame {
+ 	
+ 	};
 
 }
 
