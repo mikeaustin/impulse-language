@@ -23,7 +23,7 @@ namespace impulse {
 
 		NumberProto() { TRACE( "NumberProto::NumberProto()" ); }
 
-		static Frame& instance()
+		static NumberProto& instance()
 		{
 			ENTER( "NumberProto::instance()" );
 

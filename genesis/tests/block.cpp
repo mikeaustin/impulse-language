@@ -34,10 +34,10 @@ namespace impulse {
 			cout << "\nTesting Block..." << endl;
 			cout << "------------------------------------------------------------" << endl;
 
-			Frame& lobby = *new Frame();
+			LocalsProto& lobby = *new LocalsProto();
 
-			vector<GCValue> argnames; argnames.push_back( SymbolProto::at( "x" ) );
-			BlockProto& block = *new BlockProto( foo, argnames, 5 );
+			vector< GCValue::Type<SymbolProto> > argnames; argnames.push_back( SymbolProto::at( "x" ) );
+			BlockProto& block = *new BlockProto( foo, argnames, lobby );
 
 			ASSERT( block.arity() == 1 );
 			ASSERT( block.value( 5, *new Array( 2 ) ).getFloat() == 10 );

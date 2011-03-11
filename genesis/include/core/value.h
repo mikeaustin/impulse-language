@@ -60,13 +60,26 @@ namespace impulse {
 		Value apply( const Array& args ) { return apply( *this, args ); }
 
 		string inspect() const;
+
+		template <typename T> class Type;
+	 
+	};
+
+	template <typename T>
+	class Value::Type : public Value {
+	
+	 public:
+	 
+		Type( T& frame ) : Value( frame ) { }
+
+		T& getFrame() { return get<T>(); }
 	 
 	};
 
  //
  // class GCValue
  //
- 
+
 	class GCValue : public Value {
 	
 	 public:
@@ -81,7 +94,20 @@ namespace impulse {
 		inline GCValue( const Value& value );
 
  		Value& operator =( const Value& value );
+
+		template <typename T> class Type;
 	
+	};
+
+	template <typename T>
+	class GCValue::Type : public GCValue {
+	
+	 public:
+	 
+		Type( Frame& frame ) : GCValue( frame ) { }
+
+		T& getFrame() { return get<T>(); }
+	 
 	};
 
 }

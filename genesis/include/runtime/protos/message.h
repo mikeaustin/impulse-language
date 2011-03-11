@@ -14,11 +14,6 @@
 
 namespace impulse {
 
-	template <typename T>
-	class Value<T> : public Value {
-	
-	};
-
  //
  // class MessageProto
  //
@@ -35,7 +30,7 @@ namespace impulse {
 			std::cout << _name << std::endl;
 			std::cout << _args.get<ArrayProto>()[0] << std::endl;
 
-			if (_name.get<SymbolProto>().getName() == "foo")
+			if (_name.getFrame().getName() == "foo")
 				return _args.get<ArrayProto>()[0].getFloat() * 2;
 				
 			return Value();
@@ -43,8 +38,8 @@ namespace impulse {
 		
 	 private:
 
-		GCValue _name;
-		GCValue _args;
+		GCValue::Type<SymbolProto> _name;
+		GCValue::Type<ArrayProto>  _args;
 
 	};
 

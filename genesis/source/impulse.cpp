@@ -19,8 +19,6 @@ using std::string;
 #include "core/value.cpp"
 #include "core/frame.cpp"
 
-#include "core/protos/block.h"
-
 #include "core/protos/symbol.cpp"
 #include "runtime/protos/message.h"
 
@@ -77,6 +75,8 @@ int main( int argc, char* argv[] )
 #endif
 
 	Frame lobby;
+
+	//Value::Type<VoidProto> value( VoidProto::instance() );
 
 	std::vector<Value> code;
 	code.push_back( *new SelfMessage() );
