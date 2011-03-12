@@ -19,6 +19,7 @@ using std::string;
 #include "core/value.cpp"
 #include "core/frame.cpp"
 
+#include "core/protos/locals.h"
 #include "core/protos/symbol.cpp"
 #include "runtime/protos/message.h"
 
@@ -74,22 +75,21 @@ int main( int argc, char* argv[] )
 	std::cout << "Benchmark results:" << std::endl;
 #endif
 
-	Frame lobby;
-
-	//Value::Type<VoidProto> value( VoidProto::instance() );
+	Frame		lobby;
+	LocalsProto locals( lobby );
 
 	std::vector<Value> code;
 	code.push_back( *new SelfMessage() );
 	code.push_back( *new MessageProto( SymbolProto::at( "foo" ), *new ArrayProto( 10 ) ) );
 	
-	Value receiver = lobby;
+	Value receiver = locals;
 	Array arguments;
 	
 	std::vector<Value>::iterator message = code.begin();
 
 	while (message != code.end())
 	{
-		receiver = (*message++).apply( arguments );
+		receiver = (*message++).apply( receiver, arguments, locals );
 	}
 	
 	return 0;

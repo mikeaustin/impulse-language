@@ -5,9 +5,12 @@ all:
 	@#$(CXX) -Wall -ansi -pedantic -fno-strict-aliasing -O3 -funroll-loops $(LIBS) -Iinclude -o impulse source/impulse.cpp
 	$(CXX) -Wall -Wfatal-errors -ansi -pedantic -O3 -funroll-loops $(LIBS) -Iinclude -o impulse source/impulse.cpp
 
+run: all
+	@./impulse
+
 test:
 	@clear
-	$(CXX) -Wall -Wfatal-errors -ansi -pedantic -O3 -funroll-loops $(LIBS) -DTEST -Iinclude -o impulse source/impulse.cpp
+	$(CXX) -Wall -ansi -pedantic -O3 -funroll-loops $(LIBS) -DTEST -Iinclude -o impulse source/impulse.cpp
 	@./impulse
 
 bench:
@@ -17,7 +20,7 @@ bench:
 
 debug:
 	@clear
-	$(CXX) -Wall -Wfatal-errors -ansi -pedantic -g -DTEST -DDEBUG -Iinclude -o impulse source/impulse.cpp
+	$(CXX) -Wall -Wfatal-errors -ansi -pedantic -g $(LIBS) -DDEBUG -Iinclude -o impulse source/impulse.cpp
 
 test-debug:
 	@clear

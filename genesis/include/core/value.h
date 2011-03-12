@@ -14,6 +14,7 @@ namespace impulse {
 
 	class Frame;
 	class Array;
+	class LocalsProto;
 
  //
  // class Atom
@@ -50,14 +51,13 @@ namespace impulse {
 		Value setSlot( const string name, const Value value );
 		Value getSlot( const string name );
 
-		double getFloat() const { return _float; }
 		Frame& getFrame() const { return *_frame; }
+		double getFloat() const { return _float; }
 
 		template <typename T> T& get() const { return *static_cast<T*>( _frame ); }
 		template <typename T> T& getDynamic() const { return *dynamic_cast<T*>( _frame ); }
 
-		Value apply( Value receiver, const Array& args );
-		Value apply( const Array& args ) { return apply( *this, args ); }
+		Value apply( Value receiver, const Array& args, Value locals );
 
 		string inspect() const;
 

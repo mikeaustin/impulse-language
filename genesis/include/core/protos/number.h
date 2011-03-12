@@ -44,7 +44,7 @@ namespace impulse {
 			return Frame::inspect( self, "number" );
 		}
 
-		static Value pow_( Value self, const Array& args, Value locals )
+		Value pow_( Value self, const Array& args, Value locals )
 		{
 			return self.getFloat() * args[Index::_0].getFloat();
 		}

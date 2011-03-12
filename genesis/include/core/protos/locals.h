@@ -21,7 +21,22 @@ namespace impulse {
 
 	 public:
 
+		LocalsProto( GCValue selfContext ) : _selfContext( selfContext ) { }
+
+		virtual string inspect( const Value self ) const
+		{
+			return Frame::inspect( self, "locals" );
+		}
+
+		GCValue selfContext() { return _selfContext; }
+
+	 private:
+	 
+		GCValue _selfContext;
+
 	};
+
+	typedef LocalsProto& Locals;
 
 }
 

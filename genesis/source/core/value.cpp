@@ -44,7 +44,7 @@ namespace impulse {
 		return getSlot( SymbolProto::at( name ) );
 	}
 
-	inline Value Value::apply( Value receiver, const Array& args )
+	inline Value Value::apply( Value receiver, const Array& args, Value locals )
 	{
 		// Optimization to return *this immediately if possible
 		// If it's not garbage collected, it doesn't override value()
@@ -52,7 +52,7 @@ namespace impulse {
 		if ( getFloat() < std::numeric_limits<double>::max() )
 			return receiver;
 		else
-			return getFrame().apply( receiver, args );
+			return getFrame().apply( receiver, args, locals );
 	}
 
 	string Value::inspect() const { return getFrame().inspect( *this ); }

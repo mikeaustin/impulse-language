@@ -24,15 +24,14 @@ namespace impulse {
 
 		MessageProto( Symbol name, ArrayProto& args ) : _name( name ), _args( args ) { }
 
-		virtual Value apply( Value receiver, const Array& args )
+		virtual Value apply( Value receiver, const Array& args, Value locals )
 		{
-			std::cout << "Message::apply()" << std::endl;
-			std::cout << _name << std::endl;
-			std::cout << _args.get<ArrayProto>()[0] << std::endl;
+			TRACE( "Message::apply()" );
+			TRACE( "  _name = " <<  _name );
 
 			if (_name.getFrame().getName() == "foo")
-				return _args.get<ArrayProto>()[0].getFloat() * 2;
-				
+				return 20;
+
 			return Value();
 		}
 		
@@ -48,6 +47,15 @@ namespace impulse {
  //
  
  	class SelfMessage : public Frame {
+ 	
+ 	 public:
+ 	
+ 		virtual Value apply( Value receiver, const Array& args, Locals locals )
+ 		{
+ 			std::cout << locals.selfContext() << std::endl;
+ 			
+ 			return Value();
+ 		}
  	
  	};
 

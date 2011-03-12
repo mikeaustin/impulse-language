@@ -39,7 +39,7 @@ namespace impulse {
 		SlotMap& getSlots() { if (_publicSlots == NULL) _publicSlots = new SlotMap();
 							  return *_publicSlots; }
 
-		virtual Value apply( Value receiver, const Array& args ) { return receiver; }
+		virtual Value apply( Value receiver, const Array& args, Value locals ) { return receiver; }
 		
 		Value perform( Symbol selector, Array& args ) { return Value(); }
 
