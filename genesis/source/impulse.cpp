@@ -29,6 +29,7 @@ using std::endl;
 	#include "../tests/core.cpp"
 	#include "../tests/block.cpp"
 	#include "../tests/frame.cpp"
+	#include "../tests/number.cpp"
 #endif
 
 namespace impulse {
@@ -64,6 +65,7 @@ int main( int argc, char* argv[] )
 	CoreTest().run();
 	BlockTest().run();
 	FrameTest().run();
+	NumberTest().run();
 #endif
 
 #ifdef BENCH

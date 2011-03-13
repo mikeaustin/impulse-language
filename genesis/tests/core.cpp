@@ -70,8 +70,11 @@ namespace impulse {
 
 			Value a, b = 5.0f;
 
+			ASSERT( &b.getFrame() == &NumberValue::instance() );
+			ASSERT( &b.getFrame().getProto() == &NumberProto::instance() );
+
 			a = b;
-			
+
 			ASSERT( &a.getFrame() == &b.getFrame() );
 			ASSERT( a.getFloat() == b.getFloat() );
 

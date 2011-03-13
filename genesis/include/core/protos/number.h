@@ -8,6 +8,8 @@
 #ifndef IMPULSE_NUMBER_H
 #define IMPULSE_NUMBER_H
 
+#include <cmath>
+
 #include "core/frame.h"
 #include "core/array.h"
 
@@ -64,7 +66,7 @@ namespace impulse {
 
 		Value pow_( Value self, const Array& args, Value locals )
 		{
-			return self.getFloat() * args[Index::_0].getFloat();
+			return std::pow( self.getFloat(), args[Index::_0].getFloat() );
 		}
 
 	};

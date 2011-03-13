@@ -93,17 +93,20 @@ namespace impulse {
 		Frame* frame = this;
 		Value result;
 		
-		while (frame && frame->_publicSlots)
+		while (frame)
 		{
-			SlotMap::iterator iter = frame->_publicSlots->find( selector.getId() );
-			
-			if (iter != frame->_publicSlots->end())
+			if (frame->_publicSlots)
 			{
-				Value method = iter->second;
-				
-				result = method.apply( receiver, args, locals );
-			}
+				SlotMap::iterator iter = frame->_publicSlots->find( selector.getId() );
 			
+				if (iter != frame->_publicSlots->end())
+				{
+					Value method = iter->second;
+				
+					result = method.apply( receiver, args, locals );
+				}
+			}
+						
 			frame = frame->_protoFrame;
 		}
 

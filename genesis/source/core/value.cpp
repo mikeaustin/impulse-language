@@ -55,6 +55,11 @@ namespace impulse {
 			return getFrame().apply( receiver, args, locals );
 	}
 
+	inline Value Value::perform( const Symbol selector, const Array& args, Value locals )
+	{
+		return getFrame().perform( *this, selector, args, locals );
+	}
+
 	string Value::inspect() const { return getFrame().inspect( *this ); }
 
  //

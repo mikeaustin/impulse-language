@@ -59,6 +59,8 @@ namespace impulse {
 
 		Value apply( Value receiver, const Array& args, Value locals );
 
+		Value perform( const Symbol selector, const Array& args, Value locals );
+
 		string inspect() const;
 
 		template <typename T> class Type;
