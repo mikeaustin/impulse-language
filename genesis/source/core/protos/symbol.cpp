@@ -14,8 +14,8 @@ namespace impulse {
  // class SymbolProto
  //
 
-	SymbolId  SymbolProto::_nextId = 0;
-	SymbolMap SymbolProto::_symbolMap;
+	Frame::SymbolId        SymbolProto::_nextId = 0;
+	SymbolProto::SymbolMap SymbolProto::_symbolMap;
 
 }
 

@@ -40,10 +40,6 @@ namespace impulse {
 	const Index Index::_3( 3 );
 	const Index Index::_4( 4 );
 
-	// Experimental
-	//template <size_t index>
-	//class Index : public Index<index - 1> { };
-
  //
  // class Array
  //
@@ -78,9 +74,7 @@ namespace impulse {
 	class ArrayProto : public Frame {
 	
 	 public:
-	 
-		//ArrayProto( Value arg0 ) : _vector( 1 ) { _vector[0] = arg0; }
-		//ArrayProto( Value arg0, Value arg1 ) : _vector( 2 ) { _vector[0] = arg0; _vector[1] = arg1; }
+
 		ArrayProto( Value arg0 ) { _vector.push_back( arg0 ); }
 		ArrayProto( Value arg0, Value arg1 ) { _vector.push_back( arg0 ); _vector.push_back( arg1 ); }
 

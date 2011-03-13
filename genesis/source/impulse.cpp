@@ -13,6 +13,8 @@
 #include <string>
 
 using std::string;
+using std::cout;
+using std::endl;
 
 #include "impulse.h"
 
@@ -26,6 +28,7 @@ using std::string;
 #ifdef TEST
 	#include "../tests/core.cpp"
 	#include "../tests/block.cpp"
+	#include "../tests/frame.cpp"
 #endif
 
 namespace impulse {
@@ -49,8 +52,7 @@ int main( int argc, char* argv[] )
 		std::cout << "sizeof (double)   = " << sizeof (double)   << std::endl;
 		std::cout << "sizeof (Value)    = " << sizeof (Value)    << std::endl;
 		std::cout << "sizeof (Frame)    = " << sizeof (Frame)    << std::endl;
-		std::cout << "sizeof (SymbolId) = " << sizeof (SymbolId) << std::endl;
-		std::cout << "sizeof (SlotMap)  = " << sizeof (SlotMap)  << std::endl;
+		std::cout << "sizeof (SymbolId) = " << sizeof (Frame::SymbolId) << std::endl;
 		std::cout << "sizeof (Array)    = " << sizeof (Array)    << std::endl;
 	}
 
@@ -61,6 +63,7 @@ int main( int argc, char* argv[] )
 #ifdef TEST
 	CoreTest().run();
 	BlockTest().run();
+	FrameTest().run();
 #endif
 
 #ifdef BENCH
@@ -75,8 +78,8 @@ int main( int argc, char* argv[] )
 	std::cout << "Benchmark results:" << std::endl;
 #endif
 
-	Frame		lobby;
-	LocalsProto locals( lobby );
+	Frame& lobby  = Frame::create();
+	Frame& locals = Frame::create( lobby );
 
 	std::vector<Value> code;
 	code.push_back( *new SelfMessage() );

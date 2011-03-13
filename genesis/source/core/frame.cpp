@@ -11,7 +11,7 @@
 namespace impulse {
 
  //
- // class Frame
+ // Constructors
  //
 
 	inline void *Frame::operator new( std::size_t size )
@@ -25,6 +25,10 @@ namespace impulse {
 		
 		return frame;
 	}
+
+	inline Frame& Frame::create() { return *new Frame(); }
+
+	inline Frame& Frame::create( Frame& proto ) { return *new Frame( proto ); }
 
 	inline Frame::Frame()               : _protoFrame( NULL ), _publicSlots( NULL ), _referenceCount( 1 ) { }
 
@@ -43,23 +47,9 @@ namespace impulse {
 		//LEAVE( "Frame::~Frame()" );
 	}
 
-	inline string Frame::inspect( const Value self ) const
-	{
-		std::stringstream stream;
-		
-		stream << "<frame@" << this << ">";
-		
-		return stream.str();
-	}
-
-	inline string Frame::inspect( const Value self, string name ) const
-	{
-		std::stringstream stream;
-		
-		stream << "<" << name << "@" << this << ">";
-		
-		return stream.str();
-	}
+ //
+ // Slot Access
+ //
 
 	inline Value Frame::setSlot( const Symbol symbol, const Value value )
 	{
@@ -94,6 +84,58 @@ namespace impulse {
 		return getSlot( SymbolProto::at( name ) );
 	}
 
+ //
+ // Messaging
+ //
+
+	inline Value Frame::perform( Value receiver, const Symbol selector, const Array& args, Value locals )
+	{
+		Frame* frame = this;
+		Value result;
+		
+		while (frame && frame->_publicSlots)
+		{
+			SlotMap::iterator iter = frame->_publicSlots->find( selector.getId() );
+			
+			if (iter != frame->_publicSlots->end())
+			{
+				Value method = iter->second;
+				
+				result = method.apply( receiver, args, locals );
+			}
+			
+			frame = frame->_protoFrame;
+		}
+
+		return result;
+	}
+
+ //
+ // Inspection
+ //
+
+	inline string Frame::inspect( const Value self ) const
+	{
+		std::stringstream stream;
+		
+		stream << "<frame@" << this << ">";
+		
+		return stream.str();
+	}
+
+	inline string Frame::inspect( const Value self, string name ) const
+	{
+		std::stringstream stream;
+		
+		stream << "<" << name << "@" << this << ">";
+		
+		return stream.str();
+	}
+
+ //
+ // Garbage Collection
+ //
+
 	inline void Frame::incrementReference()
 	{
 		//if (debugGarbage) TRACE( "\t\t\t\t\t\t\t\t+ " << inspect( *this ) );
@@ -107,10 +149,11 @@ namespace impulse {
 	{
 		--_referenceCount;
 
+		if (_referenceCount < 0) TRACE( "deleting freed object " << this );
+
 		//if (debugGarbage) TRACE( "\t\t\t\t\t\t\t\t- " << inspect( *this ) << (_refCount == 0 ? " free" : "") );
 		TRACE( "\t\t\t\t\t\t\t\t- " << inspect( *this ) << " : " << _referenceCount <<  (_referenceCount == 0 ? " (freeing)" : "") );
 
-		if (_referenceCount < 0) TRACE( "deleting freed object " << this );
 
 		if (_referenceCount == 0)
 		{

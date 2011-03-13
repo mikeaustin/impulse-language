@@ -11,6 +11,9 @@
 #include "core/frame.h"
 #include "core/array.h"
 
+#include "core/protos/symbol.h"
+#include "core/protos/block.h"
+
 namespace impulse {
 
  //
@@ -20,6 +23,10 @@ namespace impulse {
 	class NumberProto : public Frame {
 
 	 public:
+
+	 //
+	 // Lifecycle
+	 //
 
 		NumberProto() { TRACE( "NumberProto::NumberProto()" ); }
 
@@ -36,13 +43,24 @@ namespace impulse {
 
 		static void initSlots()
 		{
-			//instance().setSlot( "x", 20 );
+			static std::vector<ArgType> argtypes;
+			argtypes.push_back( ArgType( SymbolProto::at( "n" ), NumberProto::instance() ) );
+
+			instance().setSlot( "pow", *new BlockProto<NumberProto>( instance(), &NumberProto::pow_, argtypes ) );
 		}
+
+	 //
+	 // Inspection
+	 //
 
 		virtual string inspect( const Value self ) const
 		{
 			return Frame::inspect( self, "number" );
 		}
+
+	 //
+	 // Methods
+	 //
 
 		Value pow_( Value self, const Array& args, Value locals )
 		{

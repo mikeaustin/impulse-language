@@ -15,12 +15,20 @@ namespace impulse {
  //
  // class SymbolProto
  //
-
-	typedef std::map<string, Value> SymbolMap;
  
 	class SymbolProto : public Frame {
 
 	 public:
+
+	 //
+	 // Typedefs
+	 //
+
+		typedef std::map<string, Value> SymbolMap;
+
+	 //
+	 // Methods
+	 //
 
 		string getName() { return _name; }
 
@@ -28,18 +36,19 @@ namespace impulse {
 		
 		static const Symbol at( const string name )
 		{
-			//TRACE( "SymbolProto::at( " << name << " )" );
 			SymbolMap::iterator iter = _symbolMap.find( name );
 			
 			if (iter != _symbolMap.end())
 			{
-				//(*iter).second.get<SymbolProto>().incrementReference();
-				
 				return (*iter).second.get<SymbolProto>();
 			}
 
 			return *new SymbolProto( name );
 		}
+
+	 //
+	 // Inspection
+	 //
 
 		virtual string inspect( const Value self ) const
 		{

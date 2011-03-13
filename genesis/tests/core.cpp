@@ -15,7 +15,7 @@ namespace impulse {
 	
 	 public:
 	 
-		void run()
+		virtual void run()
 		{
 			testGC();
 			testValue();
@@ -34,7 +34,7 @@ namespace impulse {
 			{
 				Frame::ReleasePool releasePool;
 
-				GCValue value = *new Frame();
+				GCValue value = Frame::create();
 
 				ASSERT( releasePool.size() == 1 );
 				ASSERT( releasePool.depth() == 3 );
@@ -89,7 +89,7 @@ namespace impulse {
 
 			ASSERT( &foo == &SymbolProto::at( "foo" ) );
 
-			Frame frame( VoidProto::instance() );
+			Frame& frame = Frame::create( VoidProto::instance() );
 			
 			frame.setSlot( foo, 10 );
 			ASSERT( frame.getSlot( foo ).getFloat() == 10 );
