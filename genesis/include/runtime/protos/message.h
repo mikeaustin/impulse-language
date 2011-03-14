@@ -33,13 +33,9 @@ namespace impulse {
 			msgArgs.size( _args.getFrame().size() );
 			Array args; args.self( msgArgs.self() );
 
-			switch (_args.getFrame().size())
+			for (unsigned int i = 0; i < _args.getFrame().size(); i++)
 			{
-				case 5: msgArgs[Index::_4] = _args.getFrame()[4].apply( locals, args, locals );
-				case 4: msgArgs[Index::_3] = _args.getFrame()[3].apply( locals, args, locals );
-				case 3: msgArgs[Index::_2] = _args.getFrame()[2].apply( locals, args, locals );
-				case 2: msgArgs[Index::_1] = _args.getFrame()[1].apply( locals, args, locals );
-				case 1: msgArgs[Index::_0] = _args.getFrame()[0].apply( locals, args, locals );
+				msgArgs[i] = _args.getFrame()[i].apply( locals, args, locals );
 			}
 
 			TRACE( "" );

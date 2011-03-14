@@ -70,6 +70,13 @@ namespace impulse {
 
 	 private:
 
+		// For efficiency, MessageProto is allowed to index the array directly
+
+		Value& operator []( int index ) { return (Value&) *(&_0 + index); }
+		const Value& operator []( int index ) const { return (Value&) *(&_0 + index); }
+
+		friend class MessageProto;
+
 		GCValue _self;
 	 
 		size_t _size;

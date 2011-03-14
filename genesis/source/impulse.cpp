@@ -99,7 +99,7 @@ int main( int argc, char* argv[] )
 		Array arguments;
 		arguments.self( 5 );
 
-//		for (int i = 0; i < 20000000; i++)
+		for (int i = 0; i < 20000000; i++)
 		{
 			std::vector< std::vector<Value> >::iterator line = code.begin();
 
