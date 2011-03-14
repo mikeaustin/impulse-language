@@ -15,6 +15,7 @@ namespace impulse {
 	class Frame;
 	class Array;
 	class LocalsProto;
+	class SelfMessage;
 
  //
  // class Atom
@@ -51,6 +52,8 @@ namespace impulse {
 		Value setSlot( const string name, const Value value );
 		Value getSlot( const string name );
 
+		Frame& getProto();
+
 		Frame& getFrame() const { return *_frame; }
 		double getFloat() const { return _float; }
 
@@ -60,6 +63,7 @@ namespace impulse {
 		Value apply( Value receiver, const Array& args, Value locals );
 
 		Value perform( const Symbol selector, const Array& args, Value locals );
+		Value perform( const string name, const Array& args, Value locals );
 
 		string inspect() const;
 
@@ -77,6 +81,9 @@ namespace impulse {
 		T& getFrame() { return get<T>(); }
 	 
 	};
+
+	std::ostream& operator <<( std::ostream& stream, Value value );
+
 
  //
  // class GCValue

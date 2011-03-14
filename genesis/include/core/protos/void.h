@@ -20,7 +20,7 @@ namespace impulse {
 
 	 public:
 
-		VoidProto() { TRACE( "VoidProto::VoidProto()" ); }
+		VoidProto() { }
 
 		static VoidProto& instance()
 		{

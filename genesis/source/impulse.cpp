@@ -13,17 +13,20 @@
 #include <string>
 
 using std::string;
+using std::cin;
 using std::cout;
 using std::endl;
 
 #include "impulse.h"
 
-#include "core/value.cpp"
-#include "core/frame.cpp"
-
 #include "core/protos/locals.h"
 #include "core/protos/symbol.cpp"
+#include "core/protos/locals.h"
+#include "core/protos/method.h"
 #include "runtime/protos/message.h"
+
+#include "core/value.cpp"
+#include "core/frame.cpp"
 
 #ifdef TEST
 	#include "../tests/core.cpp"
@@ -57,46 +60,69 @@ int main( int argc, char* argv[] )
 		std::cout << "sizeof (Array)    = " << sizeof (Array)    << std::endl;
 	}
 
-	Frame::ReleasePool releasePool;
+	{
+		Frame::ReleasePool releasePool;
 
-	NumberProto::initSlots();
+		ObjectProto::initSlots();
+		NumberProto::initSlots();
 
 #ifdef TEST
-	CoreTest().run();
-	BlockTest().run();
-	FrameTest().run();
-	NumberTest().run();
+		CoreTest().run();
+		BlockTest().run();
+		FrameTest().run();
+		NumberTest().run();
 #endif
 
 #ifdef BENCH
-	Array args;
+		Array args;
 	
-	for ( volatile int i = 0; i < 1000000000; i++ )
-	{
-		//Value( 10 ).apply( 10, args );
-		//block.apply( 10, args );
-	}
+		//for ( volatile int i = 0; i < 1000000000; i++ )
+		{
+			//Value( 10 ).apply( 10, args );
+			//block.apply( 10, args );
+		}
 	
-	std::cout << "Benchmark results:" << std::endl;
+		std::cout << "Benchmark results:" << std::endl;
 #endif
 
-	Frame& lobby  = Frame::create();
-	Frame& locals = Frame::create( lobby );
+		Frame& lobby  = Frame::create();
+		LocalsProto& locals = *new LocalsProto( lobby );
 
-	std::vector<Value> code;
-	code.push_back( *new SelfMessage() );
-	code.push_back( *new MessageProto( SymbolProto::at( "foo" ), *new ArrayProto( 10 ) ) );
+		std::vector< std::vector<Value> > code;
+		code.push_back( std::vector<Value>() );
+		
+		code.back().push_back( *new SelfMessage() );
+		//code.back().push_back( *new MessageProto( SymbolProto::at( "pow" ), *new ArrayProto( *new SelfMessage() ) ) );
+		code.back().push_back( *new PowMessage( *new ArrayProto( *new SelfMessage() ) ) );
 	
-	Value receiver = locals;
-	Array arguments;
-	
-	std::vector<Value>::iterator message = code.begin();
+		Value receiver = locals;
+		Array arguments;
+		arguments.self( 5 );
 
-	while (message != code.end())
-	{
-		receiver = (*message++).apply( receiver, arguments, locals );
+//		for (int i = 0; i < 20000000; i++)
+		{
+			std::vector< std::vector<Value> >::iterator line = code.begin();
+
+			while (line != code.end())
+			{
+				std::vector<Value>::iterator message = line->begin();
+
+				TRACE( "" );
+
+				while (message != line->end())
+				{
+					receiver = (*message++).apply( receiver, arguments, locals );
+			
+					TRACE( "" );
+				}
+			
+				++line;
+			}
+		}
+		
+		cout << "result = " << receiver << endl;
 	}
-	
+
 	return 0;
 }
 

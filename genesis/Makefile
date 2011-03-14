@@ -17,12 +17,12 @@ test:
 
 bench:
 	@clear
-	$(CXX) -Wall -Wfatal-errors -ansi -pedantic -O3 -funroll-loops $(LIBS) -DBENCH -Iinclude -o impulse source/impulse.cpp
+	$(CXX) -Wall -Wfatal-errors -ansi -pedantic -O3 -g -pg -funroll-loops $(LIBS) -DBENCH -Iinclude -o impulse source/impulse.cpp
 	@time -p ./impulse
 
 debug:
 	@clear
-	$(CXX) -Wall -Wfatal-errors -ansi -pedantic -g $(LIBS) -DDEBUG -Iinclude -o impulse source/impulse.cpp
+	$(CXX) -Wall -ansi -pedantic -g -pg $(LIBS) -DDEBUG -Iinclude -o impulse source/impulse.cpp
 
 test-debug:
 	@clear

@@ -15,6 +15,8 @@
 
 #include "core/protos/symbol.h"
 #include "core/protos/block.h"
+#include "core/protos/method.h"
+#include "core/protos/object.h"
 
 namespace impulse {
 
@@ -30,25 +32,23 @@ namespace impulse {
 	 // Lifecycle
 	 //
 
-		NumberProto() { TRACE( "NumberProto::NumberProto()" ); }
+		NumberProto() : Frame( ObjectProto::instance() ) { }
 
 		static NumberProto& instance()
 		{
-			ENTER( "NumberProto::instance()" );
-
 			static NumberProto number;
-
-			LEAVE( "NumberProto::instance()" );
 
 			return number;
 		}
 
 		static void initSlots()
 		{
-			static std::vector<ArgType> argtypes;
-			argtypes.push_back( ArgType( SymbolProto::at( "n" ), NumberProto::instance() ) );
+			static std::vector<ArgType> powArgs, sinArgs;
+			powArgs.push_back( ArgType( SymbolProto::at( "n" ), NumberProto::instance() ) );
 
-			instance().setSlot( "pow", *new BlockProto<NumberProto>( instance(), &NumberProto::pow_, argtypes ) );
+			instance().setSlot( "pow", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::pow_, powArgs ) ) );
+			instance().setSlot( "sin", *new BlockProto<NumberProto>( instance(), &NumberProto::sin, sinArgs ) );
+			
 		}
 
 	 //
@@ -66,7 +66,18 @@ namespace impulse {
 
 		Value pow_( Value self, const Array& args, Value locals )
 		{
-			return std::pow( self.getFloat(), args[Index::_0].getFloat() );
+			ENTER( "NumberProto::pow_( self = " << self << ", args[0] = " << args[Index::_0] << " )" );
+			
+			Value result = std::pow( self.getFloat(), args[Index::_0].getFloat() );
+			
+			LEAVE( result );
+			
+			return result;
+		}
+
+		Value sin( Value self, const Array& args, Value locals )
+		{
+			return std::sin( self.getFloat() );
 		}
 
 	};

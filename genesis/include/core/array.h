@@ -54,6 +54,7 @@ namespace impulse {
 		Array( Value arg0 ) : _size( 1 ), _0( arg0 ) { }
 		Array( Value arg0, Value arg1 ) : _size( 1 ), _0( arg0 ), _1( arg1 ) { }
 
+		void size( size_t size ) { _size = size; }
 		size_t size() const { return _size; }
 
 		Value& operator []( Index index ) { return (Value&) *(&_0 + index.index()); }
@@ -63,9 +64,14 @@ namespace impulse {
 		{
 			return "<args>";
 		}
- 
+
+		void self( Value self ) { _self = self; }
+		GCValue self() const { return _self; }
+
 	 private:
 
+		GCValue _self;
+	 
 		size_t _size;
 		Atom _0, _1, _2, _3, _4;
 		

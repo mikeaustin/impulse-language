@@ -19,7 +19,7 @@ namespace impulse {
  // class Value
  //
 
-	inline Value::Value()               : Atom( VoidProto::instance(), 0 ) { }
+	inline Value::Value()               : Atom( VoidProto::instance(), 0.0 ) { }
 	inline Value::Value( Atom value )   : Atom( value ) { }
 	inline Value::Value( Frame& frame ) : Atom( frame, std::numeric_limits<double>::max() ) { }
 	inline Value::Value( double value )	: Atom( NumberValue::instance(), value ) { }
@@ -44,20 +44,41 @@ namespace impulse {
 		return getSlot( SymbolProto::at( name ) );
 	}
 
+	inline Frame& Value::getProto() { return _frame->getProto(); }
+
 	inline Value Value::apply( Value receiver, const Array& args, Value locals )
 	{
 		// Optimization to return *this immediately if possible
 		// If it's not garbage collected, it doesn't override value()
 		
-		if ( getFloat() < std::numeric_limits<double>::max() )
-			return receiver;
+		ENTER( "Value::apply( receiver = " << receiver << " )" );
+		
+		Value result;
+		
+		if (getFloat() < std::numeric_limits<double>::max())
+			result = *this;
 		else
-			return getFrame().apply( receiver, args, locals );
+			result = getFrame().apply( receiver, args, locals );
+			
+		LEAVE( result );
+		
+		return result;
 	}
 
 	inline Value Value::perform( const Symbol selector, const Array& args, Value locals )
 	{
-		return getFrame().perform( *this, selector, args, locals );
+		ENTER( "Value::perform( selector = " << selector << " ) *this = " << *this );
+		
+		Value result = getFrame().perform( *this, selector, args, locals );
+		
+		LEAVE( result );
+		
+		return result;
+	}
+
+	inline Value Value::perform( const string name, const Array& args, Value locals )
+	{
+		return perform( SymbolProto::at( name ), args, locals );
 	}
 
 	string Value::inspect() const { return getFrame().inspect( *this ); }

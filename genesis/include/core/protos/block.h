@@ -47,6 +47,8 @@ namespace impulse {
 
 		Value value_( Value receiver, const Array& args, Value locals )
 		{
+			ENTER( "Function::value_( receiver = " << receiver << " )" );
+			
 			static const Array msgArgs;
 
 			switch (args.size())
@@ -65,6 +67,8 @@ namespace impulse {
 				receiver = (*message++).apply( receiver, msgArgs, locals );
 			}
 
+			LEAVE( receiver );
+
 			return receiver;
 		}
 
@@ -75,45 +79,66 @@ namespace impulse {
 	
 	};
 
+
+	class Block : public Frame {
+	
+	 public:
+
+		Block( std::vector<ArgType> argtypes, GCValue locals ) : _argtypes( argtypes ), _locals( locals ) { }
+
+		short arity() { return _argtypes.size(); }
+	 
+		virtual Value value( Value receiver, const Array& args ) = 0;
+
+	 //private:
+	 
+		std::vector<ArgType> _argtypes;
+		GCValue              _locals;
+		
+	};
+
  //
  // class BlockProto
  //
 
 	template <typename T>
-	class BlockProto : public Frame {
+	class BlockProto : public Block {
 
 		typedef Value (T::*const Method)(Value, const Array&, Value);
 	
 	 public:
 	 
 		BlockProto( T& object, Method method, std::vector<ArgType> argtypes )
-		 : _object( object ), _method( method ), _argtypes( argtypes ) { }
+		 : Block( argtypes, Value() ), _object( object ), _method( method ) { }
 
 		BlockProto( std::vector<GCValue> code, std::vector<ArgType> argtypes, Value locals )
-		 : _object( *new Function( argtypes, code ) ), _method( &Function::value_ ), _argtypes( argtypes ), _locals( locals ) { }
+		 : Block( argtypes, locals ), _object( *new Function( argtypes, code ) ), _method( &Function::value_ ) { }
 
-		short arity() { return _argtypes.size(); }
-
-		virtual Value apply( Value receiver, const Array& args, Value locals )
+		/*virtual Value apply( Value receiver, const Array& args, Value locals )
 		{
 			return value( receiver, args );
+		}*/
+
+		virtual Value value( Value receiver, const Array& args )
+		{
+			ENTER( "BlockProto::value( receiver = " << receiver << " )" );
+			
+			Value result;
+			
+			if (args.size() == _argtypes.size())
+				result = (_object.*_method)( receiver, args, _locals.getFrame() );
+			else
+				result = Value();
+				
+			LEAVE( result );
+			
+			return result;
 		}
 
-		Value value( Value receiver, const Array& args )
-		{
-			if (args.size() == _argtypes.size())
-				return (_object.*_method)( receiver, args, _locals.getFrame() );
-			else
-				return Value();
-		}
+	 private:
 
 	 	T&     _object;
 		Method _method;
-
-	 private:
-	 
-		std::vector<ArgType> _argtypes;
-		GCValue              _locals;
 		
 	};
 

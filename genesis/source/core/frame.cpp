@@ -54,10 +54,8 @@ namespace impulse {
 	inline Value Frame::setSlot( const Symbol symbol, const Value value )
 	{
 		// TODO: Why doesn't insert work the same as []?
-		//_slots.at( symbol.getId() ) = value;
-		getSlots()[symbol.getId()] = value;
-		//_slots.insert( _slots.find( symbol.getId() ), std::make_pair(symbol.getId(), value) );
 		//getSlots().insert( std::make_pair( symbol.getId(), value ) );
+		getSlots()[symbol.getId()] = value;
 
 		return value;
 	}
@@ -90,6 +88,8 @@ namespace impulse {
 
 	inline Value Frame::perform( Value receiver, const Symbol selector, const Array& args, Value locals )
 	{
+		ENTER( "Frame::perform( receiver = " << receiver << ", selector = " << selector << " )" );
+		
 		Frame* frame = this;
 		Value result;
 		
@@ -109,6 +109,8 @@ namespace impulse {
 						
 			frame = frame->_protoFrame;
 		}
+
+		LEAVE( result );
 
 		return result;
 	}
@@ -141,11 +143,9 @@ namespace impulse {
 
 	inline void Frame::incrementReference()
 	{
-		//if (debugGarbage) TRACE( "\t\t\t\t\t\t\t\t+ " << inspect( *this ) );
-	
 		++_referenceCount;
 
-		TRACE( "\t\t\t\t\t\t\t\t+ " << inspect( *this ) << " : " << _referenceCount );
+		//TRACE( "\t\t\t\t\t\t\t\t+ " << inspect( *this ) << " : " << _referenceCount );
 	}
 
 	inline void Frame::decrementReference()
@@ -155,8 +155,7 @@ namespace impulse {
 		if (_referenceCount < 0) TRACE( "deleting freed object " << this );
 
 		//if (debugGarbage) TRACE( "\t\t\t\t\t\t\t\t- " << inspect( *this ) << (_refCount == 0 ? " free" : "") );
-		TRACE( "\t\t\t\t\t\t\t\t- " << inspect( *this ) << " : " << _referenceCount <<  (_referenceCount == 0 ? " (freeing)" : "") );
-
+		//TRACE( "\t\t\t\t\t\t\t\t- " << inspect( *this ) << " : " << _referenceCount <<  (_referenceCount == 0 ? " (freeing)" : "") );
 
 		if (_referenceCount == 0)
 		{
