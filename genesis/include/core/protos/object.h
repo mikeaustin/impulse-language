@@ -13,6 +13,7 @@
 
 #include "core/protos/symbol.h"
 #include "core/protos/block.h"
+#include "core/protos/method.h"
 
 namespace impulse {
 
@@ -40,7 +41,7 @@ namespace impulse {
 			static std::vector<ArgType> noArgs;
 
 			instance().setSlot( "version", 0.2 );
-			instance().setSlot( "proto", *new BlockProto<ObjectProto>( instance(), &ObjectProto::proto, noArgs ) );
+			instance().setSlot( "proto", *new MethodProto( *new BlockProto<ObjectProto>( instance(), &ObjectProto::proto, noArgs ) ) );
 		}
 
 	 //

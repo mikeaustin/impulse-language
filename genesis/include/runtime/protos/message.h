@@ -45,8 +45,8 @@ namespace impulse {
 		{
 			ENTER( "Message::apply( receiver = " << receiver << " ) _name = " << _name );
 
-			if (_name.getFrame().getName() == "foo")
-				return 20;
+//			if (_name.getFrame().getName() == "foo")
+//				return 20;
 
 			Array msgArgs; msgArgs.self( receiver );
 

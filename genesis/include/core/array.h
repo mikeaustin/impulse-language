@@ -65,7 +65,7 @@ namespace impulse {
 			return "<args>";
 		}
 
-		void self( Value self ) { _self = self; }
+		Array& self( Value self ) { return _self = self, *this; }
 		GCValue self() const { return _self; }
 
 	 private:

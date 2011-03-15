@@ -47,7 +47,7 @@ namespace impulse {
 			powArgs.push_back( ArgType( SymbolProto::at( "n" ), NumberProto::instance() ) );
 
 			instance().setSlot( "pow", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::pow_, powArgs ) ) );
-			instance().setSlot( "sin", *new BlockProto<NumberProto>( instance(), &NumberProto::sin, sinArgs ) );
+			instance().setSlot( "sin", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::sin, sinArgs ) ) );
 			
 		}
 

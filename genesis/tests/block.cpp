@@ -43,16 +43,16 @@ namespace impulse {
 			BlockProto<BlockTest>& block = *new BlockProto<BlockTest>( *this, &BlockTest::foo_, argtypes );
 
 			ASSERT( block.arity() == 1 );
-			ASSERT( block.value( 5, *new Array( 2 ) ).getFloat() == 10 );
+			ASSERT( block.value( 5, Array( 2 ) ).getFloat() == 10 );
 
 
 			vector<GCValue> code;
-			code.push_back( *new MessageProto( SymbolProto::at( "foo" ), *new ArrayProto( 10 ) ) );
+			code.push_back( *new SelfMessage() );
 
 			BlockProto<Function>& block2 = *new BlockProto<Function>( code, argtypes, locals );
 
 			ASSERT( block2.arity() == 1 );
-			ASSERT( block2.value( 5, *new Array( 2 ) ).getFloat() == 20 );
+			ASSERT( block2.value( 5, Array( 2 ) ).getFloat() == 5 );
 
 			cout << "------------------------------------------------------------" << endl;
 		}
