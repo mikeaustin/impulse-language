@@ -74,7 +74,7 @@ int main( int argc, char* argv[] )
 #endif
 
 #ifdef BENCH
-		Array args;
+		Array args( 0 );
 	
 		//for ( volatile int i = 0; i < 1000000000; i++ )
 		{
@@ -92,12 +92,12 @@ int main( int argc, char* argv[] )
 		code.push_back( std::vector<Value>() );
 		
 		code.back().push_back( *new SelfMessage() );
-		//code.back().push_back( *new MessageProto( SymbolProto::at( "pow" ), *new ArrayProto( *new SelfMessage() ) ) );
-		code.back().push_back( *new PowMessage( *new ArrayProto( *new SelfMessage() ) ) );
+		code.back().push_back( *new MessageProto( SymbolProto::at( "pow" ), *new ArrayProto( *new SelfMessage() ) ) );
+		//code.back().push_back( *new PowMessage( *new ArrayProto( *new SelfMessage() ) ) );
 	
 		Value receiver = locals;
-		Array arguments;
-		arguments.self( 5 );
+		const Array arguments( 5 );
+		//arguments.self( 5 );
 
 //		for (int i = 0; i < 20000000; i++)
 		{
@@ -109,11 +109,15 @@ int main( int argc, char* argv[] )
 
 				TRACE( "" );
 
+				receiver = locals;
+
 				while (message != line->end())
 				{
-					receiver = (*message++).apply( receiver, arguments, locals );
-			
+					receiver = (*message).apply( receiver, arguments, locals );
+
 					TRACE( "" );
+
+					++message;
 				}
 			
 				++line;

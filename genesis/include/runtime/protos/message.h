@@ -31,11 +31,15 @@ namespace impulse {
 		void evaluateArgs( Array& msgArgs, Value locals )
 		{
 			msgArgs.size( _args.getFrame().size() );
-			Array args; args.self( msgArgs.self() );
+			Array args( msgArgs.self() );
 
-			for (unsigned int i = 0; i < _args.getFrame().size(); i++)
+			switch (_args.getFrame().size())
 			{
-				msgArgs[i] = _args.getFrame()[i].apply( locals, args, locals );
+				case 5: msgArgs[4] = _args.getFrame()[4].apply( locals, args, locals );
+				case 4: msgArgs[3] = _args.getFrame()[3].apply( locals, args, locals );
+				case 3: msgArgs[2] = _args.getFrame()[2].apply( locals, args, locals );
+				case 2: msgArgs[1] = _args.getFrame()[1].apply( locals, args, locals );
+				case 1: msgArgs[0] = _args.getFrame()[0].apply( locals, args, locals );
 			}
 
 			TRACE( "" );
@@ -45,18 +49,29 @@ namespace impulse {
 		{
 			ENTER( "Message::apply( receiver = " << receiver << " ) _name = " << _name );
 
-//			if (_name.getFrame().getName() == "foo")
-//				return 20;
+			switch (_args.getFrame().size())
+			{
+				case 2: {
+					const Array msgArgs( receiver, _args.getFrame()[0].apply( locals, args, locals ),
+												   _args.getFrame()[1].apply( locals, args, locals ) );
+					return receiver.perform( _name.getFrame(), msgArgs, locals );
+				} break;
+				case 1: {
+					const Array msgArgs( receiver, _args.getFrame()[0].apply( locals, args, locals ) );
+					return receiver.perform( _name.getFrame(), msgArgs, locals );
+				} break;
+				default: return Value();
+			}
 
-			Array msgArgs; msgArgs.self( receiver );
+//			Array msgArgs( receiver );
 
-			evaluateArgs( msgArgs, locals );
+//			evaluateArgs( msgArgs, locals );
 
-			Value result = receiver.perform( _name.getFrame(), msgArgs, locals );
+//			Value result = receiver.perform( _name.getFrame(), msgArgs, locals );
 			
-			LEAVE( result );
+//			LEAVE( result );
 			
-			return result;
+//			return result;
 		}
 		
 	 private:
@@ -77,10 +92,8 @@ namespace impulse {
  		virtual Value apply( Value receiver, const Array& args, Value locals )
  		{
  			ENTER( "SelfMessage::apply( receiver = " << receiver << " )" );
- 			
- 			//return locals.get<LocalsProto>().selfContext();
 
- 			LEAVE( args.self() );
+ 			LEAVE( receiver );
 
 			return args.self();
 		}
@@ -101,7 +114,7 @@ namespace impulse {
 
 			if (&receiver.getProto() == &NumberProto::instance())
 			{
-				Array msgArgs; msgArgs.self( args.self() ); evaluateArgs( msgArgs, locals );
+				const Array msgArgs( args.self(), getArgs()[0].apply( locals, args, locals ) );
 				
 				result = std::pow( receiver.getFloat(), msgArgs[Index::_0].getFloat() );
 			}

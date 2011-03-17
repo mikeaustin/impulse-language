@@ -24,8 +24,6 @@ namespace impulse {
 
 		static VoidProto& instance()
 		{
-			//TRACE( "VoidProto::instance()" );
-			
 			static VoidProto void_;
 
 			return void_;

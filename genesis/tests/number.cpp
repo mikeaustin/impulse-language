@@ -27,8 +27,8 @@ namespace impulse {
 
 			Frame& locals = Frame::create();
 
-			ASSERT( Value( 5 ).perform( "pow", Array( 2 ), locals ).getFloat() == 25 );
-			ASSERT( Value( 5 ).perform( "sin", Array(), locals ).getFloat() == std::sin( 5 ) );
+			ASSERT( Value( 5 ).perform( "pow", Array( 5, 2 ), locals ).getFloat() == 25 );
+			ASSERT( Value( 5 ).perform( "sin", Array( 5 ), locals ).getFloat() == std::sin( 5 ) );
 
 			cout << "------------------------------------------------------------" << endl;
 		}

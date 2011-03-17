@@ -12,6 +12,7 @@
 
 namespace impulse {
 
+	class GCValue;
 	class Frame;
 	class Array;
 	class LocalsProto;
@@ -45,6 +46,7 @@ namespace impulse {
 	 	Value( Atom atom );
 	 	Value( Frame& frame );
 		Value( double value );
+		Value( SelfMessage& value );
 
 		Value setSlot( const Symbol symbol, const Value value );
 		Value getSlot( const Symbol symbol );

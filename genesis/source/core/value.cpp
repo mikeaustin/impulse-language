@@ -15,14 +15,19 @@
 
 namespace impulse {
 
+	static const double min_float = std::numeric_limits<double>::min();
+	static const double max_float = std::numeric_limits<double>::max();
+
  //
  // class Value
  //
 
 	inline Value::Value()               : Atom( VoidProto::instance(), 0.0 ) { }
 	inline Value::Value( Atom value )   : Atom( value ) { }
-	inline Value::Value( Frame& frame ) : Atom( frame, std::numeric_limits<double>::max() ) { }
+	inline Value::Value( Frame& frame ) : Atom( frame, max_float ) { }
 	inline Value::Value( double value )	: Atom( NumberValue::instance(), value ) { }
+
+	inline Value::Value( SelfMessage& value ) : Atom( value, min_float ) { }
 
 	inline Value Value::setSlot( const Symbol symbol, const Value value )
 	{
@@ -49,14 +54,19 @@ namespace impulse {
 	inline Value Value::apply( Value receiver, const Array& args, Value locals )
 	{
 		// Optimization to return *this immediately if possible
-		// If it's not garbage collected, it doesn't override value()
+		// If it's not garbage collected, it doesn't override apply()
 		
 		ENTER( "Value::apply( receiver = " << receiver << " )" );
 		
 		Value result;
 		
-		if (getFloat() < std::numeric_limits<double>::max())
-			result = *this;
+		if (getFloat() < max_float)
+		{
+			if (_float > min_float)
+				result = *this;
+			else
+				result = args.self();
+		}
 		else
 			result = getFrame().apply( receiver, args, locals );
 			
@@ -92,13 +102,13 @@ namespace impulse {
 	inline GCValue::GCValue( double value ) : Value( value ) { }
 	inline GCValue::GCValue( Frame& frame ) : Value( frame )
 	{
-		if (getFloat() == std::numeric_limits<double>::max())
+		if (getFloat() == max_float)
 			_frame->incrementReference();
 	}
 
 	inline GCValue::~GCValue()
 	{
-		if (_float == std::numeric_limits<double>::max())
+		if (_float == max_float)
 			_frame->decrementReference();
 	}
 
@@ -106,7 +116,7 @@ namespace impulse {
 		_frame = value._frame;
 		_float = value.getFloat();
 		
-		if (getFloat() == std::numeric_limits<double>::max())
+		if (getFloat() == max_float)
 			_frame->incrementReference();
 	}
 
@@ -114,7 +124,7 @@ namespace impulse {
 		_frame = value._frame;
 		_float = value.getFloat();
 		
-		if (getFloat() == std::numeric_limits<double>::max())
+		if (getFloat() == max_float)
 			_frame->incrementReference();
 	}
 
@@ -122,10 +132,10 @@ namespace impulse {
  	{
 		if (_frame != value._frame && _float != value._float)
 		{
-			if (value.getFloat() == std::numeric_limits<double>::max())
+			if (value.getFloat() == max_float)
 				value.getFrame().incrementReference();
 
-			if (getFloat() == std::numeric_limits<double>::max())
+			if (getFloat() == max_float)
 				getFrame().decrementReference();
 		}
 

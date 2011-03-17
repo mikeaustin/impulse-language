@@ -50,9 +50,9 @@ namespace impulse {
 
 	 public:
 
-		Array() : _size( 0 ) { }
-		Array( Value arg0 ) : _size( 1 ), _0( arg0 ) { }
-		Array( Value arg0, Value arg1 ) : _size( 1 ), _0( arg0 ), _1( arg1 ) { }
+		Array( Value self ) : _self( self ), _size( 0 ) { }
+		Array( Value self, Value arg0 ) : _self( self ), _size( 1 ), _0( arg0 ) { }
+		Array( Value self, Value arg0, Value arg1 ) : _self( self ), _size( 1 ), _0( arg0 ), _1( arg1 ) { }
 
 		void size( size_t size ) { _size = size; }
 		size_t size() const { return _size; }
@@ -65,8 +65,8 @@ namespace impulse {
 			return "<args>";
 		}
 
-		Array& self( Value self ) { return _self = self, *this; }
-		GCValue self() const { return _self; }
+		//Array& self( Value self ) { return _self = self, *this; }
+		Value self() const { return Atom( *_self._frame, _self._float ); }
 
 	 private:
 
@@ -77,7 +77,7 @@ namespace impulse {
 
 		friend class MessageProto;
 
-		GCValue _self;
+		Value _self;
 	 
 		size_t _size;
 		Atom _0, _1, _2, _3, _4;

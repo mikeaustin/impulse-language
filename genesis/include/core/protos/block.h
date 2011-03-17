@@ -48,8 +48,8 @@ namespace impulse {
 		Value value_( Value receiver, const Array& args, Value locals )
 		{
 			ENTER( "Function::value_( receiver = " << receiver << " )" );
-			
-			static const Array msgArgs;
+
+			const Array msgArgs( args.self() );
 
 			switch (args.size())
 			{
@@ -64,7 +64,7 @@ namespace impulse {
 
 			while (message != _code.end())
 			{
-				receiver = (*message++).apply( receiver, msgArgs, locals );
+				receiver = (*message++).apply( locals, msgArgs, locals );
 			}
 
 			LEAVE( receiver );
