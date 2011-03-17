@@ -27,6 +27,7 @@ namespace impulse {
 	 public:
 
 		Atom() { }
+		Atom( void* frame, double value ) : _frame( NULL ), _float( value ) { }
 		Atom( Frame& frame, double value ) : _frame( &frame ), _float( value ) { }
 
 		Frame* _frame;

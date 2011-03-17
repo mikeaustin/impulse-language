@@ -92,14 +92,14 @@ int main( int argc, char* argv[] )
 		code.push_back( std::vector<Value>() );
 		
 		code.back().push_back( *new SelfMessage() );
-		code.back().push_back( *new MessageProto( SymbolProto::at( "pow" ), *new ArrayProto( *new SelfMessage() ) ) );
-		//code.back().push_back( *new PowMessage( *new ArrayProto( *new SelfMessage() ) ) );
+		//code.back().push_back( *new MessageProto( SymbolProto::at( "pow" ), *new ArrayProto( *new SelfMessage() ) ) );
+		code.back().push_back( *new PowMessage( *new ArrayProto( *new SelfMessage() ) ) );
 	
 		Value receiver = locals;
 		const Array arguments( 5 );
 		//arguments.self( 5 );
 
-//		for (int i = 0; i < 20000000; i++)
+		for (int i = 0; i < 20000000; i++)
 		{
 			std::vector< std::vector<Value> >::iterator line = code.begin();
 

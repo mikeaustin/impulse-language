@@ -22,7 +22,8 @@ namespace impulse {
  // class Value
  //
 
-	inline Value::Value()               : Atom( VoidProto::instance(), 0.0 ) { }
+	//inline Value::Value()               : Atom( VoidProto::instance(), 0.0 ) { }
+	inline Value::Value()               : Atom( NULL, 0.0 ) { }
 	inline Value::Value( Atom value )   : Atom( value ) { }
 	inline Value::Value( Frame& frame ) : Atom( frame, max_float ) { }
 	inline Value::Value( double value )	: Atom( NumberValue::instance(), value ) { }
