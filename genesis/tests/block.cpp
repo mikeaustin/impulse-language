@@ -22,7 +22,7 @@ namespace impulse {
 			testBlock();
 		}
 
-		Value foo_( Value self, const Array& args, Value locals )
+		static Value foo_( Value self, const Array& args )
 		{
 			return self.getFloat() * args[Index::_0].getFloat();
 		}
@@ -40,6 +40,20 @@ namespace impulse {
 			static std::vector<ArgType> argtypes;
 			argtypes.push_back( ArgType( SymbolProto::at( "n" ), NumberProto::instance() ) );
 
+			Function3& block = *new Function3( &foo_, argtypes );
+
+			ASSERT( block.arity() == 1 );
+			ASSERT( block.value( 5, Array( 5, 2 ) ).getFloat() == 10 );
+
+			vector< vector<GCValue> > code( 1 );
+			code.back().push_back( *new SelfMessage() );
+
+			Block2& block2 = *new Block2( code, argtypes, locals );
+
+			ASSERT( block2.arity() == 1 );
+			ASSERT( Block2::value_( block2, Array( 5, 2 ) ).getFloat() == 5 );
+			ASSERT( block2.value( block2, Array( 5, 2 ) ).getFloat() == 5 );
+/*
 			BlockProto<BlockTest>& block = *new BlockProto<BlockTest>( *this, &BlockTest::foo_, argtypes );
 
 			ASSERT( block.arity() == 1 );
@@ -53,7 +67,7 @@ namespace impulse {
 
 			ASSERT( block2.arity() == 1 );
 			ASSERT( block2.value( 5, Array( 5, 2 ) ).getFloat() == 5 );
-
+*/
 			cout << "------------------------------------------------------------" << endl;
 		}
 

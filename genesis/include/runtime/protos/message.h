@@ -28,12 +28,13 @@ namespace impulse {
 		SymbolProto& getName() { return _name.getFrame(); }
 		ArrayProto&  getArgs() { return _args.getFrame(); }
 		
-		void evaluateArgs( Array& msgArgs, Value locals )
+		virtual Value apply( Value receiver, const Array& args, Value locals )
 		{
-			msgArgs.size( _args.getFrame().size() );
-			Array args( msgArgs.self() );
+			ENTER( "Message::apply( receiver = " << receiver << " ) _name = " << _name );
 
-			switch (_args.getFrame().size())
+			Array msgArgs( receiver ); msgArgs.size( _args.getFrame().size() );
+
+			switch (msgArgs.size())
 			{
 				case 5: msgArgs[4] = _args.getFrame()[4].apply( locals, args, locals );
 				case 4: msgArgs[3] = _args.getFrame()[3].apply( locals, args, locals );
@@ -42,36 +43,19 @@ namespace impulse {
 				case 1: msgArgs[0] = _args.getFrame()[0].apply( locals, args, locals );
 			}
 
-			TRACE( "" );
-		}
-
-		virtual Value apply( Value receiver, const Array& args, Value locals )
-		{
-			ENTER( "Message::apply( receiver = " << receiver << " ) _name = " << _name );
-
-			switch (_args.getFrame().size())
+/*			if (_args.getFrame().size() <= 5)
 			{
-				case 2: {
-					const Array msgArgs( receiver, _args.getFrame()[0].apply( locals, args, locals ),
-												   _args.getFrame()[1].apply( locals, args, locals ) );
-					return receiver.perform( _name.getFrame(), msgArgs, locals );
-				} break;
-				case 1: {
-					const Array msgArgs( receiver, _args.getFrame()[0].apply( locals, args, locals ) );
-					return receiver.perform( _name.getFrame(), msgArgs, locals );
-				} break;
-				default: return Value();
+				for (unsigned int i = 0; i < _args.getFrame().size(); ++i)
+				{
+					msgArgs[i] = _args.getFrame()[i].apply( locals, args, locals );
+				}
 			}
-
-//			Array msgArgs( receiver );
-
-//			evaluateArgs( msgArgs, locals );
-
-//			Value result = receiver.perform( _name.getFrame(), msgArgs, locals );
+*/
+			Value result = receiver.perform( _name.getFrame(), static_cast<const Array>( msgArgs ), locals );
+						
+			LEAVE( result );
 			
-//			LEAVE( result );
-			
-//			return result;
+			return result;
 		}
 		
 	 private:

@@ -22,9 +22,9 @@ namespace impulse {
 			testFrame();
 		}
 
-		Value foo_( Value receiver, const Array& args, Value locals )
+		Value foo_( Value self, const Array& args, Value locals )
 		{
-			ASSERT( &receiver.getFrame() == &_frame );
+			ASSERT( &self.getFrame() == &_frame );
 			
 			return args[Index::_0].getFloat() * 2;
 		}
@@ -41,7 +41,7 @@ namespace impulse {
 
 			_frame.setSlot( "foo", *new MethodProto( *new BlockProto<FrameTest>( *this, &FrameTest::foo_, argtypes ) ) );
 
-			ASSERT( _frame.perform( SymbolProto::at( "foo" ), Array( 5 ), locals ).getFloat() == 10 );
+			ASSERT( _frame.perform( SymbolProto::at( "foo" ), Array( 5, 5 ), locals ).getFloat() == 10 );
 			ASSERT( &Value( 5 ).perform( "proto", Array( 5 ), locals ).getFrame() == &NumberProto::instance() );
 
 			cout << "------------------------------------------------------------" << endl;

@@ -45,6 +45,34 @@ namespace impulse {
 		
 	};
 
+	class MethodProto2 : public Frame {
+
+	 public:
+
+		MethodProto2( Function3& function ) : _function( function ) { }
+
+		MethodProto2( Function2 function, std::vector<ArgType> argtypes )
+		 : _function( *new Function3( function, argtypes ) ) { }
+
+		//short arity() { return _block.get< BlockProto<Function> >().arity(); }
+
+		virtual Value apply( Value receiver, const Array& args, Value locals )
+		{
+			ENTER( "MethodProto2::apply( receiver = " << receiver << " )" );
+
+			Value result = _function.getFrame().value( receiver, args );
+			
+			LEAVE( result );
+			
+			return result;
+		}
+
+	 private:
+	 
+		GCValue::Type<Function3> _function;
+		
+	};
+
 }
 
 #endif

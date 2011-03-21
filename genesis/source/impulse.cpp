@@ -19,8 +19,9 @@ using std::endl;
 
 #include "impulse.h"
 
-#include "core/protos/locals.h"
 #include "core/protos/symbol.cpp"
+#include "core/protos/number.cpp"
+
 #include "core/protos/locals.h"
 #include "core/protos/method.h"
 #include "runtime/protos/message.h"
@@ -86,7 +87,7 @@ int main( int argc, char* argv[] )
 #endif
 
 		Frame& lobby  = Frame::create();
-		LocalsProto& locals = *new LocalsProto( lobby );
+		Value locals = *new LocalsProto( lobby );
 
 		std::vector< std::vector<Value> > code;
 		code.push_back( std::vector<Value>() );
@@ -99,7 +100,7 @@ int main( int argc, char* argv[] )
 		const Array arguments( 5 );
 		//arguments.self( 5 );
 
-		for (int i = 0; i < 20000000; i++)
+		for (int i = 0; i < 40000000; i++)
 		{
 			std::vector< std::vector<Value> >::iterator line = code.begin();
 

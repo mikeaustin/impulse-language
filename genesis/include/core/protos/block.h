@@ -53,11 +53,11 @@ namespace impulse {
 
 			switch (args.size())
 			{
-				case 5:  locals.setSlot( _argtypes[4].getName(), args[Index::_4] );
-				case 4:  locals.setSlot( _argtypes[3].getName(), args[Index::_3] );
-				case 3:  locals.setSlot( _argtypes[2].getName(), args[Index::_2] );
-				case 2:  locals.setSlot( _argtypes[1].getName(), args[Index::_1] );
-				case 1:  locals.setSlot( _argtypes[0].getName(), args[Index::_0] );
+				case 5: locals.setSlot( _argtypes[4].getName(), args[Index::_4] );
+				case 4: locals.setSlot( _argtypes[3].getName(), args[Index::_3] );
+				case 3: locals.setSlot( _argtypes[2].getName(), args[Index::_2] );
+				case 2: locals.setSlot( _argtypes[1].getName(), args[Index::_1] );
+				case 1: locals.setSlot( _argtypes[0].getName(), args[Index::_0] );
 			}
 
 			std::vector<GCValue>::iterator message = _code.begin();
@@ -76,6 +76,7 @@ namespace impulse {
 
 		std::vector<ArgType> _argtypes;
 		std::vector<GCValue> _code;
+		std::vector< std::vector<Value> > code2;
 	
 	};
 
@@ -84,7 +85,7 @@ namespace impulse {
 	
 	 public:
 
-		Block( std::vector<ArgType> argtypes, GCValue locals ) : _argtypes( argtypes ), _locals( locals ) { }
+		Block( std::vector<ArgType> argtypes, Value locals ) : _argtypes( argtypes ), _locals( locals ) { }
 
 		short arity() { return _argtypes.size(); }
 	 
@@ -114,11 +115,6 @@ namespace impulse {
 		BlockProto( std::vector<GCValue> code, std::vector<ArgType> argtypes, Value locals )
 		 : Block( argtypes, locals ), _object( *new Function( argtypes, code ) ), _method( &Function::value_ ) { }
 
-		/*virtual Value apply( Value receiver, const Array& args, Value locals )
-		{
-			return value( receiver, args );
-		}*/
-
 		virtual Value value( Value receiver, const Array& args )
 		{
 			ENTER( "BlockProto::value( receiver = " << receiver << " )" );
@@ -139,6 +135,92 @@ namespace impulse {
 
 	 	T&     _object;
 		Method _method;
+		
+	};
+
+	typedef Value (*const Function2)(Value, const Array&);
+
+	class Function3 : public Frame {
+	
+	 public:
+	 
+		Function3( Function2 function, std::vector<ArgType> argtypes )
+		 : _function( function ), _argtypes( argtypes ) { }
+
+		short arity() { return _argtypes.size(); }
+
+		Value value( Value self, const Array& args )
+		{
+			ENTER( "Function3::value( self = " << self << " )" );
+
+			Value result = (*_function)( self, args );
+			
+			LEAVE( result );
+			
+			return result;
+		}
+
+	 //protected:
+
+		Function2            _function;
+		std::vector<ArgType> _argtypes;
+	
+	};
+
+	class Block2 : public Function3 {
+	
+	 public:
+
+		Block2( std::vector< std::vector<GCValue> > code, std::vector<ArgType> argtypes, Value locals )
+		 : Function3( value_, argtypes ), _code( code ), _locals( locals ) { }
+
+		virtual string inspect( const Value self ) const
+		{
+			return Frame::inspect( self, "block" );
+		}
+
+		static Value value_( Value self, const Array& args )
+		{
+			Block2& block = self.get<Block2>();
+
+			const Array msgArgs( args.self() );
+			Value receiver;
+
+			switch (args.size())
+			{
+				case 5: block._locals.setSlot( block._argtypes[4].getName(), args[Index::_4] );
+				case 4: block._locals.setSlot( block._argtypes[3].getName(), args[Index::_3] );
+				case 3: block._locals.setSlot( block._argtypes[2].getName(), args[Index::_2] );
+				case 2: block._locals.setSlot( block._argtypes[1].getName(), args[Index::_1] );
+				case 1: block._locals.setSlot( block._argtypes[0].getName(), args[Index::_0] );
+			}
+
+			std::vector< std::vector<GCValue> >::iterator expression = block._code.begin();
+
+			while (expression != block._code.end())
+			{
+				std::vector<GCValue>::iterator message = expression->begin();
+				
+				receiver = block._locals;
+				
+				while (message != expression->end())
+				{
+					receiver = (*message).apply( block._locals, msgArgs, block._locals );
+					
+					++message;
+				}
+				
+				++expression;
+			}
+
+			return receiver;		
+		}
+		
+	 private:
+	 
+		std::vector< std::vector<GCValue> >
+		        _code;
+		GCValue _locals;
 		
 	};
 

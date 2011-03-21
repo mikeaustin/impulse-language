@@ -8,7 +8,8 @@
 #ifndef IMPULSE_H
 #define IMPULSE_H
 
-#ifdef DEBUG
+#ifdef TRACE
+	#undef TRACE
 	#define TRACE( expr ) std::cout << &spaces[60 - indent] << expr << std::endl
 	#define ENTER( expr ) std::cout << &spaces[60 - indent] << "> " << expr << std::endl; indent += 4
 	#define LEAVE( expr ) indent -= 4; std::cout << &spaces[60 - indent] << "< " << expr << std::endl

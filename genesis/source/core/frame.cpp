@@ -119,7 +119,7 @@ namespace impulse {
  // Inspection
  //
 
-	inline string Frame::inspect( const Value self ) const
+	string Frame::inspect( const Value self ) const
 	{
 		std::stringstream stream;
 		
@@ -128,7 +128,7 @@ namespace impulse {
 		return stream.str();
 	}
 
-	inline string Frame::inspect( const Value self, string name ) const
+	string Frame::inspect( const Value self, string name ) const
 	{
 		std::stringstream stream;
 		

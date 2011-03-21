@@ -46,39 +46,24 @@ namespace impulse {
 			static std::vector<ArgType> powArgs, sinArgs;
 			powArgs.push_back( ArgType( SymbolProto::at( "n" ), NumberProto::instance() ) );
 
-			instance().setSlot( "pow", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::pow_, powArgs ) ) );
-			instance().setSlot( "sin", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::sin, sinArgs ) ) );
-			
+			//instance().setSlot( "pow", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::pow_, powArgs ) ) );
+			instance().setSlot( "pow", *new MethodProto2( &pow_, powArgs ) );
+			//instance().setSlot( "sin", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::sin, sinArgs ) ) );
+			instance().setSlot( "sin", *new MethodProto2( &sin, sinArgs ) );
 		}
 
 	 //
 	 // Inspection
 	 //
 
-		virtual string inspect( const Value self ) const
-		{
-			return Frame::inspect( self, "number" );
-		}
+		virtual string inspect( const Value self ) const;
 
 	 //
 	 // Methods
 	 //
 
-		Value pow_( Value self, const Array& args, Value locals )
-		{
-			ENTER( "NumberProto::pow_( self = " << self << ", args[0] = " << args[Index::_0] << " )" );
-			
-			Value result = std::pow( self.getFloat(), args[Index::_0].getFloat() );
-			
-			LEAVE( result );
-			
-			return result;
-		}
-
-		Value sin( Value self, const Array& args, Value locals )
-		{
-			return std::sin( self.getFloat() );
-		}
+		static Value pow_( Value self, const Array& args );
+		static Value sin( Value self, const Array& args );
 
 	};
 

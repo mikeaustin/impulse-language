@@ -15,15 +15,21 @@
 
 namespace impulse {
 
-	static const double min_float = std::numeric_limits<double>::min();
-	static const double max_float = std::numeric_limits<double>::max();
+	//static const double min_float = __DBL_MIN__;
+	//static const double max_float = __DBL_MAX__;
+
+#define min_float __DBL_MIN__
+#define max_float __DBL_MAX__
+
+	static const long min_float_cast = 0x10000000000000;
+	static const long max_float_cast = 0x7fefffffffffffff;
 
  //
  // class Value
  //
 
-	//inline Value::Value()               : Atom( VoidProto::instance(), 0.0 ) { }
-	inline Value::Value()               : Atom( NULL, 0.0 ) { }
+	inline Value::Value()               : Atom( VoidProto::instance(), 0.0 ) { }
+	//inline Value::Value()               : Atom( NULL, 0.0 ) { }
 	inline Value::Value( Atom value )   : Atom( value ) { }
 	inline Value::Value( Frame& frame ) : Atom( frame, max_float ) { }
 	inline Value::Value( double value )	: Atom( NumberValue::instance(), value ) { }
@@ -61,16 +67,24 @@ namespace impulse {
 		
 		Value result;
 		
-		if (getFloat() < max_float)
+		if (getFloat() != max_float)
 		{
-			if (_float > min_float)
+			if (_float != min_float)
 				result = *this;
 			else
 				result = args.self();
 		}
 		else
 			result = getFrame().apply( receiver, args, locals );
-			
+
+/*
+		switch (_long)
+		{
+			case max_float_cast: result = getFrame().apply( receiver, args, locals ); break;
+			case min_float_cast: result = args.self(); break;
+			default:             result = *this; break;
+		}
+*/
 		LEAVE( result );
 		
 		return result;
