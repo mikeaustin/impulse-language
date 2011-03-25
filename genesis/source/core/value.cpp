@@ -58,7 +58,7 @@ namespace impulse {
 
 	inline Frame& Value::getProto() { return _frame->getProto(); }
 
-	inline Value Value::apply( Value receiver, const Array& args, Value locals )
+	inline Value Value::apply( Value receiver, const Array& args, Value locals ) const
 	{
 		// Optimization to return *this immediately if possible
 		// If it's not garbage collected, it doesn't override apply()

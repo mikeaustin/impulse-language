@@ -63,7 +63,7 @@ namespace impulse {
 		template <typename T> T& get() const { return *static_cast<T*>( _frame ); }
 		template <typename T> T& getDynamic() const { return *dynamic_cast<T*>( _frame ); }
 
-		Value apply( Value receiver, const Array& args, Value locals );
+		Value apply( Value receiver, const Array& args, Value locals ) const;
 
 		Value perform( const Symbol selector, const Array& args, Value locals );
 		Value perform( const string name, const Array& args, Value locals );
@@ -118,7 +118,7 @@ namespace impulse {
 	 
 		Type( Frame& frame ) : GCValue( frame ) { }
 
-		T& getFrame() { return get<T>(); }
+		T& getFrame() const { return get<T>(); }
 	 
 	};
 

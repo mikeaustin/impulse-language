@@ -28,7 +28,7 @@ namespace impulse {
 
 		//short arity() { return _block.get< BlockProto<Function> >().arity(); }
 
-		virtual Value apply( Value receiver, const Array& args, Value locals )
+		virtual Value apply( Value receiver, const Array& args, Value locals ) const
 		{
 			ENTER( "MethodProto::apply( receiver = " << receiver << " )" );
 			
@@ -56,7 +56,7 @@ namespace impulse {
 
 		//short arity() { return _block.get< BlockProto<Function> >().arity(); }
 
-		virtual Value apply( Value receiver, const Array& args, Value locals )
+		virtual Value apply( Value receiver, const Array& args, Value locals ) const
 		{
 			ENTER( "MethodProto2::apply( receiver = " << receiver << " )" );
 

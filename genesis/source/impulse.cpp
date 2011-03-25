@@ -93,20 +93,20 @@ int main( int argc, char* argv[] )
 		code.push_back( std::vector<Value>() );
 		
 		code.back().push_back( *new SelfMessage() );
-		//code.back().push_back( *new MessageProto( SymbolProto::at( "pow" ), *new ArrayProto( *new SelfMessage() ) ) );
-		code.back().push_back( *new PowMessage( *new ArrayProto( *new SelfMessage() ) ) );
-	
+		code.back().push_back( *new MessageProto( SymbolProto::at( "pow" ), *new ArrayProto( *new SelfMessage() ) ) );
+		//code.back().push_back( *new PowMessage( *new ArrayProto( *new SelfMessage() ) ) );
+
 		Value receiver = locals;
 		const Array arguments( 5 );
 		//arguments.self( 5 );
 
 		for (int i = 0; i < 40000000; i++)
 		{
-			std::vector< std::vector<Value> >::iterator line = code.begin();
+			std::vector< std::vector<Value> >::const_iterator line = code.begin();
 
 			while (line != code.end())
 			{
-				std::vector<Value>::iterator message = line->begin();
+				std::vector<Value>::const_iterator message = line->begin();
 
 				TRACE( "" );
 

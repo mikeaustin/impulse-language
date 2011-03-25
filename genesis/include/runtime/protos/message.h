@@ -25,10 +25,10 @@ namespace impulse {
 
 		MessageProto( Symbol name, ArrayProto& args ) : _name( name ), _args( args ) { }
 
-		SymbolProto& getName() { return _name.getFrame(); }
-		ArrayProto&  getArgs() { return _args.getFrame(); }
+		SymbolProto& getName() const { return _name.getFrame(); }
+		ArrayProto&  getArgs() const { return _args.getFrame(); }
 		
-		virtual Value apply( Value receiver, const Array& args, Value locals )
+		virtual Value apply( Value receiver, const Array& args, Value locals ) const
 		{
 			ENTER( "Message::apply( receiver = " << receiver << " ) _name = " << _name );
 
@@ -73,7 +73,7 @@ namespace impulse {
  	
  	 public:
  	
- 		virtual Value apply( Value receiver, const Array& args, Value locals )
+ 		virtual Value apply( Value receiver, const Array& args, Value locals ) const
  		{
  			ENTER( "SelfMessage::apply( receiver = " << receiver << " )" );
 
@@ -90,7 +90,7 @@ namespace impulse {
 	 
 	 	PowMessage( ArrayProto& args ) : MessageProto( SymbolProto::at( "pow" ), args ) { }
 	 
-		virtual Value apply( Value receiver, const Array& args, Value locals )
+		virtual Value apply( Value receiver, const Array& args, Value locals ) const
 		{
  			ENTER( "PowMessage::apply( receiver = " << receiver << " )" );
 			

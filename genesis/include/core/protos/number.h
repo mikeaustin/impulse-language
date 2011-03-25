@@ -46,7 +46,7 @@ namespace impulse {
 			static std::vector<ArgType> powArgs, sinArgs;
 			powArgs.push_back( ArgType( SymbolProto::at( "n" ), NumberProto::instance() ) );
 
-			//instance().setSlot( "pow", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::pow_, powArgs ) ) );
+			//instance().setSlot( "pow", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::pow2_, powArgs ) ) );
 			instance().setSlot( "pow", *new MethodProto2( &pow_, powArgs ) );
 			//instance().setSlot( "sin", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::sin, sinArgs ) ) );
 			instance().setSlot( "sin", *new MethodProto2( &sin, sinArgs ) );
@@ -63,6 +63,7 @@ namespace impulse {
 	 //
 
 		static Value pow_( Value self, const Array& args );
+		Value pow2_( Value self, const Array& args, Value locals );
 		static Value sin( Value self, const Array& args );
 
 	};

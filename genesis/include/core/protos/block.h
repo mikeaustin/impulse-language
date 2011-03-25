@@ -195,11 +195,11 @@ namespace impulse {
 				case 1: block._locals.setSlot( block._argtypes[0].getName(), args[Index::_0] );
 			}
 
-			std::vector< std::vector<GCValue> >::iterator expression = block._code.begin();
+			std::vector< std::vector<GCValue> >::const_iterator expression = block._code.begin();
 
 			while (expression != block._code.end())
 			{
-				std::vector<GCValue>::iterator message = expression->begin();
+				std::vector<GCValue>::const_iterator message = expression->begin();
 				
 				receiver = block._locals;
 				

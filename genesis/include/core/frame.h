@@ -56,7 +56,7 @@ namespace impulse {
 	// Messaging
 	//
 
-		virtual Value apply( Value receiver, const Array& args, Value locals ) { return receiver; }
+		virtual Value apply( Value receiver, const Array& args, Value locals ) const { return receiver; }
 
 		Value perform( Symbol selector, const Array& args, Value locals ) { return perform( *this, selector, args, locals ); }
 		Value perform( Value receiver, const Symbol selector, const Array& args, Value locals );

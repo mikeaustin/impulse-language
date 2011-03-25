@@ -34,6 +34,17 @@ namespace impulse {
 		return result;
 	}
 
+	Value NumberProto::pow2_( Value self, const Array& args, Value locals )
+	{
+		ENTER( "NumberProto::pow_( self = " << self << ", args[0] = " << args[Index::_0] << " )" );
+		
+		Value result = std::pow( self.getFloat(), args[Index::_0].getFloat() );
+		
+		LEAVE( result );
+		
+		return result;
+	}
+
 	Value NumberProto::sin( Value self, const Array& args )
 	{
 		return std::sin( self.getFloat() );
