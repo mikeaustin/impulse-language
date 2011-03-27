@@ -32,7 +32,7 @@ namespace impulse {
 		{
 			ENTER( "Message::apply( receiver = " << receiver << " ) _name = " << _name );
 
-			Array msgArgs( receiver ); msgArgs.size( _args.getFrame().size() );
+			Array msgArgs; msgArgs.size( _args.getFrame().size() ).self( receiver );
 
 			switch (msgArgs.size())
 			{
@@ -92,7 +92,7 @@ namespace impulse {
 
 			if (&receiver.getFrame() == &NumberValue::instance())
 			{
-				const Array msgArgs( args.self(), getArgs()[0].apply( locals, args, locals ) );
+				Array msgArgs( getArgs()[0].apply( locals, args, locals ) ); msgArgs.self( args.self() );
 
 				if (&msgArgs[Index::_0].getFrame() == &NumberValue::instance())
 				{

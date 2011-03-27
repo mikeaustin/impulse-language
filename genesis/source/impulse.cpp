@@ -78,7 +78,7 @@ int main( int argc, char* argv[] )
 #endif
 
 #ifdef BENCH
-		Array args( 0 );
+		Array args();
 	
 		//for ( volatile int i = 0; i < 1000000000; i++ )
 		{
@@ -100,8 +100,7 @@ int main( int argc, char* argv[] )
 		code.back().push_back( *new OperatorMessage( *new SymbolProto( SymbolProto::POW ), *new ArrayProto( *new SelfMessage() ) ) );
 
 		Value receiver = locals;
-		const Array arguments( 5 );
-		//arguments.self( 5 );
+		Array arguments( 5 ); arguments.self( 5 );
 
 		for (int i = 0; i < 40000000; i++)
 		{

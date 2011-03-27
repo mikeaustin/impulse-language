@@ -43,7 +43,7 @@ namespace impulse {
 			Function3& block = *new Function3( &foo_, argtypes );
 
 			ASSERT( block.arity() == 1 );
-			ASSERT( block.value( 5, Array( 5, 2 ) ).getFloat() == 10 );
+			ASSERT( block.value( 5, Array( 2 ).self( 5 ) ).getFloat() == 10 );
 
 			vector< vector<GCValue> > code( 1 );
 			code.back().push_back( *new SelfMessage() );
@@ -51,8 +51,8 @@ namespace impulse {
 			Block2& block2 = *new Block2( code, argtypes, locals );
 
 			ASSERT( block2.arity() == 1 );
-			ASSERT( Block2::value_( block2, Array( 5, 2 ) ).getFloat() == 5 );
-			ASSERT( block2.value( block2, Array( 5, 2 ) ).getFloat() == 5 );
+			ASSERT( Block2::value_( block2, Array( 2 ).self( 5 ) ).getFloat() == 5 );
+			ASSERT( block2.value( block2, Array( 2 ).self( 5 ) ).getFloat() == 5 );
 /*
 			BlockProto<BlockTest>& block = *new BlockProto<BlockTest>( *this, &BlockTest::foo_, argtypes );
 

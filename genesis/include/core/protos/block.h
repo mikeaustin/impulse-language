@@ -49,7 +49,7 @@ namespace impulse {
 		{
 			ENTER( "Function::value_( receiver = " << receiver << " )" );
 
-			const Array msgArgs( args.self() );
+			Array msgArgs; msgArgs.self( args.self() );
 
 			switch (args.size())
 			{

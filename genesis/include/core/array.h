@@ -50,11 +50,11 @@ namespace impulse {
 
 	 public:
 
-		Array( Value self ) : _self( self ), _size( 0 ) { }
-		Array( Value self, Value arg0 ) : _self( self ), _size( 1 ), _0( arg0 ) { }
-		Array( Value self, Value arg0, Value arg1 ) : _self( self ), _size( 1 ), _0( arg0 ), _1( arg1 ) { }
+		Array() : _size( 0 ) { }
+		Array( Value arg0 ) : _size( 1 ), _0( arg0 ) { }
+		Array( Value arg0, Value arg1 ) : _size( 1 ), _0( arg0 ), _1( arg1 ) { }
 
-		void size( size_t size ) { _size = size; }
+		Array& size( size_t size ) { return _size = size, *this; }
 		size_t size() const { return _size; }
 
 		Value& operator []( Index index ) { return (Value&) *(&_0 + index.index()); }
@@ -65,7 +65,7 @@ namespace impulse {
 			return "<args>";
 		}
 
-		void self( Frame& self ) { _self = self; }
+		Array& self( Value self ) { return _self = self, *this; }
 		Value self() const { return Atom( *_self._frame, _self._float ); }
 
 	 private:
