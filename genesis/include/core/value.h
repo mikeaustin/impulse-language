@@ -47,6 +47,7 @@ namespace impulse {
 	 	Value( Atom atom );
 	 	Value( Frame& frame );
 		Value( double value );
+		Value( string value );
 		Value( SelfMessage& value );
 
 		Value setSlot( const Symbol symbol, const Value value );

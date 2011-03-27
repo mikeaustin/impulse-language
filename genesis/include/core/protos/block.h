@@ -160,7 +160,7 @@ namespace impulse {
 			return result;
 		}
 
-	 //protected:
+	 protected:
 
 		Function2            _function;
 		std::vector<ArgType> _argtypes;

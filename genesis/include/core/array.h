@@ -65,6 +65,7 @@ namespace impulse {
 			return "<args>";
 		}
 
+		void self( Frame& self ) { _self = self; }
 		Value self() const { return Atom( *_self._frame, _self._float ); }
 
 	 private:

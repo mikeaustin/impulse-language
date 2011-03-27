@@ -25,8 +25,8 @@ namespace impulse {
 
 		MessageProto( Symbol name, ArrayProto& args ) : _name( name ), _args( args ) { }
 
-		SymbolProto& getName() const { return _name.getFrame(); }
-		ArrayProto&  getArgs() const { return _args.getFrame(); }
+		const SymbolProto& getName() const { return _name.getFrame(); }
+		const ArrayProto&  getArgs() const { return _args.getFrame(); }
 		
 		virtual Value apply( Value receiver, const Array& args, Value locals ) const
 		{
@@ -43,15 +43,7 @@ namespace impulse {
 				case 1: msgArgs[0] = _args.getFrame()[0].apply( locals, args, locals );
 			}
 
-/*			if (_args.getFrame().size() <= 5)
-			{
-				for (unsigned int i = 0; i < _args.getFrame().size(); ++i)
-				{
-					msgArgs[i] = _args.getFrame()[i].apply( locals, args, locals );
-				}
-			}
-*/
-			Value result = receiver.perform( _name.getFrame(), static_cast<const Array>( msgArgs ), locals );
+			Value result = receiver.perform( _name.getFrame(), msgArgs, locals );
 						
 			LEAVE( result );
 			
@@ -84,33 +76,42 @@ namespace impulse {
  	
  	};
 
-	class PowMessage : public MessageProto {
+ //
+ // class OperatorMessage
+ //
+
+	class OperatorMessage : public MessageProto {
 	
 	 public:
-	 
-	 	PowMessage( ArrayProto& args ) : MessageProto( SymbolProto::at( "pow" ), args ) { }
-	 
+	
+		OperatorMessage( Symbol selector, ArrayProto& args ) : MessageProto( selector, args ) { }
+	
 		virtual Value apply( Value receiver, const Array& args, Value locals ) const
 		{
- 			ENTER( "PowMessage::apply( receiver = " << receiver << " )" );
-			
 			Value result;
 
-			if (&receiver.getProto() == &NumberProto::instance())
+			if (&receiver.getFrame() == &NumberValue::instance())
 			{
 				const Array msgArgs( args.self(), getArgs()[0].apply( locals, args, locals ) );
-				
-				result = std::pow( receiver.getFloat(), msgArgs[Index::_0].getFloat() );
+
+				if (&msgArgs[Index::_0].getFrame() == &NumberValue::instance())
+				{
+					switch (getName().getId())
+					{
+						case SymbolProto::ADD: result = receiver.getFloat() + msgArgs[Index::_0].getFloat();
+						case SymbolProto::MUL: result = receiver.getFloat() * msgArgs[Index::_0].getFloat();
+						case SymbolProto::POW: result = std::pow( receiver.getFloat(), msgArgs[Index::_0].getFloat() );
+					}
+				}
+				else result = MessageProto::apply( receiver, args, locals );
 			}
 			else result = MessageProto::apply( receiver, args, locals );
-
-			LEAVE( result );
-
+	
 			return result;
 		}
 		
 	};
-
+	
 }
 
 #endif

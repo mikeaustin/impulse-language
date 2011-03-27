@@ -10,6 +10,7 @@
 #include "core/protos/void.h"
 #include "core/protos/number.h"
 #include "core/protos/symbol.h"
+#include "core/protos/string.h"
 
 #include <limits>
 
@@ -33,6 +34,7 @@ namespace impulse {
 	inline Value::Value( Atom value )   : Atom( value ) { }
 	inline Value::Value( Frame& frame ) : Atom( frame, max_float ) { }
 	inline Value::Value( double value )	: Atom( NumberValue::instance(), value ) { }
+	inline Value::Value( string value ) : Atom( StringProto::create( value ), 0.0 ) { }
 
 	inline Value::Value( SelfMessage& value ) : Atom( value, min_float ) { }
 

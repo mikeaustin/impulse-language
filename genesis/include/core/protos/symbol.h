@@ -25,14 +25,18 @@ namespace impulse {
 	 //
 
 		typedef std::map<string, Value> SymbolMap;
+		
+		const static SymbolId ADD = 100;
+		const static SymbolId MUL = 101;
+		const static SymbolId POW = 102;
 
 	 //
 	 // Methods
 	 //
 
-		string getName() { return _name; }
+		string getName() const { return _name; }
 
-		SymbolId getId() { return _id; }
+		SymbolId getId() const { return _id; }
 		
 		static const Symbol at( const string name )
 		{
@@ -59,6 +63,8 @@ namespace impulse {
 			return Frame::inspect( self, stream.str() );
 		}
 
+		SymbolProto( SymbolId id ) : _name( "anonymous" ), _id( id ) { }
+
 	 private:
 
 	 	SymbolProto( string name ) : _name( name ), _id( _nextId++ )
@@ -66,8 +72,9 @@ namespace impulse {
 	 		_symbolMap[name] = Value( *this );
 	 	}
 
-		string    _name;
-		SymbolId  _id;
+
+		string   _name;
+		SymbolId _id;
 
 		static SymbolId  _nextId;
 		static SymbolMap _symbolMap;

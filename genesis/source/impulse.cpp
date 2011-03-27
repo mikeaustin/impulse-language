@@ -24,10 +24,13 @@ using std::endl;
 
 #include "core/protos/locals.h"
 #include "core/protos/method.h"
+#include "core/protos/stream.h"
 #include "runtime/protos/message.h"
 
 #include "core/value.cpp"
 #include "core/frame.cpp"
+
+#include "parser/parser.h"
 
 #ifdef TEST
 	#include "../tests/core.cpp"
@@ -93,8 +96,8 @@ int main( int argc, char* argv[] )
 		code.push_back( std::vector<Value>() );
 		
 		code.back().push_back( *new SelfMessage() );
-		code.back().push_back( *new MessageProto( SymbolProto::at( "pow" ), *new ArrayProto( *new SelfMessage() ) ) );
-		//code.back().push_back( *new PowMessage( *new ArrayProto( *new SelfMessage() ) ) );
+		//code.back().push_back( *new MessageProto( SymbolProto::at( "pow" ), *new ArrayProto( *new SelfMessage() ) ) );
+		code.back().push_back( *new OperatorMessage( *new SymbolProto( SymbolProto::POW ), *new ArrayProto( *new SelfMessage() ) ) );
 
 		Value receiver = locals;
 		const Array arguments( 5 );
@@ -127,6 +130,10 @@ int main( int argc, char* argv[] )
 		
 		cout << "result = " << receiver << endl;
 	}
+
+//	Scanner& scanner = *new Scanner( cin );
+//	scanner.add( (Token (Scanner::*)(const int) const) &NumberScanner::scanNumber );
+//	scanner.peekToken();
 
 	return 0;
 }
