@@ -24,6 +24,7 @@ namespace impulse {
 
 	static const long min_float_cast = 0x10000000000000;
 	static const long max_float_cast = 0x7fefffffffffffff;
+	static const unsigned long nan_float_cast  = 9221120237041090560;
 
  //
  // class Value
@@ -37,6 +38,7 @@ namespace impulse {
 	inline Value::Value( string value ) : Atom( StringProto::create( value ), 0.0 ) { }
 
 	inline Value::Value( SelfMessage& value ) : Atom( value, min_float ) { }
+	//inline Value::Value( OperatorMessage& value ) : Atom( value, nan_float_cast ) { }
 
 	inline Value Value::setSlot( const Symbol symbol, const Value value )
 	{
@@ -68,7 +70,7 @@ namespace impulse {
 		ENTER( "Value::apply( receiver = " << receiver << " )" );
 		
 		Value result;
-		
+
 		if (getFloat() != max_float)
 		{
 			if (_float != min_float)
@@ -79,9 +81,9 @@ namespace impulse {
 		else
 			result = getFrame().apply( receiver, args, locals );
 
-/*
-		switch (_long)
+/*		switch (reinterpret_cast<const unsigned long&>( _float ))
 		{
+			case nan_float_cast: result = static_cast<OperatorMessage&>( getFrame() ).apply( receiver, args, locals ); break;
 			case max_float_cast: result = getFrame().apply( receiver, args, locals ); break;
 			case min_float_cast: result = args.self(); break;
 			default:             result = *this; break;
@@ -162,7 +164,7 @@ namespace impulse {
  		return *this;
  	}
 
-	std::ostream& operator <<( std::ostream& stream, Value value )
+	std::ostream& operator <<( std::ostream& stream, const Value value )
 	{
 		stream << value.inspect();
 			

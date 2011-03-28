@@ -183,7 +183,7 @@ namespace impulse {
 		{
 			Block2& block = self.get<Block2>();
 
-			const Array msgArgs( args.self() );
+			Array msgArgs; msgArgs.self( args.self() );
 			Value receiver;
 
 			switch (args.size())

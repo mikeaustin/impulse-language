@@ -49,6 +49,7 @@ namespace impulse {
 		Value( double value );
 		Value( string value );
 		Value( SelfMessage& value );
+		//Value( OperatorMessage& value );
 
 		Value setSlot( const Symbol symbol, const Value value );
 		Value getSlot( const Symbol symbol );
@@ -86,7 +87,7 @@ namespace impulse {
 	 
 	};
 
-	std::ostream& operator <<( std::ostream& stream, Value value );
+	std::ostream& operator <<( std::ostream& stream, const Value value );
 
 
  //

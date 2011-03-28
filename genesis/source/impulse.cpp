@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <string>
+#include <numeric>
 
 using std::string;
 using std::cin;
@@ -47,6 +48,9 @@ namespace impulse {
 }
 
 using namespace impulse;
+
+Value receiver;
+Array arguments;
 
 int main( int argc, char* argv[] )
 {
@@ -97,24 +101,32 @@ int main( int argc, char* argv[] )
 		
 		code.back().push_back( *new SelfMessage() );
 		//code.back().push_back( *new MessageProto( SymbolProto::at( "pow" ), *new ArrayProto( *new SelfMessage() ) ) );
-		code.back().push_back( *new OperatorMessage( *new SymbolProto( SymbolProto::POW ), *new ArrayProto( *new SelfMessage() ) ) );
+		code.back().push_back( *new OperatorMessage<mul_>( *new SymbolProto( SymbolProto::MUL ), *new ArrayProto( *new SelfMessage() ) ) );
 
-		Value receiver = locals;
-		Array arguments( 5 ); arguments.self( 5 );
+		receiver = locals;
+		arguments.self( 5 );
 
-		for (int i = 0; i < 40000000; i++)
+		struct Func {
+			static Value applyFunc( Value receiver, Value message )
+			{
+				return message.apply( receiver, arguments, receiver );
+			}
+		};
+
+		for (int i = 0; i < 200000000; i++)
 		{
 			std::vector< std::vector<Value> >::const_iterator line = code.begin();
 
 			while (line != code.end())
 			{
 				std::vector<Value>::const_iterator message = line->begin();
+				const std::vector<Value>::const_iterator end = line->end();
 
 				TRACE( "" );
 
 				receiver = locals;
 
-				while (message != line->end())
+				while (message != end)
 				{
 					receiver = (*message).apply( receiver, arguments, locals );
 

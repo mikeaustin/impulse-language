@@ -25,12 +25,12 @@ namespace impulse {
 
 		MessageProto( Symbol name, ArrayProto& args ) : _name( name ), _args( args ) { }
 
-		const SymbolProto& getName() const { return _name.getFrame(); }
-		const ArrayProto&  getArgs() const { return _args.getFrame(); }
+		SymbolProto& getName() const { return _name.getFrame(); }
+		ArrayProto&  getArgs() const { return _args.getFrame(); }
 		
 		virtual Value apply( Value receiver, const Array& args, Value locals ) const
 		{
-			ENTER( "Message::apply( receiver = " << receiver << " ) _name = " << _name );
+			ENTER( "Message::apply( receiver = " << receiver << " ) _name = " << _name.getFrame() );
 
 			Array msgArgs; msgArgs.size( _args.getFrame().size() ).self( receiver );
 
@@ -80,38 +80,34 @@ namespace impulse {
  // class OperatorMessage
  //
 
+	Value mul_( Value receiver, const Array& msgArgs ) { return receiver.getFloat() * msgArgs[Index::_0].getFloat(); }
+	Value div_( Value receiver, const Array& msgArgs ) { return receiver.getFloat() / msgArgs[Index::_0].getFloat(); }
+	Value pow_( Value receiver, const Array& msgArgs ) { return pow( receiver.getFloat(), msgArgs[Index::_0].getFloat() ); }
+
+	template <Value (*function)(Value, const Array&)>
 	class OperatorMessage : public MessageProto {
 	
 	 public:
 	
 		OperatorMessage( Symbol selector, ArrayProto& args ) : MessageProto( selector, args ) { }
-	
+		
 		virtual Value apply( Value receiver, const Array& args, Value locals ) const
 		{
 			Value result;
 
-			if (&receiver.getFrame() == &NumberValue::instance())
-			{
-				Array msgArgs( getArgs()[0].apply( locals, args, locals ) ); msgArgs.self( args.self() );
+			Array msgArgs( getArgs()[0].apply( locals, args, locals ) ); msgArgs.self( args.self() );
 
-				if (&msgArgs[Index::_0].getFrame() == &NumberValue::instance())
-				{
-					switch (getName().getId())
-					{
-						case SymbolProto::ADD: result = receiver.getFloat() + msgArgs[Index::_0].getFloat();
-						case SymbolProto::MUL: result = receiver.getFloat() * msgArgs[Index::_0].getFloat();
-						case SymbolProto::POW: result = std::pow( receiver.getFloat(), msgArgs[Index::_0].getFloat() );
-					}
-				}
-				else result = MessageProto::apply( receiver, args, locals );
+			if (&receiver.getFrame() == &NumberValue::instance() && &msgArgs[Index::_0].getFrame() == &NumberValue::instance())
+			{
+				result = (*function)( receiver, msgArgs );
 			}
-			else result = MessageProto::apply( receiver, args, locals );
+			else result = receiver.perform( getName(), msgArgs, locals );
 	
 			return result;
 		}
 		
 	};
-	
+
 }
 
 #endif
