@@ -106,13 +106,6 @@ int main( int argc, char* argv[] )
 		receiver = locals;
 		arguments.self( 5 );
 
-		struct Func {
-			static Value applyFunc( Value receiver, Value message )
-			{
-				return message.apply( receiver, arguments, receiver );
-			}
-		};
-
 		for (int i = 0; i < 200000000; i++)
 		{
 			std::vector< std::vector<Value> >::const_iterator line = code.begin();
@@ -128,7 +121,7 @@ int main( int argc, char* argv[] )
 
 				while (message != end)
 				{
-					receiver = (*message).apply( receiver, arguments, locals );
+					receiver = message->apply( receiver, arguments, locals );
 
 					TRACE( "" );
 
