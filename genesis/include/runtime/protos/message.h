@@ -84,7 +84,7 @@ namespace impulse {
 	Value div_( Value receiver, const Array& msgArgs ) { return receiver.getFloat() / msgArgs[Index::_0].getFloat(); }
 	Value pow_( Value receiver, const Array& msgArgs ) { return pow( receiver.getFloat(), msgArgs[Index::_0].getFloat() ); }
 
-	template <Value (*function)(Value, const Array&)>
+	template <Value (*operation)(Value, const Array&)>
 	class OperatorMessage : public MessageProto {
 	
 	 public:
@@ -99,7 +99,7 @@ namespace impulse {
 
 			if (&receiver.getFrame() == &NumberValue::instance() && &msgArgs[Index::_0].getFrame() == &NumberValue::instance())
 			{
-				result = (*function)( receiver, msgArgs );
+				result = (*operation)( receiver, msgArgs );
 			}
 			else result = receiver.perform( getName(), msgArgs, locals );
 	
