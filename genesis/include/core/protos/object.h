@@ -42,6 +42,7 @@ namespace impulse {
 
 			instance().setSlot( "version", 0.2 );
 			instance().setSlot( "proto", *new MethodProto( *new BlockProto<ObjectProto>( instance(), &ObjectProto::proto, noArgs ) ) );
+			//instance().addMethod( "proto", *new Method( &ObjectProto::proto, noArgs ) ) );
 		}
 
 	 //

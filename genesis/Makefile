@@ -1,4 +1,5 @@
-OPTS =	-Woverloaded-virtual --param inline-unit-growth=10000 --param large-function-growth=10000 --param max-inline-insns-single=10000
+#OPTS =	-Woverloaded-virtual --param inline-unit-growth=10000 --param large-function-growth=10000 --param max-inline-insns-single=10000
+OPTS =	-Wfatal-errors
 
 all:
 	@clear

@@ -30,8 +30,9 @@ namespace impulse {
  // class Value
  //
 
-	inline Value::Value()               : Atom( VoidProto::instance(), 0.0 ) { }
-	//inline Value::Value()               : Atom( NULL, 0.0 ) { }
+	// TODO: Faster, but don't dereference void's _frame!
+	//inline Value::Value()               : Atom( VoidProto::instance(), 0.0 ) { }
+	inline Value::Value()               : Atom( NULL, 0.0 ) { }
 	inline Value::Value( Atom value )   : Atom( value ) { }
 	inline Value::Value( Frame& frame ) : Atom( frame, max_float ) { }
 	inline Value::Value( double value )	: Atom( NumberValue::instance(), value ) { }
@@ -110,7 +111,11 @@ namespace impulse {
 		return perform( SymbolProto::at( name ), args, locals );
 	}
 
-	string Value::inspect() const { return getFrame().inspect( *this ); }
+	string Value::inspect() const
+	{
+		return &getFrame() == NULL ? VoidProto::instance().inspect( *this )
+		                           : getFrame().inspect( *this );
+	}
 
  //
  // class GCValue

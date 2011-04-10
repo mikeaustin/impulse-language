@@ -28,6 +28,15 @@ namespace impulse {
 		SymbolProto& getName() const { return _name.getFrame(); }
 		ArrayProto&  getArgs() const { return _args.getFrame(); }
 		
+		virtual string inspect( const Value self ) const
+		{
+			MessageProto& message = *dynamic_cast<MessageProto*>( &self.getFrame() );
+			
+			std::ostringstream stream; stream << "message:" << message.getName().getName();
+
+			return Frame::inspect( self, stream.str() );
+		}
+
 		virtual Value apply( Value receiver, const Array& args, Value locals ) const
 		{
 			ENTER( "Message::apply( receiver = " << receiver << " ) _name = " << _name.getFrame() );
@@ -80,6 +89,8 @@ namespace impulse {
  // class OperatorMessage
  //
 
+	Value add_( Value receiver, const Array& msgArgs ) { return receiver.getFloat() + msgArgs[Index::_0].getFloat(); }
+	Value sub_( Value receiver, const Array& msgArgs ) { return receiver.getFloat() - msgArgs[Index::_0].getFloat(); }
 	Value mul_( Value receiver, const Array& msgArgs ) { return receiver.getFloat() * msgArgs[Index::_0].getFloat(); }
 	Value div_( Value receiver, const Array& msgArgs ) { return receiver.getFloat() / msgArgs[Index::_0].getFloat(); }
 	Value pow_( Value receiver, const Array& msgArgs ) { return pow( receiver.getFloat(), msgArgs[Index::_0].getFloat() ); }

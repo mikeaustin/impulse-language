@@ -58,9 +58,11 @@ namespace impulse {
 		{
 			SymbolProto& symbol = *dynamic_cast<SymbolProto*>( &self.getFrame() );
 			
-			std::ostringstream stream; stream << "symbol:" << symbol.getName();
+			return "'" + symbol.getName();
+			
+			//std::ostringstream stream; stream << "symbol:" << symbol.getName();
 
-			return Frame::inspect( self, stream.str() );
+			//return Frame::inspect( self, stream.str() );
 		}
 
 		SymbolProto( SymbolId id ) : _name( "anonymous" ), _id( id ) { }

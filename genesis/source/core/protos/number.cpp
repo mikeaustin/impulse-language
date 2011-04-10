@@ -23,6 +23,11 @@ namespace impulse {
  // Methods
  //
 
+	//Value NumberProto::mul_( Value self, const Array& args )
+	//{
+	//	return self.getFloat() * args[Index::_0].getFloat();
+	//}
+
 	Value NumberProto::pow_( Value self, const Array& args )
 	{
 		ENTER( "NumberProto::pow_( self = " << self << ", args[0] = " << args[Index::_0] << " )" );

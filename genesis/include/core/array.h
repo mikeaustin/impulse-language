@@ -66,7 +66,7 @@ namespace impulse {
 		}
 
 		Array& self( Value self ) { return _self = self, *this; }
-		Value self() const { return Atom( *_self._frame, _self._float ); }
+		Value self() const { return _self; }
 
 	 private:
 
@@ -88,6 +88,7 @@ namespace impulse {
 	
 	 public:
 
+		ArrayProto() { }
 		ArrayProto( Value arg0 ) { _vector.push_back( arg0 ); }
 		ArrayProto( Value arg0, Value arg1 ) { _vector.push_back( arg0 ); _vector.push_back( arg1 ); }
 

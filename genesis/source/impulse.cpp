@@ -11,11 +11,15 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <numeric>
 
 using std::string;
+using std::vector;
+using std::istream;
 using std::cin;
 using std::cout;
+using std::cerr;
 using std::endl;
 
 #include "impulse.h"
@@ -32,6 +36,8 @@ using std::endl;
 #include "core/frame.cpp"
 
 #include "parser/parser.h"
+
+#include "parser/scanner.cpp"
 
 #ifdef TEST
 	#include "../tests/core.cpp"
@@ -54,7 +60,7 @@ Array arguments;
 
 int main( int argc, char* argv[] )
 {
-	if (1)
+	if (0)
 	{
 		//std::cout << "------------------------------------------------------------" << std::endl;
 		std::cout << "Impulse 0.2.0 — Copyright 2008-2011 Mike Austin" << std::endl;
@@ -68,6 +74,7 @@ int main( int argc, char* argv[] )
 		std::cout << "sizeof (Array)    = " << sizeof (Array)    << std::endl;
 	}
 
+	if (0)
 	{
 		Frame::ReleasePool releasePool;
 
@@ -100,13 +107,14 @@ int main( int argc, char* argv[] )
 		code.push_back( std::vector<Value>() );
 		
 		code.back().push_back( *new SelfMessage() );
-		//code.back().push_back( *new MessageProto( SymbolProto::at( "pow" ), *new ArrayProto( *new SelfMessage() ) ) );
-		code.back().push_back( *new OperatorMessage<mul_>( *new SymbolProto( SymbolProto::MUL ), *new ArrayProto( *new SelfMessage() ) ) );
+		//code.back().push_back( *new MessageProto( SymbolProto::at( "mul" ), *new ArrayProto( *new SelfMessage() ) ) );
+		code.back().push_back( *new OperatorMessage<mul_>( SymbolProto::at( "*" ), *new ArrayProto( *new SelfMessage() ) ) );
+		//code.back().push_back( *new ConstOperatorMessage<mul_>( SymbolProto::at( "*", 5 ) ) );
 
 		receiver = locals;
 		arguments.self( 5 );
 
-		for (int i = 0; i < 200000000; i++)
+		//for (int i = 0; i < 200000000; i++)
 		{
 			std::vector< std::vector<Value> >::const_iterator line = code.begin();
 
@@ -135,10 +143,36 @@ int main( int argc, char* argv[] )
 		cout << "result = " << receiver << endl;
 	}
 
-//	Scanner& scanner = *new Scanner( cin );
-//	scanner.add( (Token (Scanner::*)(const int) const) &NumberScanner::scanNumber );
-//	scanner.peekToken();
+	{
+		Frame& lobby  = Frame::create();
+		Value locals = *new LocalsProto( lobby );
 
+		Scanner& scanner = *new Scanner( cin );
+
+		Token token;
+	
+//		while (token = scanner.nextToken(), token.type() != NULL)
+//		{
+//			cout << "=> " << token.value().inspect() << endl;
+//		}
+
+		StatementParser parser( scanner );
+	
+		vector<GCValue> messages;
+		parser.parse( messages );
+
+		vector<GCValue>::const_iterator message = messages.begin();
+
+		while (message != messages.end())
+		{
+			receiver = message->apply( receiver, arguments, locals );
+		
+			++message;
+		}
+
+		cout << receiver << endl;
+	}
+	
 	return 0;
 }
 

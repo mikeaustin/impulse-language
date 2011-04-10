@@ -30,8 +30,6 @@ namespace impulse {
 	 // Lifecycle
 	 //
 
-		StringProto() : Frame( ObjectProto::instance() ) { }
-
 		static StringProto& instance()
 		{
 			static StringProto string_;
@@ -58,7 +56,10 @@ namespace impulse {
 	 // Inspection
 	 //
 
-		virtual string inspect( const Value self ) const;
+		virtual string inspect( const Value self ) const
+		{
+			return "\"" + self.get<StringProto>().getString() + "\"";
+		}
 
 	 //
 	 // Methods
@@ -69,8 +70,9 @@ namespace impulse {
 		//static Value sin( Value self, const Array& args );
 
 	 private:
-	 
-		StringProto( string string_ ) : _string( string_ ) { }
+
+		StringProto()                 : Frame( ObjectProto::instance() ) { }
+		StringProto( string string_ ) : Frame( ObjectProto::instance() ), _string( string_ ) { }
 
 		string _string;
 

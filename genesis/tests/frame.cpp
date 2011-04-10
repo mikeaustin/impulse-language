@@ -41,7 +41,7 @@ namespace impulse {
 
 			_frame.setSlot( "foo", *new MethodProto( *new BlockProto<FrameTest>( *this, &FrameTest::foo_, argtypes ) ) );
 
-			ASSERT( _frame.perform( SymbolProto::at( "foo" ), Array( 5, 5 ), locals ).getFloat() == 10 );
+			ASSERT( _frame.perform( SymbolProto::at( "foo" ), Array( 5 ), locals ).getFloat() == 10 );
 			ASSERT( &Value( 5 ).perform( "proto", Array(), locals ).getFrame() == &NumberProto::instance() );
 
 			cout << "------------------------------------------------------------" << endl;
