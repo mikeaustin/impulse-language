@@ -75,7 +75,7 @@ int main( int argc, char* argv[] )
 		std::cout << "sizeof (Array)    = " << sizeof (Array)    << std::endl;
 	}
 
-	if (1)
+	if (0)
 	{
 		Frame::ReleasePool releasePool;
 
@@ -158,19 +158,10 @@ int main( int argc, char* argv[] )
 //		{
 //			cout << "=> " << token.value().inspect() << endl;
 //		}
-
 	
-		vector<GCValue> messages = parser.parse();
-//		Expression& expression = parser.parse();
+		Expression& expression = parser.parse();
 
-		vector<GCValue>::const_iterator message = messages.begin();
-
-		while (message != messages.end())
-		{
-			receiver = message->apply( receiver, arguments, locals );
-		
-			++message;
-		}
+		receiver = expression.apply( receiver, arguments, locals );
 
 		cout << receiver << endl;
 	}

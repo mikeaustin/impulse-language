@@ -29,10 +29,30 @@ namespace impulse {
 		
 		Scanner& scanner() { return _scanner; }
 
-		virtual const vector<GCValue> parse();
+		Token expect( Token::Type type, const string value )
+		{
+			if (scanner().peekToken().type() != type)
+			{
+				cerr << "Expected " << value << ", found " << scanner().peekToken().value().inspect() << endl;
+			}
+			
+			return scanner().nextToken();
+		}
 
-		virtual void initialize( vector<GCValue>& messages, Token peek ) { }
-		virtual void finalize( vector<GCValue>& messages, Token peek ) { }
+		Token option( Token::Type type, const string value )
+		{
+			if (scanner().peekToken().type() != type)
+			{
+				return Token();
+			}
+
+			return scanner().nextToken();
+		}
+
+		virtual Expression& parse();
+
+		//virtual void initialize( vector<GCValue>& messages, Token peek ) { }
+		//virtual void finalize( vector<GCValue>& messages, Token peek ) { }
 		
 		virtual Value lit_number_( Token peek ) { return Value(); }
 		virtual Value lit_string_( Token peek ) { return Value(); }
@@ -56,7 +76,7 @@ namespace impulse {
 
 		StatementParser( Scanner& scanner ) : Parser( scanner ) { }
 
-		virtual const vector<GCValue> parse();
+		virtual Expression& parse();
 		
 	};
 
@@ -66,9 +86,10 @@ namespace impulse {
 
 		ExpressionParser( Scanner& scanner ) : Parser( scanner ) { }
 
-		virtual const vector<GCValue> parse();
+		virtual Expression& parse();
 
 		virtual Value lit_number_( Token peek );
+		virtual Value openparen_( Token peek );
 		
 	};
 
@@ -86,7 +107,7 @@ namespace impulse {
 	
 	 public:
 
-		virtual const vector<GCValue> parse();
+		virtual Expression& parse();
 
 		BinaryExpressionParser( Scanner& scanner ) : ExpressionParser( scanner ) { }
 		
@@ -106,9 +127,9 @@ namespace impulse {
  //
  //
 
-	const vector<GCValue> Parser::parse()
+	Expression& Parser::parse()
 	{
-		vector<GCValue> messages;
+		Expression& expression = *new Expression();
 
 		Token peek = scanner().peekToken();
 
@@ -116,15 +137,15 @@ namespace impulse {
 
 		if (&operand.getFrame() != NULL)
 		{
-			messages.push_back( operand );
+			expression.push( operand );
 		}
 		
-		return messages;
+		return expression;
 	}
 
-	const vector<GCValue> StatementParser::parse()
+	Expression& StatementParser::parse()
 	{	
-		vector<GCValue> messages = ExpressionParser( scanner() ).parse();
+		Expression& expression = ExpressionParser( scanner() ).parse();
 		
 		Token peek = scanner().peekToken();
 		
@@ -135,47 +156,49 @@ namespace impulse {
 		
 		scanner().nextToken();
 		
-		return messages;
+		return expression;
 	}
 	
-	const vector<GCValue> ExpressionParser::parse()
+	Expression& ExpressionParser::parse()
 	{
-		vector<GCValue> messages = Parser::parse();
+		Expression& expression = Parser::parse();
 
-		if (messages.size() == 0)
+		if (expression.size() == 0)
 		{
 			cerr << "*** Expected operand" << endl;
 			
-			return messages;
+			return expression;
 		}
 		
-		vector<GCValue> messages2;
-		while (messages2 = MessageParser( scanner() ).parse(), messages2.size() > 0)
+		Expression* expression2;
+		while (expression2 = &MessageParser( scanner() ).parse(), expression2->size() > 0)
 		{
-			messages.insert( messages.end(), messages2.begin(), messages2.end() );
+			//messages.insert( messages.end(), messages2.begin(), messages2.end() );
+			expression.concat( *expression2 );
 		}
 
-		return messages;
+		return expression;
 	}
 
-	const vector<GCValue> BinaryExpressionParser::parse()
+	Expression& BinaryExpressionParser::parse()
 	{
-		vector<GCValue> messages = Parser::parse();
+		Expression& expression = Parser::parse();
 
-		if (messages.size() == 0)
+		if (expression.size() == 0)
 		{
 			cerr << "*** Expected operand" << endl;
 			
-			return messages;
+			return expression;
 		}
 		
-		vector<GCValue> messages2;
-		while (messages2 = BinaryMessageParser( scanner() ).parse(), messages2.size() > 0)
+		Expression* expression2;
+		while (expression2 = &BinaryMessageParser( scanner() ).parse(), expression2->size() > 0)
 		{
-			messages.insert( messages.end(), messages2.begin(), messages2.end() );
+			//messages.insert( messages.end(), messages2.begin(), messages2.end() );
+			expression.concat( *expression2 );
 		}
 
-		return messages;
+		return expression;
 	}
 
 	Value ExpressionParser::lit_number_( Token peek )
@@ -185,20 +208,31 @@ namespace impulse {
 		return token.value();
 	}
 
+	Value ExpressionParser::openparen_( Token peek )
+	{
+		expect( &Parser::openparen_, "(" );
+		
+		Expression& expression = ExpressionParser( scanner() ).parse();
+
+		expect( &Parser::closeparen_, ")" );
+		
+		return expression;
+	}
+
 	Value MessageParser::operator_( Token peek )
 	{
 		Token token = scanner().nextToken();
 
-		vector<GCValue> argument = BinaryExpressionParser( scanner() ).parse();
+		Expression& argument = BinaryExpressionParser( scanner() ).parse();
 
 		Symbol symbol = SymbolProto::at( token.value().get<StringProto>().getString() );
 
 		if (&symbol == &SymbolProto::at( "+" ))
-			return *new OperatorMessage<add_>( symbol, *new ArrayProto( argument[0] ) );
+			return *new OperatorMessage<add_>( symbol, *new ArrayProto( argument ) );
 		else if (&symbol == &SymbolProto::at( "-" ))
-			return *new OperatorMessage<sub_>( symbol, *new ArrayProto( argument[0] ) );
+			return *new OperatorMessage<sub_>( symbol, *new ArrayProto( argument ) );
 		else
-			return *new MessageProto( symbol, *new ArrayProto( argument[0] ) );
+			return *new MessageProto( symbol, *new ArrayProto( argument ) );
 
 		return Value();
 	}

@@ -58,12 +58,12 @@ namespace impulse {
  		Token nextToken();
  		Token currToken();
 
-        bool isopera( int c )
-        {
-                char opstring[2] = { c, '\0' };
-                char operators[] = "+-*%/<>=.";
+		bool isopera( int c )
+		{
+			char opstring[2] = { c, '\0' };
+			char operators[] = "+-*%/<>=.";
 
-                return strpbrk( opstring, operators );
+			return strpbrk( opstring, operators );
         }
  		
  		Token lit_number_( int c );
