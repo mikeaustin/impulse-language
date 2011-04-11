@@ -27,7 +27,7 @@ namespace impulse {
 	
 	 public:
 	
-		typedef bool (Parser::*Type)(vector<GCValue>&, Token);
+		typedef Value (Parser::*Type)(Token);
 
 		Token()                         : _type( NULL ) { }
 		Token( Type type, Value value ) : _type( type ), _value( value ) { }

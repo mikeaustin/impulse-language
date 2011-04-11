@@ -148,6 +148,7 @@ int main( int argc, char* argv[] )
 		Value locals = *new LocalsProto( lobby );
 
 		Scanner& scanner = *new Scanner( cin );
+		StatementParser parser( scanner );
 
 		Token token;
 	
@@ -156,10 +157,8 @@ int main( int argc, char* argv[] )
 //			cout << "=> " << token.value().inspect() << endl;
 //		}
 
-		StatementParser parser( scanner );
 	
-		vector<GCValue> messages;
-		parser.parse( messages );
+		vector<GCValue> messages = parser.parse();
 
 		vector<GCValue>::const_iterator message = messages.begin();
 

@@ -29,19 +29,19 @@ namespace impulse {
 		
 		Scanner& scanner() { return _scanner; }
 
-		virtual bool parse( vector<GCValue>& messages );
+		virtual const vector<GCValue> parse();
 
 		virtual void initialize( vector<GCValue>& messages, Token peek ) { }
 		virtual void finalize( vector<GCValue>& messages, Token peek ) { }
 		
-		virtual bool lit_number_( vector<GCValue>& messages, Token peek ) { return false; }
-		virtual bool lit_string_( vector<GCValue>& messages, Token peek ) { return false; }
-		virtual bool identifier_( vector<GCValue>& messages, Token peek ) { return false; }
-		virtual bool operator_( vector<GCValue>& messages, Token peek ) { return false; }
-		virtual bool openparen_( vector<GCValue>& messages, Token peek ) { return false; }
-		virtual bool closeparen_( vector<GCValue>& messages, Token peek ) { return false; }
-		virtual bool verticalbar_( vector<GCValue>& messages, Token peek ) { return false; }
-		virtual bool endline_( vector<GCValue>& messages, Token peek ) { return false; }
+		virtual Value lit_number_( Token peek ) { return Value(); }
+		virtual Value lit_string_( Token peek ) { return Value(); }
+		virtual Value identifier_( Token peek ) { return Value(); }
+		virtual Value operator_( Token peek ) { return Value(); }
+		virtual Value openparen_( Token peek ) { return Value(); }
+		virtual Value closeparen_( Token peek ) { return Value(); }
+		virtual Value verticalbar_( Token peek ) { return Value(); }
+		virtual Value endline_( Token peek ) { return Value(); }
 
 	 private:
 	
@@ -56,7 +56,7 @@ namespace impulse {
 
 		StatementParser( Scanner& scanner ) : Parser( scanner ) { }
 
-		virtual bool parse( vector<GCValue>& messages );
+		virtual const vector<GCValue> parse();
 		
 	};
 
@@ -66,7 +66,9 @@ namespace impulse {
 
 		ExpressionParser( Scanner& scanner ) : Parser( scanner ) { }
 
-		virtual bool lit_number_( vector<GCValue>& messages, Token peek );
+		virtual const vector<GCValue> parse();
+
+		virtual Value lit_number_( Token peek );
 		
 	};
 
@@ -76,7 +78,7 @@ namespace impulse {
 	
 		MessageParser( Scanner& scanner ) : Parser( scanner ) { }
 
-		virtual bool operator_( vector<GCValue>& messages, Token peek );
+		virtual Value operator_( Token peek );
 		
 	};
 
@@ -84,38 +86,45 @@ namespace impulse {
 	
 	 public:
 
-		BinaryExpressionParser( Scanner& scanner ) : ExpressionParser( scanner ) { }
+		virtual const vector<GCValue> parse();
 
-		virtual bool lit_number_( vector<GCValue>& messages, Token peek );
+		BinaryExpressionParser( Scanner& scanner ) : ExpressionParser( scanner ) { }
 		
 	};
 
-	class BinaryMessageParser : public ExpressionParser {
+	class BinaryMessageParser : public MessageParser {
 	
 	 public:
 
-		BinaryMessageParser( Scanner& scanner ) : ExpressionParser( scanner ) { }
+		BinaryMessageParser( Scanner& scanner ) : MessageParser( scanner ) { }
 
-		virtual bool operator_( vector<GCValue>& messages, Token peek );
+		virtual Value operator_( Token peek );
 		
 	};
 
-	//
-	//
-	//
+ //
+ //
+ //
 
-	bool Parser::parse( vector<GCValue>& messages )
+	const vector<GCValue> Parser::parse()
 	{
-		Token peek = _scanner.peekToken();
+		vector<GCValue> messages;
 
-		//initialize( messages, scanner().currToken() );
-		return (this->*peek.type())( messages, peek );
-		//finalize( messages, scanner().currToken() );
+		Token peek = scanner().peekToken();
+
+		Value operand = (this->*peek.type())( peek );
+
+		if (&operand.getFrame() != NULL)
+		{
+			messages.push_back( operand );
+		}
+		
+		return messages;
 	}
 
-	bool StatementParser::parse( vector<GCValue>& messages )
+	const vector<GCValue> StatementParser::parse()
 	{	
-		ExpressionParser( scanner() ).parse( messages );
+		vector<GCValue> messages = ExpressionParser( scanner() ).parse();
 		
 		Token peek = scanner().peekToken();
 		
@@ -126,55 +135,77 @@ namespace impulse {
 		
 		scanner().nextToken();
 		
-		return true;
+		return messages;
+	}
+	
+	const vector<GCValue> ExpressionParser::parse()
+	{
+		vector<GCValue> messages = Parser::parse();
+
+		if (&messages[0].getFrame() == NULL)
+		{
+			cerr << "*** Expected operand" << endl;
+			
+			return messages;
+		}
+		
+		vector<GCValue> messages2;
+		while (messages2 = MessageParser( scanner() ).parse(), messages2.size() > 0)
+		{
+			messages.insert( messages.end(), messages2.begin(), messages2.end() );
+		}
+
+		return messages;
 	}
 
-	bool ExpressionParser::lit_number_( vector<GCValue>& messages, Token peek )
+	const vector<GCValue> BinaryExpressionParser::parse()
+	{
+		vector<GCValue> messages = Parser::parse();
+
+		if (&messages[0].getFrame() == NULL)
+		{
+			cerr << "*** Expected operand" << endl;
+			
+			return messages;
+		}
+		
+		vector<GCValue> messages2;
+		while (messages2 = BinaryMessageParser( scanner() ).parse(), messages2.size() > 0)
+		{
+			messages.insert( messages.end(), messages2.begin(), messages2.end() );
+		}
+
+		return messages;
+	}
+
+	Value ExpressionParser::lit_number_( Token peek )
 	{
 		Token token = scanner().nextToken();
 
-		messages.push_back( token.value() );
-
-		while (MessageParser( scanner() ).parse( messages ));
-
-		return true;
+		return token.value();
 	}
 
-	bool MessageParser::operator_( vector<GCValue>& messages, Token peek )
+	Value MessageParser::operator_( Token peek )
 	{
 		Token token = scanner().nextToken();
 
-		vector<GCValue> argument;
-		BinaryExpressionParser( scanner() ).parse( argument );
+		vector<GCValue> argument = BinaryExpressionParser( scanner() ).parse();
 
 		Symbol symbol = SymbolProto::at( token.value().get<StringProto>().getString() );
 
 		if (&symbol == &SymbolProto::at( "+" ))
-			messages.push_back( *new OperatorMessage<add_>( symbol, *new ArrayProto( argument[0] ) ) );
+			return *new OperatorMessage<add_>( symbol, *new ArrayProto( argument[0] ) );
 		else if (&symbol == &SymbolProto::at( "-" ))
-			messages.push_back( *new OperatorMessage<sub_>( symbol, *new ArrayProto( argument[0] ) ) );
+			return *new OperatorMessage<sub_>( symbol, *new ArrayProto( argument[0] ) );
 		else
-			messages.push_back( *new MessageProto( symbol, *new ArrayProto( argument[0] ) ) );
+			return *new MessageProto( symbol, *new ArrayProto( argument[0] ) );
 
-		MessageParser( scanner() ).parse( messages );
-
-		return true;
+		return Value();
 	}
 
-	bool BinaryExpressionParser::lit_number_( vector<GCValue>& messages, Token peek )
+	Value BinaryMessageParser::operator_( Token peek )
 	{
-		Token token = scanner().nextToken();
-
-		messages.push_back( token.value() );
-
-		while (BinaryMessageParser( scanner() ).parse( messages ));
-
-		return true;
-	}
-
-	bool BinaryMessageParser::operator_( vector<GCValue>& messages, Token peek )
-	{
-		return false;
+		return Value();
 	}
 		
 }
