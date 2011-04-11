@@ -142,7 +142,7 @@ namespace impulse {
 	{
 		vector<GCValue> messages = Parser::parse();
 
-		if (&messages[0].getFrame() == NULL)
+		if (messages.size() == 0)
 		{
 			cerr << "*** Expected operand" << endl;
 			
@@ -162,7 +162,7 @@ namespace impulse {
 	{
 		vector<GCValue> messages = Parser::parse();
 
-		if (&messages[0].getFrame() == NULL)
+		if (messages.size() == 0)
 		{
 			cerr << "*** Expected operand" << endl;
 			

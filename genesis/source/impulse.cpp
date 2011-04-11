@@ -31,6 +31,7 @@ using std::endl;
 #include "core/protos/method.h"
 #include "core/protos/stream.h"
 #include "runtime/protos/message.h"
+#include "runtime/protos/expression.h"
 
 #include "core/value.cpp"
 #include "core/frame.cpp"
@@ -74,7 +75,7 @@ int main( int argc, char* argv[] )
 		std::cout << "sizeof (Array)    = " << sizeof (Array)    << std::endl;
 	}
 
-	if (0)
+	if (1)
 	{
 		Frame::ReleasePool releasePool;
 
@@ -143,15 +144,16 @@ int main( int argc, char* argv[] )
 		cout << "result = " << receiver << endl;
 	}
 
+	if (1)
 	{
-		Frame& lobby  = Frame::create();
+		Frame& lobby = Frame::create();
 		Value locals = *new LocalsProto( lobby );
 
 		Scanner& scanner = *new Scanner( cin );
 		StatementParser parser( scanner );
 
 		Token token;
-	
+
 //		while (token = scanner.nextToken(), token.type() != NULL)
 //		{
 //			cout << "=> " << token.value().inspect() << endl;
@@ -159,6 +161,7 @@ int main( int argc, char* argv[] )
 
 	
 		vector<GCValue> messages = parser.parse();
+//		Expression& expression = parser.parse();
 
 		vector<GCValue>::const_iterator message = messages.begin();
 
