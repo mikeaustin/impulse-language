@@ -15,6 +15,8 @@
 #include <cstdio>
 #include <cstring>
 
+using std::istream;
+
 namespace impulse {
 
 	class Parser;
@@ -185,11 +187,11 @@ namespace impulse {
 	
 		 public:
 		 
-			Scanlet( std::istream& stream ) : _stream( stream ) { }
+			Scanlet( istream& stream ) : _stream( stream ) { }
 		
 			virtual Token scan() = 0;
 		
-			std::istream& stream() { return _stream; }
+			istream& stream() { return _stream; }
 
             bool isopera( int c )
             {
@@ -201,14 +203,14 @@ namespace impulse {
 		
 		 private:
 	
-			std::istream& _stream;
+			istream& _stream;
 		};
  	
  	 public:
  	 
- 		Scanner( std::istream& stream );
+ 		Scanner( istream& stream );
  		
- 		std::istream& stream() { return _stream; }
+ 		istream& stream() { return _stream; }
 
 		void addParselet( Scanlet& scanlet )
 		{
@@ -225,7 +227,7 @@ namespace impulse {
  				
  			int c = _stream.peek();
 
-			std::vector<Scanlet*>::const_iterator iter = _scanlets.begin();
+			vector<Scanlet*>::const_iterator iter = _scanlets.begin();
 
 			while (iter != _scanlets.end())
 			{
@@ -241,7 +243,7 @@ namespace impulse {
 
 			if (_token.type() == Token::EMPTY)
 			{
-				std::cerr << "*** Unexpected token: '" << (unsigned char) c << "'" << endl;
+				cerr << "*** Unexpected token: '" << (unsigned char) c << "'" << endl;
 			}
 
  			return _token;
@@ -258,9 +260,9 @@ namespace impulse {
 
  	 private:
  	 
- 		std::istream& _stream;
+ 		istream& _stream;
  		Token         _token;
- 		std::vector<Scanlet*> _scanlets;
+ 		vector<Scanlet*> _scanlets;
 
  	};
 
@@ -272,7 +274,7 @@ namespace impulse {
 	
 	 public:
 	
-		SymbolScanlet( std::istream& stream ) : Scanlet( stream ) { }
+		SymbolScanlet( istream& stream ) : Scanlet( stream ) { }
 
 		virtual Token scan()
 		{
@@ -297,13 +299,13 @@ namespace impulse {
 	
 	 public:
 
-		NumberScanlet( std::istream& stream ) : Scanlet( stream ) { }
+		NumberScanlet( istream& stream ) : Scanlet( stream ) { }
 	
 		virtual Token scan()
 		{
 			if (!isdigit( stream().peek() )) return Token();
 			
-			std::stringstream buffer;
+			stringstream buffer;
 			
 			while (isdigit( stream().peek() ))
 			{
@@ -330,7 +332,7 @@ namespace impulse {
 	
 	 public:
 
-		StringScanlet( std::istream& stream ) : Scanlet( stream ) { }
+		StringScanlet( istream& stream ) : Scanlet( stream ) { }
 
 		virtual Token scan()
 		{
@@ -338,7 +340,7 @@ namespace impulse {
 
 			stream().get();
 			
-			std::stringstream buffer;
+			stringstream buffer;
 			
 			while (stream().peek() != '"')
 			{
@@ -355,13 +357,13 @@ namespace impulse {
 	
 	 public:
 
-		IdentScanlet( std::istream& stream ) : Scanlet( stream ) { }
+		IdentScanlet( istream& stream ) : Scanlet( stream ) { }
 
 		virtual Token scan()
 		{
 			if (!isalpha(stream().peek())) return Token();
 
-			std::stringstream buffer;
+			stringstream buffer;
 			
 			while (isalpha(stream().peek()))
 			{
@@ -372,7 +374,7 @@ namespace impulse {
 		}
 	};
 
-	Scanner::Scanner( std::istream& stream ) : _stream( stream )
+	Scanner::Scanner( istream& stream ) : _stream( stream )
 	{
 		addParselet( *new SymbolScanlet( cin ) );
 		addParselet( *new NumberScanlet( cin ) );
@@ -386,7 +388,7 @@ namespace impulse {
 #endif
 
 /*
-		std::stringstream _buffer, _subpattern;
+		stringstream _buffer, _subpattern;
 		unsigned _index;
 
 		bool parse( string pattern )
@@ -418,7 +420,7 @@ namespace impulse {
 
 		string match( string pattern )
 		{
-			//std::stringstream subpattern2;
+			//stringstream subpattern2;
 	
 			while (_index < pattern.size())
 			{

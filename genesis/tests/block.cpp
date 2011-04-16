@@ -37,7 +37,7 @@ namespace impulse {
 			Frame& lobby  = Frame::create();
 			Frame& locals = Frame::create( lobby );
 
-			static std::vector<ArgType> argtypes;
+			static vector<ArgType> argtypes;
 			argtypes.push_back( ArgType( SymbolProto::at( "n" ), NumberProto::instance() ) );
 
 			Function3& block = *new Function3( &foo_, argtypes );
@@ -45,7 +45,7 @@ namespace impulse {
 			ASSERT( block.arity() == 1 );
 			ASSERT( block.value( 5, Array( 2 ).self( 5 ) ).getFloat() == 10 );
 
-			vector< vector<GCValue> > code( 1 );
+			vector<Expression> code( 1 );
 			code.back().push_back( *new SelfMessage() );
 
 			Block2& block2 = *new Block2( code, argtypes, locals );
@@ -53,21 +53,7 @@ namespace impulse {
 			ASSERT( block2.arity() == 1 );
 			ASSERT( Block2::value_( block2, Array( 2 ).self( 5 ) ).getFloat() == 5 );
 			ASSERT( block2.value( block2, Array( 2 ).self( 5 ) ).getFloat() == 5 );
-/*
-			BlockProto<BlockTest>& block = *new BlockProto<BlockTest>( *this, &BlockTest::foo_, argtypes );
 
-			ASSERT( block.arity() == 1 );
-			ASSERT( block.value( 5, Array( 5, 2 ) ).getFloat() == 10 );
-
-
-			vector<GCValue> code;
-			code.push_back( *new SelfMessage() );
-
-			BlockProto<Function>& block2 = *new BlockProto<Function>( code, argtypes, locals );
-
-			ASSERT( block2.arity() == 1 );
-			ASSERT( block2.value( 5, Array( 5, 2 ) ).getFloat() == 5 );
-*/
 			cout << "------------------------------------------------------------" << endl;
 		}
 

@@ -10,6 +10,8 @@
 
 #include <ostream>
 
+using std::ostream;
+
 namespace impulse {
 
 	class GCValue;
@@ -87,7 +89,7 @@ namespace impulse {
 	 
 	};
 
-	std::ostream& operator <<( std::ostream& stream, const Value value );
+	ostream& operator <<( ostream& stream, const Value value );
 
 
  //

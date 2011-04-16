@@ -8,13 +8,15 @@
 #include "core/frame.h"
 #include "core/protos/symbol.h"
 
+using std::stringstream;
+
 namespace impulse {
 
  //
  // Constructors
  //
 
-	inline void *Frame::operator new( std::size_t size )
+	inline void *Frame::operator new( size_t size )
 	{
 		Frame* frame = (Frame *) ::operator new( size );
 
@@ -54,7 +56,7 @@ namespace impulse {
 	inline Value Frame::setSlot( const Symbol symbol, const Value value )
 	{
 		// TODO: Why doesn't insert work the same as []?
-		//getSlots().insert( std::make_pair( symbol.getId(), value ) );
+		//getSlots().insert( make_pair( symbol.getId(), value ) );
 		getSlots()[symbol.getId()] = value;
 
 		return value;
@@ -121,7 +123,7 @@ namespace impulse {
 
 	string Frame::inspect( const Value self ) const
 	{
-		std::stringstream stream;
+		stringstream stream;
 		
 		stream << "<frame@" << this << ">";
 		
@@ -130,7 +132,7 @@ namespace impulse {
 
 	string Frame::inspect( const Value self, string name ) const
 	{
-		std::stringstream stream;
+		stringstream stream;
 		
 		stream << "<" << name << "@" << this << ">";
 		
@@ -165,7 +167,7 @@ namespace impulse {
 		}
 	}
 
-	std::vector< std::vector<Frame*> > Frame::_releasePoolStack;
+	vector< vector<Frame*> > Frame::_releasePoolStack;
 
  //
  // ReleasePool
@@ -175,15 +177,15 @@ namespace impulse {
 	{
 		TRACE( "Pushing new release pool..." );
 		
-		Frame::_releasePoolStack.push_back( std::vector<Frame*>() );
+		Frame::_releasePoolStack.push_back( vector<Frame*>() );
 	}
 
 	inline Frame::ReleasePool::~ReleasePool()
 	{
 		TRACE( "Poping old release pool..." );
 		
-		std::vector<Frame*> pool = _releasePoolStack.back();
-		std::vector<Frame*>::iterator iter = pool.begin();
+		vector<Frame*> pool = _releasePoolStack.back();
+		vector<Frame*>::iterator iter = pool.begin();
 		
 		while (iter != pool.end())
 		{

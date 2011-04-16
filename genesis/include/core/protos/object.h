@@ -38,7 +38,7 @@ namespace impulse {
 
 		static void initSlots()
 		{
-			static std::vector<ArgType> noArgs;
+			static vector<ArgType> noArgs;
 
 			instance().setSlot( "version", 0.2 );
 			instance().setSlot( "proto", *new MethodProto( *new BlockProto<ObjectProto>( instance(), &ObjectProto::proto, noArgs ) ) );

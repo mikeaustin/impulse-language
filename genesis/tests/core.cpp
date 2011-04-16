@@ -39,16 +39,16 @@ namespace impulse {
 				ASSERT( releasePool.size() == 1 );
 				ASSERT( releasePool.depth() == 3 );
 
-				ASSERT( value.getFloat() == std::numeric_limits<double>::max() );
+				ASSERT( value.getFloat() == numeric_limits<double>::max() );
 				ASSERT( value.getFrame().referenceCount() == 2 );
 
-				std::vector<GCValue> vector; vector.push_back( value );
+				vector<GCValue> vector; vector.push_back( value );
 				
 				ASSERT( value.getFrame().referenceCount() == 3 );
 				
 				value = Value();
 
-				ASSERT( value.getFloat() != std::numeric_limits<double>::max() );
+				ASSERT( value.getFloat() != numeric_limits<double>::max() );
 				// TODO: getFrame() returns NULL
 				//ASSERT( value.getFrame().referenceCount() == 1 );
 			}

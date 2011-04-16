@@ -25,9 +25,14 @@ namespace impulse {
 
 		Expression() { }
 
+		Expression(const Expression& expression)
+		{
+			_messages = expression._messages;
+		}
+
 		size_t size() { return _messages.size(); }
 
-		void push( Value message )
+		void push_back( Value message )
 		{
 			_messages.push_back( message );
 		}

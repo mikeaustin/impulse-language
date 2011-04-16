@@ -36,7 +36,7 @@ namespace impulse {
 
 			Frame& locals = Frame::create();
 			
-			static std::vector<ArgType> argtypes;
+			static vector<ArgType> argtypes;
 			argtypes.push_back( ArgType( SymbolProto::at( "n" ), NumberProto::instance() ) );
 
 			_frame.setSlot( "foo", *new MethodProto( *new BlockProto<FrameTest>( *this, &FrameTest::foo_, argtypes ) ) );

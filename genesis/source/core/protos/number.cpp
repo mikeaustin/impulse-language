@@ -32,7 +32,7 @@ namespace impulse {
 	{
 		ENTER( "NumberProto::pow_( self = " << self << ", args[0] = " << args[Index::_0] << " )" );
 		
-		Value result = std::pow( self.getFloat(), args[Index::_0].getFloat() );
+		Value result = pow( self.getFloat(), args[Index::_0].getFloat() );
 		
 		LEAVE( result );
 		
@@ -43,7 +43,7 @@ namespace impulse {
 	{
 		ENTER( "NumberProto::pow_( self = " << self << ", args[0] = " << args[Index::_0] << " )" );
 		
-		Value result = std::pow( self.getFloat(), args[Index::_0].getFloat() );
+		Value result = pow( self.getFloat(), args[Index::_0].getFloat() );
 		
 		LEAVE( result );
 		

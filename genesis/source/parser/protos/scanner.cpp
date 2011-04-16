@@ -5,7 +5,9 @@
 // All rights reserved.
 //
 
-#include "parser/scanner.h"
+#include "parser/protos/scanner.h"
+
+using std::stringstream;
 
 namespace impulse {
 
@@ -13,7 +15,7 @@ namespace impulse {
 	{
 		if (!isdigit( c )) return Token();
 		
-		std::stringstream buffer;
+		stringstream buffer;
 		
 		while (isdigit( stream().peek() ))
 		{

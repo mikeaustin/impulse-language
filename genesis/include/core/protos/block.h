@@ -12,6 +12,7 @@
 #include "core/array.h"
 
 #include "core/protos/locals.h"
+#include "runtime/protos/expression.h"
 
 namespace impulse {
 
@@ -42,7 +43,7 @@ namespace impulse {
 
 	 public:
 
-		Function( std::vector<ArgType> argtypes, std::vector<GCValue> code )
+		Function( vector<ArgType> argtypes, vector<GCValue> code )
 		 : _argtypes( argtypes ), _code( code ) { }
 
 		Value value_( Value receiver, const Array& args, Value locals )
@@ -60,7 +61,7 @@ namespace impulse {
 				case 1: locals.setSlot( _argtypes[0].getName(), args[Index::_0] );
 			}
 
-			std::vector<GCValue>::iterator message = _code.begin();
+			vector<GCValue>::iterator message = _code.begin();
 
 			while (message != _code.end())
 			{
@@ -74,9 +75,9 @@ namespace impulse {
 
 	 private:
 
-		std::vector<ArgType> _argtypes;
-		std::vector<GCValue> _code;
-		std::vector< std::vector<Value> > code2;
+		vector<ArgType> _argtypes;
+		vector<GCValue> _code;
+		vector< vector<Value> > code2;
 	
 	};
 
@@ -85,7 +86,7 @@ namespace impulse {
 	
 	 public:
 
-		Block( std::vector<ArgType> argtypes, Value locals ) : _argtypes( argtypes ), _locals( locals ) { }
+		Block( vector<ArgType> argtypes, Value locals ) : _argtypes( argtypes ), _locals( locals ) { }
 
 		short arity() { return _argtypes.size(); }
 	 
@@ -93,8 +94,8 @@ namespace impulse {
 
 	 //private:
 	 
-		std::vector<ArgType> _argtypes;
-		GCValue              _locals;
+		vector<ArgType> _argtypes;
+		GCValue         _locals;
 		
 	};
 
@@ -109,10 +110,10 @@ namespace impulse {
 	
 	 public:
 	 
-		BlockProto( T& object, Method method, std::vector<ArgType> argtypes )
+		BlockProto( T& object, Method method, vector<ArgType> argtypes )
 		 : Block( argtypes, Value() ), _object( object ), _method( method ) { }
 
-		BlockProto( std::vector<GCValue> code, std::vector<ArgType> argtypes, Value locals )
+		BlockProto( vector<GCValue> code, vector<ArgType> argtypes, Value locals )
 		 : Block( argtypes, locals ), _object( *new Function( argtypes, code ) ), _method( &Function::value_ ) { }
 
 		virtual Value value( Value receiver, const Array& args )
@@ -144,7 +145,7 @@ namespace impulse {
 	
 	 public:
 	 
-		Function3( Function2 function, std::vector<ArgType> argtypes )
+		Function3( Function2 function, vector<ArgType> argtypes )
 		 : _function( function ), _argtypes( argtypes ) { }
 
 		short arity() { return _argtypes.size(); }
@@ -162,8 +163,8 @@ namespace impulse {
 
 	 protected:
 
-		Function2            _function;
-		std::vector<ArgType> _argtypes;
+		Function2       _function;
+		vector<ArgType> _argtypes;
 	
 	};
 
@@ -171,8 +172,11 @@ namespace impulse {
 	
 	 public:
 
-		Block2( std::vector< std::vector<GCValue> > code, std::vector<ArgType> argtypes, Value locals )
-		 : Function3( value_, argtypes ), _code( code ), _locals( locals ) { }
+		//Block2( vector< vector<GCValue> > code, vector<ArgType> argtypes, Value locals )
+		// : Function3( value_, argtypes ), _code( code ), _locals( locals ) { }
+
+		Block2( vector<Expression> expressions, vector<ArgType> argtypes, Value locals )
+		 : Function3( value_, argtypes ), _expressions( expressions ), _locals( locals ) { }
 
 		virtual string inspect( const Value self ) const
 		{
@@ -184,7 +188,6 @@ namespace impulse {
 			Block2& block = self.get<Block2>();
 
 			Array msgArgs; msgArgs.self( args.self() );
-			Value receiver;
 
 			switch (args.size())
 			{
@@ -195,20 +198,14 @@ namespace impulse {
 				case 1: block._locals.setSlot( block._argtypes[0].getName(), args[Index::_0] );
 			}
 
-			std::vector< std::vector<GCValue> >::const_iterator expression = block._code.begin();
+			vector<Expression>::const_iterator expression = block._expressions.begin();
+			Value receiver;
 
-			while (expression != block._code.end())
+			while (expression != block._expressions.end())
 			{
-				std::vector<GCValue>::const_iterator message = expression->begin();
-				
 				receiver = block._locals;
 				
-				while (message != expression->end())
-				{
-					receiver = (*message).apply( block._locals, msgArgs, block._locals );
-					
-					++message;
-				}
+				receiver = expression->apply( block._locals, msgArgs, block._locals );
 				
 				++expression;
 			}
@@ -218,9 +215,8 @@ namespace impulse {
 		
 	 private:
 	 
-		std::vector< std::vector<GCValue> >
-		        _code;
-		GCValue _locals;
+		vector<Expression> _expressions;
+		GCValue            _locals;
 		
 	};
 

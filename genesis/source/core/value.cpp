@@ -14,6 +14,8 @@
 
 #include <limits>
 
+using std::ostream;
+
 namespace impulse {
 
 	//static const double min_float = __DBL_MIN__;
@@ -169,7 +171,7 @@ namespace impulse {
  		return *this;
  	}
 
-	std::ostream& operator <<( std::ostream& stream, const Value value )
+	ostream& operator <<( ostream& stream, const Value value )
 	{
 		stream << value.inspect();
 			

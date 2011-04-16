@@ -16,7 +16,7 @@
 
 using std::string;
 using std::vector;
-using std::istream;
+
 using std::cin;
 using std::cout;
 using std::cerr;
@@ -36,9 +36,10 @@ using std::endl;
 #include "core/value.cpp"
 #include "core/frame.cpp"
 
-#include "parser/parser.h"
+#include "parser/protos/parser.h"
 
-#include "parser/scanner.cpp"
+#include "parser/protos/scanner.cpp"
+#include "runtime/protos/message.cpp"
 
 #ifdef TEST
 	#include "../tests/core.cpp"
@@ -61,21 +62,21 @@ Array arguments;
 
 int main( int argc, char* argv[] )
 {
-	if (0)
+	if (1)
 	{
-		//std::cout << "------------------------------------------------------------" << std::endl;
-		std::cout << "Impulse 0.2.0 — Copyright 2008-2011 Mike Austin" << std::endl;
+		//cout << "------------------------------------------------------------" << endl;
+		cout << "Impulse 0.2.0 — Copyright 2008-2011 Mike Austin" << endl;
 
-		std::cout << std::endl;
+		cout << endl;
 	
-		std::cout << "sizeof (double)   = " << sizeof (double)   << std::endl;
-		std::cout << "sizeof (Value)    = " << sizeof (Value)    << std::endl;
-		std::cout << "sizeof (Frame)    = " << sizeof (Frame)    << std::endl;
-		std::cout << "sizeof (SymbolId) = " << sizeof (Frame::SymbolId) << std::endl;
-		std::cout << "sizeof (Array)    = " << sizeof (Array)    << std::endl;
+		cout << "sizeof (double)   = " << sizeof (double)   << endl;
+		cout << "sizeof (Value)    = " << sizeof (Value)    << endl;
+		cout << "sizeof (Frame)    = " << sizeof (Frame)    << endl;
+		cout << "sizeof (SymbolId) = " << sizeof (Frame::SymbolId) << endl;
+		cout << "sizeof (Array)    = " << sizeof (Array)    << endl;
 	}
 
-	if (0)
+	if (1)
 	{
 		Frame::ReleasePool releasePool;
 
@@ -98,53 +99,11 @@ int main( int argc, char* argv[] )
 			//block.apply( 10, args );
 		}
 	
-		std::cout << "Benchmark results:" << std::endl;
+		cout << "Benchmark results:" << endl;
 #endif
-
-		Frame& lobby  = Frame::create();
-		Value locals = *new LocalsProto( lobby );
-
-		std::vector< std::vector<Value> > code;
-		code.push_back( std::vector<Value>() );
-		
-		code.back().push_back( *new SelfMessage() );
-		//code.back().push_back( *new MessageProto( SymbolProto::at( "mul" ), *new ArrayProto( *new SelfMessage() ) ) );
-		code.back().push_back( *new OperatorMessage<mul_>( SymbolProto::at( "*" ), *new ArrayProto( *new SelfMessage() ) ) );
-		//code.back().push_back( *new ConstOperatorMessage<mul_>( SymbolProto::at( "*", 5 ) ) );
-
-		receiver = locals;
-		arguments.self( 5 );
-
-		//for (int i = 0; i < 200000000; i++)
-		{
-			std::vector< std::vector<Value> >::const_iterator line = code.begin();
-
-			while (line != code.end())
-			{
-				std::vector<Value>::const_iterator message = line->begin();
-				const std::vector<Value>::const_iterator end = line->end();
-
-				TRACE( "" );
-
-				receiver = locals;
-
-				while (message != end)
-				{
-					receiver = message->apply( receiver, arguments, locals );
-
-					TRACE( "" );
-
-					++message;
-				}
-			
-				++line;
-			}
-		}
-		
-		cout << "result = " << receiver << endl;
 	}
 
-	if (1)
+	if (0)
 	{
 		Frame& lobby = Frame::create();
 		Value locals = *new LocalsProto( lobby );

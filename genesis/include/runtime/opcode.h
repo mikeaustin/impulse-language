@@ -9,7 +9,7 @@
 					{
 						case SymbolProto::ADD: result = receiver.getFloat() + msgArgs[Index::_0].getFloat(); break;
 						case SymbolProto::MUL: result = receiver.getFloat() * msgArgs[Index::_0].getFloat(); break;
-						case SymbolProto::POW: result = std::pow( receiver.getFloat(), msgArgs[Index::_0].getFloat() ); break;
+						case SymbolProto::POW: result = pow( receiver.getFloat(), msgArgs[Index::_0].getFloat() ); break;
 					}
 				}
 				else result = MessageProto::apply( receiver, args, locals );

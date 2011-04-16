@@ -10,8 +10,11 @@
 
 #include "core/frame.h"
 #include "core/array.h"
+
 #include "core/protos/symbol.h"
 #include "core/protos/number.h"
+
+using std::ostringstream;
 
 namespace impulse {
 
@@ -32,7 +35,7 @@ namespace impulse {
 		{
 			MessageProto& message = *dynamic_cast<MessageProto*>( &self.getFrame() );
 			
-			std::ostringstream stream; stream << "message:" << message.getName().getName();
+			ostringstream stream; stream << "message:" << message.getName().getName();
 
 			return Frame::inspect( self, stream.str() );
 		}
@@ -99,23 +102,10 @@ namespace impulse {
 	class OperatorMessage : public MessageProto {
 	
 	 public:
-	
+
 		OperatorMessage( Symbol selector, ArrayProto& args ) : MessageProto( selector, args ) { }
 		
-		virtual Value apply( Value receiver, const Array& args, Value locals ) const
-		{
-			Value result;
-
-			Array msgArgs( getArgs()[0].apply( locals, args, locals ) ); msgArgs.self( args.self() );
-
-			if (&receiver.getFrame() == &NumberValue::instance() && &msgArgs[Index::_0].getFrame() == &NumberValue::instance())
-			{
-				result = (*operation)( receiver, msgArgs );
-			}
-			else result = receiver.perform( getName(), msgArgs, locals );
-	
-			return result;
-		}
+		virtual Value apply( Value receiver, const Array& args, Value locals ) const;
 		
 	};
 

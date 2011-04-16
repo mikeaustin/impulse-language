@@ -137,7 +137,7 @@ namespace impulse {
 
 		if (&operand.getFrame() != NULL)
 		{
-			expression.push( operand );
+			expression.push_back( operand );
 		}
 		
 		return expression;

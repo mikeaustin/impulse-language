@@ -18,6 +18,8 @@
 #include "core/protos/method.h"
 #include "core/protos/object.h"
 
+using std::ostringstream;
+
 namespace impulse {
 
  //
@@ -43,7 +45,7 @@ namespace impulse {
 
 		static void initSlots()
 		{
-			static std::vector<ArgType> powArgs, sinArgs;
+			static vector<ArgType> powArgs, sinArgs;
 			powArgs.push_back( ArgType( SymbolProto::at( "n" ), NumberProto::instance() ) );
 
 			//instance().setSlot( "pow", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::pow2_, powArgs ) ) );
@@ -89,7 +91,7 @@ namespace impulse {
 
 		virtual string inspect( const Value self ) const
 		{
-			std::ostringstream stream;
+			ostringstream stream;
 			
 			stream << self.getFloat();
 			

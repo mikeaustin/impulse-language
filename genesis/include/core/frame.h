@@ -12,6 +12,8 @@
 #include <vector>
 #include <map>
 
+using std::map;
+
 #include "core/value.h"
 
 namespace impulse {
@@ -25,13 +27,13 @@ namespace impulse {
 	 //
 
 		typedef unsigned short SymbolId;
-		typedef std::map<const SymbolId, GCValue> SlotMap;
+		typedef map<const SymbolId, GCValue> SlotMap;
 
 	 //
 	 // Constructors
 	 //
 	
-		void *operator new( std::size_t size );
+		void *operator new( size_t size );
 
 		static Frame& create();
 		static Frame& create( Frame& proto );
@@ -52,18 +54,18 @@ namespace impulse {
 		SlotMap& getSlots() { if (_publicSlots == NULL) _publicSlots = new SlotMap();
 							  return *_publicSlots; }
 
-	//
-	// Messaging
-	//
+	 //
+	 // Messaging
+	 //
 
 		virtual Value apply( Value receiver, const Array& args, Value locals ) const { return receiver; }
 
 		Value perform( Symbol selector, const Array& args, Value locals ) { return perform( *this, selector, args, locals ); }
 		Value perform( Value receiver, const Symbol selector, const Array& args, Value locals );
 
-	//
-	// Inspection
-	//
+	 //
+	 // Inspection
+	 //
 
 		virtual string inspect( const Value self ) const;
 		string inspect( const Value self, const string name ) const;
@@ -108,7 +110,7 @@ namespace impulse {
 		SlotMap* _publicSlots;
 		short    _referenceCount;
 
-		static std::vector< std::vector<Frame*> > _releasePoolStack;
+		static vector< vector<Frame*> > _releasePoolStack;
 
 	};
 	

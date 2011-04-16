@@ -45,7 +45,7 @@ namespace impulse {
 
 		static void initSlots()
 		{
-/*			static std::vector<ArgType> powArgs, sinArgs;
+/*			static vector<ArgType> powArgs, sinArgs;
 			powArgs.push_back( ArgType( SymbolProto::at( "n" ), NumberProto::instance() ) );
 
 			//instance().setSlot( "pow", *new MethodProto( *new BlockProto<NumberProto>( instance(), &NumberProto::pow2_, powArgs ) ) );

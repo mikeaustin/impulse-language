@@ -1,0 +1,129 @@
+//
+// core/protos/block.h
+//
+// Copyright 2008-2011 Mike Austin
+// All rights reserved.
+//
+
+#ifndef IMPULSE_PARSER_H
+#define IMPULSE_PARSER_H
+
+#include "core/frame.h"
+#include "core/array.h"
+
+#include "scanner.h"
+
+using namespace std;
+
+namespace impulse {
+
+ //
+ // class Parser
+ //
+
+	class Parser {
+	
+	 public:
+	 
+		class Parselet {
+		
+		 public:
+
+			virtual Value parse( Parser& parser, Token token )
+			{
+				return Value();
+			}
+		
+		};
+		
+	 public:
+
+		Parser( Scanner& scanner );
+
+		virtual vector<GCValue> parse()
+		{
+			std::vector<GCValue> messages;
+
+			Token token = scanner().peekToken();
+
+			Parselet& literal = getParselet( token.type() );
+			
+			messages.push_back( literal.parse( *this, scanner().nextToken() ) );
+
+			return messages;
+		}
+
+		void addParselet( Token::Type token, Parselet& parselet )
+	 	{
+	 		_parselets[token] = &parselet;
+		}
+
+		Parselet& getParselet( Token::Type type )
+		{
+			map<Token::Type, Parselet*>::iterator iter = _parselets.find( type );
+			
+			if (iter != _parselets.end())
+				return *iter->second;
+			
+			return *new Parselet();
+		}
+		
+		Scanner& scanner() { return _scanner; }
+		
+		vector<Value> parse( Parser& parser, Token token );
+	
+	 private:
+	 
+		Scanner& _scanner;
+		map<Token::Type, Parselet*> _parselets;
+	
+	};
+
+	class ExpressionParser : public Parser {
+	
+	 public:
+	
+		ExpressionParser( Scanner& scanner ) : Parser( scanner ) { }
+		
+		vector<GCValue> parse()
+		{
+			vector<GCValue> messages = Parser::parse();
+			
+			MessageParser( scanner ).parse();
+		}
+	
+	};
+
+	class NumberParselet : public Parser::Parselet {
+	
+	 public:
+	
+		virtual Value parse( Parser& parser, Token token )
+		{
+			return token.value();
+		}
+		
+	};
+
+	class IdentParselet : public Parser::Parselet {
+	
+	 public:
+	
+		virtual Value parse( Parser& parser, Token token )
+		{
+			return *new MessageProto( token.value().get<SymbolProto>(), *new ArrayProto() );
+		}
+		
+	};
+
+
+	Parser::Parser( Scanner& scanner ) : _scanner( scanner )
+	{
+		addParselet( Token::NUMBER, *new NumberParselet() );
+		addParselet( Token::IDENT, *new IdentParselet() );
+	}
+
+}
+
+#endif
+

@@ -10,6 +10,8 @@
 
 #include "core/frame.h"
 
+using std::map;
+
 namespace impulse {
 
  //
@@ -24,7 +26,7 @@ namespace impulse {
 	 // Typedefs
 	 //
 
-		typedef std::map<string, Value> SymbolMap;
+		typedef map<string, Value> SymbolMap;
 		
 		const static SymbolId ADD = 100;
 		const static SymbolId MUL = 101;
@@ -60,7 +62,7 @@ namespace impulse {
 			
 			return "'" + symbol.getName();
 			
-			//std::ostringstream stream; stream << "symbol:" << symbol.getName();
+			//ostringstream stream; stream << "symbol:" << symbol.getName();
 
 			//return Frame::inspect( self, stream.str() );
 		}

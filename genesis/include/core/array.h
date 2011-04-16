@@ -104,7 +104,7 @@ namespace impulse {
 		
 	 private:
 	 
-		std::vector<GCValue> _vector;
+		vector<GCValue> _vector;
 	
 	};
 

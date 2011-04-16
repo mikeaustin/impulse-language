@@ -51,7 +51,7 @@ namespace impulse {
 
 		MethodProto2( Function3& function ) : _function( function ) { }
 
-		MethodProto2( Function2 function, std::vector<ArgType> argtypes )
+		MethodProto2( Function2 function, vector<ArgType> argtypes )
 		 : _function( *new Function3( function, argtypes ) ) { }
 
 		//short arity() { return _block.get< BlockProto<Function> >().arity(); }

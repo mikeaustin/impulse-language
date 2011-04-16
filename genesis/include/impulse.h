@@ -10,17 +10,17 @@
 
 #ifdef TRACE
 	#undef TRACE
-	#define TRACE( expr ) std::cout << &spaces[60 - indent] << expr << std::endl
-	#define ENTER( expr ) std::cout << &spaces[60 - indent] << "> " << expr << std::endl; indent += 4
-	#define LEAVE( expr ) indent -= 4; std::cout << &spaces[60 - indent] << "< " << expr << std::endl
+	#define TRACE( expr ) cout << &spaces[60 - indent] << expr << endl
+	#define ENTER( expr ) cout << &spaces[60 - indent] << "> " << expr << endl; indent += 4
+	#define LEAVE( expr ) indent -= 4; cout << &spaces[60 - indent] << "< " << expr << endl
 #else
 	#define TRACE( expr )
 	#define ENTER( expr )
 	#define LEAVE( expr )
 #endif
 
-#define ASSERT( code ) std::cout << ((code) ? \
-	"\x1b[32m\x1b[1mpass\x1b[0m" : "\x1b[31m\x1b[1mfail\x1b[0m") << " " << #code << std::endl
+#define ASSERT( code ) cout << ((code) ? \
+	"\x1b[32m\x1b[1mpass\x1b[0m" : "\x1b[31m\x1b[1mfail\x1b[0m") << " " << #code << endl
 
 namespace impulse {
 
