@@ -24,7 +24,7 @@ namespace impulse {
 	class Parser : public Frame {
 	
 	 public:
-	
+
 		Parser( Scanner& scanner ) : _scanner( scanner ) { }
 		
 		Scanner& scanner() { return _scanner; }
@@ -49,19 +49,29 @@ namespace impulse {
 			return scanner().nextToken();
 		}
 
-		virtual Expression& parse();
+		int precedence( Token token )
+		{
+			if (token.value().get<StringProto>().getString() == "*")
+				return 10;
+			else if (token.value().get<StringProto>().getString() == "+")
+				return 20;
+			
+			return 0;
+		}
+
+		virtual Expression& parse( int prec );
 
 		//virtual void initialize( vector<GCValue>& messages, Token peek ) { }
 		//virtual void finalize( vector<GCValue>& messages, Token peek ) { }
 		
-		virtual Value lit_number_( Token peek ) { return Value(); }
-		virtual Value lit_string_( Token peek ) { return Value(); }
-		virtual Value identifier_( Token peek ) { return Value(); }
-		virtual Value operator_( Token peek ) { return Value(); }
-		virtual Value openparen_( Token peek ) { return Value(); }
-		virtual Value closeparen_( Token peek ) { return Value(); }
-		virtual Value verticalbar_( Token peek ) { return Value(); }
-		virtual Value endline_( Token peek ) { return Value(); }
+		virtual Value lit_number_( Token peek, int prec ) { return Value(); }
+		virtual Value lit_string_( Token peek, int prec ) { return Value(); }
+		virtual Value identifier_( Token peek, int prec ) { return Value(); }
+		virtual Value operator_( Token peek, int prec ) { return Value(); }
+		virtual Value openparen_( Token peek, int prec ) { return Value(); }
+		virtual Value closeparen_( Token peek, int prec ) { return Value(); }
+		virtual Value verticalbar_( Token peek, int prec ) { return Value(); }
+		virtual Value endline_( Token peek, int prec ) { return Value(); }
 
 	 private:
 	
@@ -69,6 +79,9 @@ namespace impulse {
 	
 	};
 
+ //
+ //
+ //
 
 	class StatementParser : public Parser {
 	
@@ -76,8 +89,8 @@ namespace impulse {
 
 		StatementParser( Scanner& scanner ) : Parser( scanner ) { }
 
-		virtual Expression& parse();
-		
+		virtual Expression& parse( int prec );
+
 	};
 
 	class ExpressionParser : public Parser {
@@ -86,10 +99,10 @@ namespace impulse {
 
 		ExpressionParser( Scanner& scanner ) : Parser( scanner ) { }
 
-		virtual Expression& parse();
+		virtual Expression& parse( int prec );
 
-		virtual Value lit_number_( Token peek );
-		virtual Value openparen_( Token peek );
+		virtual Value lit_number_( Token peek, int prec );
+		virtual Value openparen_( Token peek, int prec );
 		
 	};
 
@@ -99,7 +112,7 @@ namespace impulse {
 	
 		MessageParser( Scanner& scanner ) : Parser( scanner ) { }
 
-		virtual Value operator_( Token peek );
+		virtual Value operator_( Token peek, int prec );
 		
 	};
 
@@ -107,7 +120,7 @@ namespace impulse {
 	
 	 public:
 
-		virtual Expression& parse();
+		virtual Expression& parse( int prec );
 
 		BinaryExpressionParser( Scanner& scanner ) : ExpressionParser( scanner ) { }
 		
@@ -119,7 +132,7 @@ namespace impulse {
 
 		BinaryMessageParser( Scanner& scanner ) : MessageParser( scanner ) { }
 
-		virtual Value operator_( Token peek );
+		virtual Value operator_( Token peek, int prec );
 		
 	};
 
@@ -127,13 +140,13 @@ namespace impulse {
  //
  //
 
-	Expression& Parser::parse()
+	Expression& Parser::parse( int prec )
 	{
 		Expression& expression = *new Expression();
 
 		Token peek = scanner().peekToken();
 
-		Value operand = (this->*peek.type())( peek );
+		Value operand = (this->*peek.type())( peek, prec );
 
 		if (&operand.getFrame() != NULL)
 		{
@@ -143,9 +156,9 @@ namespace impulse {
 		return expression;
 	}
 
-	Expression& StatementParser::parse()
+	Expression& StatementParser::parse( int prec )
 	{	
-		Expression& expression = ExpressionParser( scanner() ).parse();
+		Expression& expression = ExpressionParser( scanner() ).parse( prec );
 		
 		Token peek = scanner().peekToken();
 		
@@ -159,9 +172,30 @@ namespace impulse {
 		return expression;
 	}
 	
-	Expression& ExpressionParser::parse()
+	Expression& ExpressionParser::parse( int prec )
 	{
-		Expression& expression = Parser::parse();
+		Expression& expression = Parser::parse( prec );
+/*
+		if (expression.size() == 0)
+		{
+			cerr << "*** Expected operand" << endl;
+			
+			return expression;
+		}
+*/
+		Expression* expression2;
+		while (expression2 = &MessageParser( scanner() ).parse( prec ),
+		       expression2->size() > 0)
+		{
+			expression.concat( *expression2 );
+		}
+
+		return expression;
+	}
+
+	Expression& BinaryExpressionParser::parse( int prec )
+	{
+		Expression& expression = Parser::parse( prec );
 
 		if (expression.size() == 0)
 		{
@@ -171,59 +205,39 @@ namespace impulse {
 		}
 		
 		Expression* expression2;
-		while (expression2 = &MessageParser( scanner() ).parse(), expression2->size() > 0)
+		while (expression2 = &BinaryMessageParser( scanner() ).parse( prec ),
+		       expression2->size() > 0)
 		{
-			//messages.insert( messages.end(), messages2.begin(), messages2.end() );
 			expression.concat( *expression2 );
 		}
 
 		return expression;
 	}
 
-	Expression& BinaryExpressionParser::parse()
-	{
-		Expression& expression = Parser::parse();
-
-		if (expression.size() == 0)
-		{
-			cerr << "*** Expected operand" << endl;
-			
-			return expression;
-		}
-		
-		Expression* expression2;
-		while (expression2 = &BinaryMessageParser( scanner() ).parse(), expression2->size() > 0)
-		{
-			//messages.insert( messages.end(), messages2.begin(), messages2.end() );
-			expression.concat( *expression2 );
-		}
-
-		return expression;
-	}
-
-	Value ExpressionParser::lit_number_( Token peek )
+	Value ExpressionParser::lit_number_( Token peek, int prec )
 	{
 		Token token = scanner().nextToken();
 
 		return token.value();
 	}
 
-	Value ExpressionParser::openparen_( Token peek )
+	Value ExpressionParser::openparen_( Token peek, int prec )
 	{
 		expect( &Parser::openparen_, "(" );
 		
-		Expression& expression = ExpressionParser( scanner() ).parse();
+		Expression& expression = ExpressionParser( scanner() ).parse( prec );
 
 		expect( &Parser::closeparen_, ")" );
 		
 		return expression;
 	}
 
-	Value MessageParser::operator_( Token peek )
+	Value MessageParser::operator_( Token peek, int prec )
 	{
 		Token token = scanner().nextToken();
 
-		Expression& argument = BinaryExpressionParser( scanner() ).parse();
+		prec = precedence( peek );
+		Expression& argument = BinaryExpressionParser( scanner() ).parse( prec );
 
 		Symbol symbol = SymbolProto::at( token.value().get<StringProto>().getString() );
 
@@ -231,15 +245,22 @@ namespace impulse {
 			return *new OperatorMessage<add_>( symbol, *new ArrayProto( argument ) );
 		else if (&symbol == &SymbolProto::at( "-" ))
 			return *new OperatorMessage<sub_>( symbol, *new ArrayProto( argument ) );
+		if (&symbol == &SymbolProto::at( "*" ))
+			return *new OperatorMessage<mul_>( symbol, *new ArrayProto( argument ) );
+		else if (&symbol == &SymbolProto::at( "/" ))
+			return *new OperatorMessage<div_>( symbol, *new ArrayProto( argument ) );
 		else
 			return *new MessageProto( symbol, *new ArrayProto( argument ) );
 
 		return Value();
 	}
 
-	Value BinaryMessageParser::operator_( Token peek )
+	Value BinaryMessageParser::operator_( Token peek, int prec )
 	{
-		return Value();
+		if (precedence( peek ) > prec)
+			return MessageParser::operator_( peek, prec );
+		else
+			return Value();
 	}
 		
 }

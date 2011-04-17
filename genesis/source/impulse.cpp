@@ -103,7 +103,7 @@ int main( int argc, char* argv[] )
 #endif
 	}
 
-	if (0)
+	if (1)
 	{
 		Frame& lobby = Frame::create();
 		Value locals = *new LocalsProto( lobby );
@@ -118,7 +118,7 @@ int main( int argc, char* argv[] )
 //			cout << "=> " << token.value().inspect() << endl;
 //		}
 	
-		Expression& expression = parser.parse();
+		Expression& expression = parser.parse( 0 );
 
 		receiver = expression.apply( receiver, arguments, locals );
 

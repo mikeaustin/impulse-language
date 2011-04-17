@@ -29,7 +29,7 @@ namespace impulse {
 	
 	 public:
 	
-		typedef Value (Parser::*Type)(Token);
+		typedef Value (Parser::*Type)(Token, int);
 
 		Token()                         : _type( NULL ) { }
 		Token( Type type, Value value ) : _type( type ), _value( value ) { }
