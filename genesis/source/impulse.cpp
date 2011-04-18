@@ -57,8 +57,8 @@ namespace impulse {
 
 using namespace impulse;
 
-Value receiver;
-Array arguments;
+//Value receiver;
+//Array arguments;
 
 int main( int argc, char* argv[] )
 {
@@ -117,12 +117,22 @@ int main( int argc, char* argv[] )
 //		{
 //			cout << "=> " << token.value().inspect() << endl;
 //		}
-	
-		Expression& expression = parser.parse( 0 );
 
-		receiver = expression.apply( receiver, arguments, locals );
+		Array arguments;
 
-		cout << receiver << endl;
+		while (1)
+		{
+			cout << "] ";
+			
+			Expression& expression = parser.parse( 0 );
+
+			Value receiver = expression.apply( locals, arguments, locals );
+
+			if (&receiver.getFrame() != NULL)
+			{
+				cout << "= " << receiver << endl;
+			}
+		}
 	}
 	
 	return 0;

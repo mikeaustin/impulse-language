@@ -48,6 +48,8 @@ namespace impulse {
 		{
 			vector<GCValue>::const_iterator message = _messages.begin();
 
+			receiver = Value();
+
 			while (message != _messages.end())
 			{
 				receiver = message->apply( receiver, args, locals );
