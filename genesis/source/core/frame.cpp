@@ -106,11 +106,17 @@ namespace impulse {
 					Value method = iter->second;
 				
 					result = method.apply( receiver, args, locals );
+					
+					LEAVE( result );
+					
+					return result;
 				}
 			}
 						
 			frame = frame->_protoFrame;
 		}
+
+		cerr << "Slot not found: " << receiver.inspect() << "." << selector.getName() << endl;
 
 		LEAVE( result );
 

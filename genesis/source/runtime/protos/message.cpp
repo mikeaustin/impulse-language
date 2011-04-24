@@ -12,6 +12,8 @@ namespace impulse {
 	template <Value (*operation)(Value, const Array&)>
 	inline Value OperatorMessage<operation>::apply( Value receiver, const Array& args, Value locals ) const
 	{
+		ENTER( "OperatorMessage::apply( receiver = " << receiver << " )" );
+
 		Value result;
 
 		Array msgArgs( getArgs()[0].apply( locals, args, locals ) ); msgArgs.self( args.self() );
@@ -21,6 +23,8 @@ namespace impulse {
 			result = (*operation)( receiver, msgArgs );
 		}
 		else result = receiver.perform( getName(), msgArgs, locals );
+
+		LEAVE( result );
 
 		return result;
 	}

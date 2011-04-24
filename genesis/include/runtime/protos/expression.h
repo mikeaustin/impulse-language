@@ -46,9 +46,14 @@ namespace impulse {
 
 		virtual Value apply( Value receiver, const Array& args, Value locals ) const
 		{
+ 			ENTER( "Expression::apply( receiver = " << receiver << " )" );
+
 			vector<GCValue>::const_iterator message = _messages.begin();
 
-			receiver = Value();
+			if (message == _messages.end())
+			{
+				return Value();
+			}
 
 			while (message != _messages.end())
 			{
@@ -56,6 +61,8 @@ namespace impulse {
 		
 				++message;
 			}
+			
+			LEAVE( receiver );
 			
 			return receiver;
 		}

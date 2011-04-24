@@ -73,15 +73,17 @@ int main( int argc, char* argv[] )
 		cout << "sizeof (Value)    = " << sizeof (Value)    << endl;
 		cout << "sizeof (Frame)    = " << sizeof (Frame)    << endl;
 		cout << "sizeof (SymbolId) = " << sizeof (Frame::SymbolId) << endl;
-		cout << "sizeof (Array)    = " << sizeof (Array)    << endl;
+		cout << "sizeof (Array)    = " << sizeof (Array)    << endl << endl;
 	}
+
+	Frame::ReleasePool releasePool;
+
+	ObjectProto::initSlots();
+	NumberProto::initSlots();
 
 	if (1)
 	{
 		Frame::ReleasePool releasePool;
-
-		ObjectProto::initSlots();
-		NumberProto::initSlots();
 
 #ifdef TEST
 		CoreTest().run();
@@ -105,6 +107,8 @@ int main( int argc, char* argv[] )
 
 	if (1)
 	{
+		Frame::ReleasePool releasePool;
+
 		Frame& lobby = Frame::create();
 		Value locals = *new LocalsProto( lobby );
 
@@ -130,7 +134,7 @@ int main( int argc, char* argv[] )
 
 			if (&receiver.getFrame() != NULL)
 			{
-				cout << "= " << receiver << endl;
+				cout << "= " << receiver << endl << endl;
 			}
 		}
 	}

@@ -89,6 +89,31 @@ namespace impulse {
  	};
 
  //
+ // class AssignMessage
+ //
+ 
+ 	class AssignMessage : public MessageProto {
+ 	
+ 	 public:
+
+		AssignMessage( Symbol symbol, Value value ) : MessageProto( symbol, *new ArrayProto( value ) ) { }
+ 	
+ 		virtual Value apply( Value receiver, const Array& args, Value locals ) const
+ 		{
+ 			ENTER( "AssignMessage::apply( receiver = " << receiver << " )" );
+
+			Value value = getArgs()[0].apply( locals, args, locals );
+
+			Value result = receiver.setSlot( getName(), value );
+
+ 			LEAVE( result );
+
+			return result;
+		}
+ 	
+ 	};
+
+ //
  // class OperatorMessage
  //
 

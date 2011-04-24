@@ -11,6 +11,68 @@ using std::stringstream;
 
 namespace impulse {
 
+	inline Token::Token()                         : _type( &Parser::unknown_ ) { }
+	inline Token::Token( Type type, Value value ) : _type( type ), _value( value ) { }
+
+ //
+ //
+ //
+
+	Scanner::Scanner( istream& stream ) : _stream( stream )
+	{
+		_readers.push_back( &Scanner::lit_number_ );
+		_readers.push_back( &Scanner::lit_string_ );
+		_readers.push_back( &Scanner::identifier_ );
+		_readers.push_back( &Scanner::operator_ );
+		_readers.push_back( &Scanner::openparen_ );
+		_readers.push_back( &Scanner::closeparen_ );
+		_readers.push_back( &Scanner::verticalbar_ );
+		_readers.push_back( &Scanner::endline_ );
+	}
+
+	Token Scanner::peekToken()
+	{
+		if (_token.type() != &Parser::unknown_) return _token;
+		
+		while (isspace( stream().peek() ) && stream().peek() != 10)
+			stream().get();
+		
+		vector<Token (Scanner::*)(int c)>::iterator reader = _readers.begin();
+
+		while (_token.type() == &Parser::unknown_ && reader != _readers.end())
+		{
+			_token = (this->*(*reader++))( stream().peek() );
+		}
+
+		if (_token.type() == &Parser::unknown_)
+		{
+			cerr << "*** Unknown token: '" << (unsigned char) stream().peek() << "'" << endl;
+			
+			while (stream().peek() != 10)
+				stream().get();
+		}
+		
+		return _token;
+	}
+	
+	Token Scanner::nextToken()
+	{
+		Token token = peekToken();
+		
+		_token = Token();
+		
+		return token;
+	}
+
+	Token Scanner::currToken()
+	{
+		return _token;
+	}
+
+ //
+ //
+ //
+ 
 	Token Scanner::lit_number_( int c )
 	{
 		if (!isdigit( c )) return Token();
@@ -82,6 +144,11 @@ namespace impulse {
 		while (isopera( stream().peek() ))
 		{
 			buffer << (unsigned char) stream().get();
+		}
+		
+		if (buffer.str() == "=")
+		{
+			return Token( &Parser::assignment_, buffer.str() );
 		}
 		
 		return Token( &Parser::operator_, buffer.str() );

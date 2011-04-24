@@ -31,8 +31,8 @@ namespace impulse {
 	
 		typedef Value (Parser::*Type)(Token, int);
 
-		Token()                         : _type( NULL ) { }
-		Token( Type type, Value value ) : _type( type ), _value( value ) { }
+		Token();
+		Token( Type type, Value value );
 		
 		Type  type()  { return _type; }
 		Value value() { return _value; }
@@ -84,58 +84,6 @@ namespace impulse {
 		Token _token;
 
  	};
-
- //
- // class Scanner
- //
-
-	Scanner::Scanner( istream& stream ) : _stream( stream )
-	{
-		_readers.push_back( &Scanner::lit_number_ );
-		_readers.push_back( &Scanner::lit_string_ );
-		_readers.push_back( &Scanner::identifier_ );
-		_readers.push_back( &Scanner::operator_ );
-		_readers.push_back( &Scanner::openparen_ );
-		_readers.push_back( &Scanner::closeparen_ );
-		_readers.push_back( &Scanner::verticalbar_ );
-		_readers.push_back( &Scanner::endline_ );
-	}
-
-	Token Scanner::peekToken()
-	{
-		if (_token.type() != NULL) return _token;
-		
-		while (isspace( stream().peek() ) && stream().peek() != 10)
-			stream().get();
-		
-		vector<Token (Scanner::*)(int c)>::iterator reader = _readers.begin();
-
-		while (_token.type() == NULL && reader != _readers.end())
-		{
-			_token = (this->*(*reader++))( stream().peek() );
-		}
-
-		if (_token.type() == NULL)
-		{
-			cerr << "*** Unknown token: '" << (unsigned char) stream().peek() << "'" << endl;
-		}
-		
-		return _token;
-	}
-	
-	Token Scanner::nextToken()
-	{
-		Token token = peekToken();
-		
-		_token = Token();
-		
-		return token;
-	}
-
-	Token Scanner::currToken()
-	{
-		return _token;
-	}
 	
 /*
 	class Token {

@@ -34,6 +34,9 @@ namespace impulse {
 			if (scanner().peekToken().type() != type)
 			{
 				cerr << "Expected " << value << ", found " << scanner().peekToken().value().inspect() << endl;
+
+				while (scanner().peekToken().type() != &Parser::endline_)
+					scanner().nextToken();
 			}
 			
 			return scanner().nextToken();
@@ -51,23 +54,25 @@ namespace impulse {
 
 		int precedence( Token token )
 		{
-			if (token.value().get<StringProto>().getString() == "*")
-				return 10;
-			else if (token.value().get<StringProto>().getString() == "+")
-				return 20;
+			string operat = token.value().get<StringProto>().getString();
+			
+			if      (operat == "*" || operat == "/") return 10;
+			else if (operat == "+" || operat == "-") return 20;
 			
 			return 0;
 		}
 
-		virtual Expression& parse( int prec );
+		virtual Expression& parse( int prec = 0 );
 
 		//virtual void initialize( vector<GCValue>& messages, Token peek ) { }
 		//virtual void finalize( vector<GCValue>& messages, Token peek ) { }
 		
+		virtual Value unknown_( Token peek, int prec ) { return Value(); }
 		virtual Value lit_number_( Token peek, int prec ) { return Value(); }
 		virtual Value lit_string_( Token peek, int prec ) { return Value(); }
 		virtual Value identifier_( Token peek, int prec ) { return Value(); }
 		virtual Value operator_( Token peek, int prec ) { return Value(); }
+		virtual Value assignment_( Token peek, int prec ) { return Value(); }
 		virtual Value openparen_( Token peek, int prec ) { return Value(); }
 		virtual Value closeparen_( Token peek, int prec ) { return Value(); }
 		virtual Value verticalbar_( Token peek, int prec ) { return Value(); }
@@ -102,7 +107,18 @@ namespace impulse {
 		virtual Expression& parse( int prec );
 
 		virtual Value lit_number_( Token peek, int prec );
+		virtual Value identifier_( Token peek, int prec );
 		virtual Value openparen_( Token peek, int prec );
+		
+	};
+
+	class SimpleExprParser : public ExpressionParser {
+
+	 public:
+
+		SimpleExprParser( Scanner& scanner ) : ExpressionParser( scanner ) { }
+
+		virtual Value identifier_( Token peek, int prec );
 		
 	};
 
@@ -112,17 +128,18 @@ namespace impulse {
 	
 		MessageParser( Scanner& scanner ) : Parser( scanner ) { }
 
+		virtual Value identifier_( Token peek, int prec );
 		virtual Value operator_( Token peek, int prec );
 		
 	};
 
-	class BinaryExpressionParser : public ExpressionParser {
+	class BinaryExpressionParser : public SimpleExprParser {
 	
 	 public:
 
 		virtual Expression& parse( int prec );
 
-		BinaryExpressionParser( Scanner& scanner ) : ExpressionParser( scanner ) { }
+		BinaryExpressionParser( Scanner& scanner ) : SimpleExprParser( scanner ) { }
 		
 	};
 
@@ -162,12 +179,7 @@ namespace impulse {
 		
 		Token peek = scanner().peekToken();
 		
-		if (peek.type() != &Parser::endline_)
-		{
-			cerr << "*** Unexpected token: '" << peek.value() << "'" << endl;
-		}
-		
-		scanner().nextToken();
+		expect( &Parser::endline_, "\\n" );
 		
 		return expression;
 	}
@@ -221,15 +233,47 @@ namespace impulse {
 		return token.value();
 	}
 
+	Value ExpressionParser::identifier_( Token peek, int prec )
+	{
+		Token token   = scanner().nextToken();
+		Symbol symbol = SymbolProto::at( token.value().get<StringProto>().getString() );
+
+		if (option( &Parser::assignment_, "=" ).type() != &Parser::unknown_)
+		{
+			Expression& value = SimpleExprParser( scanner() ).parse( prec );
+			
+			return *new AssignMessage( symbol, value );
+		}
+
+		return *new MessageProto( symbol, *new ArrayProto() );
+	}
+
 	Value ExpressionParser::openparen_( Token peek, int prec )
 	{
 		expect( &Parser::openparen_, "(" );
 		
-		Expression& expression = ExpressionParser( scanner() ).parse( prec );
+		Expression& expression = SimpleExprParser( scanner() ).parse( prec );
 
 		expect( &Parser::closeparen_, ")" );
 		
 		return expression;
+	}
+
+	Value SimpleExprParser::identifier_( Token peek, int prec )
+	{
+		Token token   = scanner().nextToken();
+		Symbol symbol = SymbolProto::at( token.value().get<StringProto>().getString() );
+
+		return *new MessageProto( symbol, *new ArrayProto() );
+	}
+
+	Value MessageParser::identifier_( Token peek, int prec )
+	{
+		Token token = scanner().nextToken();
+		
+		Symbol symbol = SymbolProto::at( token.value().get<StringProto>().getString() );
+
+		return *new MessageProto( symbol, *new ArrayProto() );
 	}
 
 	Value MessageParser::operator_( Token peek, int prec )

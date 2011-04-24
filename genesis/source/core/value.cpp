@@ -70,16 +70,19 @@ namespace impulse {
 		// Optimization to return *this immediately if possible
 		// If it's not garbage collected, it doesn't override apply()
 		
-		ENTER( "Value::apply( receiver = " << receiver << " )" );
 		
 		Value result;
 
 		if (getFloat() != max_float)
 		{
+			ENTER( "Value::apply( receiver = " << receiver << " )" );
+
 			if (_float != min_float)
 				result = *this;
 			else
 				result = args.self();
+
+			LEAVE( result );
 		}
 		else
 			result = getFrame().apply( receiver, args, locals );
@@ -92,7 +95,6 @@ namespace impulse {
 			default:             result = *this; break;
 		}
 */
-		LEAVE( result );
 		
 		return result;
 	}
