@@ -1,0 +1,91 @@
+
+object <body>
+
+   field position, velocity, rest-mass
+   field index
+
+   method position
+     <n-body-system>.positions[self.index]
+   end
+
+   method position = vector
+     <n-body-system>.positions[self.index * 3] insert: vector
+   end
+
+   method move: delta-time
+      position += velocity
+   end
+   
+   method advance: delta-position, delta-time
+      velocity += delta-position * delta-time
+   end
+   
+end
+
+object <n-body-system>
+
+   field positions  = <vector> make size: bodies.size
+   field velocities = <vector> make size: bodies.size
+
+   local const solar-mass    = 4 * <number>.pi^2
+   local const days-per-year = 365.24
+ 
+   local bodies = [
+      "sun" => <body> make: |body| do
+         body.rest-mass = *solar-mass*
+      end,
+      "jupiter" => <body> make: |body| do
+         body.position  = <vector> [ 4.84143144246472090e+00,
+                                    -1.16032004402742839e+00,
+                                    -1.03622044471123109e-01 ]
+         body.position  = <vector> [ 1.66007664274403694e-03 * days-per-year,
+                                     7.69901118419740425e-03 * days-per-year,
+                                    -6.90460016972063023e-05 * days-per-year ]
+         body.rest-mass = 9.54791938424326609e-04 * solar-mass
+      end
+   ]
+
+   [bodies, 1..bodies.size] each-zip: |body, i| do
+      body.index = i
+   end
+  
+   method advance: delta-time
+      self.bodies each-pair: |body-a, body-b|
+         local delta-pos = body-a.position - body-b.position
+         local magnitude = delta-time / delta-pos.distance^3
+        
+         body-a advance: delta-pos, -body-b rest-mass * magnitude
+         body-b advance: delta-pos,  body-a rest-mass * magnitude
+      end
+     
+      bodies each: |body|
+         body.position += body.velocity * delta-time
+      end
+   end
+
+   method energy
+      local energy
+     
+      self.bodies each-pair: |body-a, body-b|
+         energy += 0.5 * body-a.rest-mass * body-a.velocity dot-product
+         local delta-pos = body-a.position - body-b.position
+         energy -= body-a.rest-mass * body-b.rest-mass / delta-pos.distance
+      end
+     
+      return energy
+   end
+    
+end
+
+
+local range = [1..args[0] as: <int>]
+bodies = <n-body-system> make
+
+print: bodies energy
+
+range each: |n|
+   bodies advance: 0.01
+end
+
+print: bodies energy
+

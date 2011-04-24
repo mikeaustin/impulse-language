@@ -1,0 +1,310 @@
+# ---------------------------------------------------------------------------- #
+#
+# Impulse Standard Library
+#
+# ---------------------------------------------------------------------------- #
+
+# ---------------------------------------------------------------------------- #
+# object <object>
+# ---------------------------------------------------------------------------- #
+
+object <object>
+
+   field slots, proto
+
+   method create
+      :slots = <map>.clone
+   end
+
+   operator . slot-name
+      return self.get-slot slot-name
+   end
+
+   operator ? expression
+      if self != nil
+         return expression []
+      end
+   end
+
+   operator nil? default
+      if self != nil
+         return self
+      else
+          return default []
+      end
+   end
+
+   method resend
+      if :proto != nil
+         self.send message, args: args, context: self
+      end
+   end
+
+   method inspect
+      :slots.each |name, value|
+         print name ~ " = " ~ value ~ "\n"
+      end
+   end
+
+   method send |name, args|
+      local function = self.get-slot name
+
+      if function ?
+         return function.eval args, context: self
+      else
+         print "No such slot: ", name
+      end
+   end
+
+   method write-on |stream|
+      stream << self
+   end
+
+end
+
+# ---------------------------------------------------------------------------- #
+# object <sequence>
+# ---------------------------------------------------------------------------- #
+
+object <sequence>
+
+   method each |block|
+      # subclass responsibility
+   end
+
+   method map |block|
+      local array = []
+ 
+      self each |item|
+         array << block [item]
+      end
+
+      return array
+   end
+
+   method fold: |block|
+      self.fold block, with: nil
+   end
+
+   method fold |block, value|
+      local value = value || self[0]
+
+      self.each |item|
+         value = block [value, item]
+      end
+
+      return value
+   end
+
+end
+
+# ---------------------------------------------------------------------------- #
+# object <number>
+# ---------------------------------------------------------------------------- #
+
+object <number>
+
+   operator ^ |exponent|
+      return [1..exponent].fold |accum, value| accum * self
+   end
+
+   method each |block|
+      [1..self] each: |item| block eval: item
+   end
+
+end
+
+object <integer> : <number>
+
+end
+
+object <float> : <number>
+
+   field bytes
+
+   method create
+      .bytes = <bytes>.clone: 'float, size: 1
+   end
+
+   operator * |value|
+      .bytes[0] * value
+   end
+
+end
+
+# ---------------------------------------------------------------------------- #
+# object <string>
+# ---------------------------------------------------------------------------- #
+
+import object.bytes
+
+object <string>
+
+   field bytes
+
+   method create
+      :bytes = <bytes>.clone
+   end
+
+   method each |block|
+      :bytes each |item| block [item]
+   end
+
+   method replace |string, other|
+      local range = self.find string
+
+      self[range] = other
+   end
+
+   method replace |<range> range, other|
+      # ...
+   end
+
+   method find |string|
+      local range = [0..0]
+
+      self.each |char, index|
+         if char == string[range.to]
+            if range.to == 0
+               range.from = index
+            end
+            range.to += 1
+         end
+      end
+
+      return range
+   end
+
+end
+
+# ---------------------------------------------------------------------------- #
+# object <array>
+# ---------------------------------------------------------------------------- #
+
+import object.sequence
+
+object <array> : <sequence>
+
+   local bytes
+
+   @request-for-enhancement 'initialize, data: \
+    id       = 2868724,
+    synopsis = "Enable time-travel"
+   method create
+      :bytes = <bytes>.clone
+   end
+
+   method each |block|
+      :bytes.size.each |index|
+         block.eval self.bytes[index]
+      end
+   end
+
+   operator [] |index|
+      if index < :bytes.size
+         return :bytes[index]
+      end
+   end
+
+   operator [] = |index, value|
+      if index < :bytes.size
+         @bytes[index] = value
+      end
+   end
+
+end
+
+# ---------------------------------------------------------------------------- #
+# object <stream>
+# ---------------------------------------------------------------------------- #
+
+object <stream>
+
+   field handle
+
+   method write |value|
+      # native write method
+   end
+
+end
+
+# ---------------------------------------------------------------------------- #
+# object <vector>
+# ---------------------------------------------------------------------------- #
+
+object <vector> : <sequence>
+
+   local bytes
+
+   method init
+      :bytes = <bytes>.clone <bytes>.float32
+   end
+
+   method each |block|
+      :bytes each |item| block.eval: item
+   end
+
+   method size
+      :bytes size
+   end
+
+   operator *= |vector|
+      [0..:bytes.size].each |index|
+         :bytes[index] *= vector.bytes[index]
+      end
+   end
+
+   method min
+      [1..:bytes.size] each |index|
+         local value = 0
+
+         if :bytes[index] > value
+            value = :bytes[index]
+         end
+
+         return value
+      end
+   end
+
+   method sum
+      return :bytes.fold |accum, item| accum + item
+   end
+
+   method mean
+      :bytes sum / :bytes size
+   end
+
+end
+
+# ---------------------------------------------------------------------------- #
+# object <bytes>
+# ---------------------------------------------------------------------------- #
+
+object <bytes>
+
+   const uint8   = 0,
+         uint16  = 1,
+         uint32  = 2,
+         uint64  = 3,
+         float32 = 4,
+         float64 = 5
+   field type, size
+
+   method create |type = uint8|
+      :type = type
+   end
+
+   method size = |size|
+      self.resize size
+   end
+
+   operator [] |index|
+      return :bytes[index]
+   end
+
+   operator [] = |index, value|
+      return :bytes[index] = value
+   end
+
+end
+
