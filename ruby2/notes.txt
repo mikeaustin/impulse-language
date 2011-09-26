@@ -1,0 +1,85 @@
+
+block = |a, b| a + b
+block apply: 2, 3
+
+block = |a, b| a + b
+block [2, 3]
+
+block = |a, b| a + b
+block (2, 3)
+
+list sort: |a, b| a < b
+
+list.sort (|a, b| a < b)
+
+list.sort |a, b| a < b
+
+method map: block
+  local array = []
+  
+  self each: |item|
+    array << block (item)
+  end
+  
+  return array
+end
+
+
+method map: block
+  local array = []
+  
+  self each: |item|
+    array << block [item]
+  end
+  
+  return array
+end
+
+method map: block
+  return self fold: |acc, item|
+    block [item]
+  end, with: []
+end
+
+method map (block)
+  return self.fold |acc, item|
+    block (item)
+  end, with: []
+end
+
+print ("Hello, world!")
+
+canvas.draw-text "Hello", size: 16.px, weight: #bold
+
+canvas.draw-text ("Hello", size: 16.px, weight: <font>.bold)
+
+define method map (block)
+  return self.fold (method (acc, item)
+                      block (item)
+                    end, with: []),
+end
+
+
+object <collection>
+
+  method private.modify-data
+    ...
+  end
+  
+  method public-method
+    self private private-method
+  end
+
+end
+
+
+method collided-with: <rock> rock
+
+method collided-with; rock :: <rock>
+
+local rock :: <rock>
+
+local <rock> rock
+
+
+
