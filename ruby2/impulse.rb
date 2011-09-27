@@ -65,16 +65,16 @@ end
 #$lobby.set_slot(:y, Value.new(1))
 
 #      (x + 5) pow: (y)
-code = [ExpressionProto.new([MessageProto.new(:x, []), MessageProto.new(:add, [Value.new(5)])]),
-        MessageProto.new(:pow, [ExpressionProto.new([MessageProto.new(:y, [])])])]
+#code = [ExpressionProto.new([MessageProto.new(:x, []), MessageProto.new(:add, [Value.new(5)])]),
+#        MessageProto.new(:pow, [ExpressionProto.new([MessageProto.new(:y, [])])])]
 #code = [Value.new(10), MessageProto.new(:sin, [])]
 #code = [Value.new(5), MessageProto.new(:is_a, [NumberProto.instance])]
-code = [BlockMessage.new(code)]
+#code = [BlockMessage.new([:x], code)]
 
 #expr = ExpressionProto.new(code)
 #p expr.eval_(lobby, [], lobby)
 
-block = BlockProto.new([ExpressionProto.new(code)], $lobby)
+#block = BlockProto.new([:x], [ExpressionProto.new(code)], $lobby)
 #p block.eval_(lobby, [], lobby).eval_(lobby, [], lobby)
 
 
@@ -100,7 +100,7 @@ messages = [ExpressionProto.new([MessageProto.new(:x, []), MessageProto.new(:add
             MessageProto.new(:pow, [ExpressionProto.new([MessageProto.new(:y, []), MessageProto.new(:add, [Value.new(1)])])])]
 assert(ExpressionProto.new(messages), :==, 100)
 
-# || ((x add: 5) pow: (y add: 1)) eval
-messages = [BlockMessage.new([ExpressionProto.new(messages)]), MessageProto.new(:eval, [])]
-assert(ExpressionProto.new(messages), :==, 100)
+# (|y| (x add: 5) pow: (y add: 1)) eval: 2
+messages = [BlockMessage.new([:y], [ExpressionProto.new(messages)]), MessageProto.new(:eval, [Value.new(2)])]
+assert(ExpressionProto.new(messages), :==, 1000)
 

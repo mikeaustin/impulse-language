@@ -20,19 +20,24 @@ end
 
 class BlockProto < FunctionProto
 
+  attr :argnames, true
   attr :expressions, true
   attr :locals, true
 
-  def initialize(expressions, locals)
+  def initialize(argnames, expressions, locals)
     super(self.method(:eval_block))
 
+    @argnames, @expressions, @locals = argnames, expressions, locals
+
     self.set_slot(:eval, FunctionProto.new(self.method(:eval_)))
-    
-    @expressions, @locals = expressions, locals
   end
 
   def eval_block(receiver, args, locals)
     locals = LocalsProto.new(@locals)
+
+    @argnames.each.with_index do |argname, i|
+      locals.set_slot(argname, args[i])
+    end
 
     return @expressions.reduce(locals) do |receiver, expression|
       expression.eval_(receiver, [], locals)

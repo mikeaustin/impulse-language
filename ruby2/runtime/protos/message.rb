@@ -34,17 +34,17 @@ end
 class BlockMessage < MessageProto
 
   attr :expressions, true
-  attr :paramters, true
+  attr :argnames, true
   attr :locals, true
 
-  def initialize(expressions)
+  def initialize(argnames, expressions)
     super(:block, [])
     
-    @expressions = expressions
+    @argnames, @expressions = argnames, expressions
   end
 
   def eval_(receiver, args, locals)
-    return BlockProto.new(@expressions, locals)
+    return BlockProto.new(@argnames, @expressions, locals)
   end
 
 end
