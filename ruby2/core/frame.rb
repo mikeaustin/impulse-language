@@ -11,7 +11,7 @@ class Frame
   end
 
   def initialize(proto)
-    @proto, @slots = proto, {}
+    @proto, @slots, @methods = proto, {}, {}
   end
 
   def init_slots()

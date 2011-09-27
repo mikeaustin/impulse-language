@@ -31,6 +31,21 @@ class MessageProto < Frame
 end
 
 
+class LocalMessage < MessageProto
+
+  def initialize(selector)
+    super(selector, [])
+  end
+
+  def eval_(receiver, args, locals)
+    trace "LocalMessage::eval()"
+
+    return receiver.slots[@selector]
+  end
+
+end
+
+
 class BlockMessage < MessageProto
 
   attr :expressions, true
@@ -45,6 +60,12 @@ class BlockMessage < MessageProto
 
   def eval_(receiver, args, locals)
     return BlockProto.new(@argnames, @expressions, locals)
+  end
+
+  def to_s()
+    argnames = @argnames.map(&:to_s).join(",")
+    
+    return "(|#{argnames}| #{expressions})"
   end
 
 end

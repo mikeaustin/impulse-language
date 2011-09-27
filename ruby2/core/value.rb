@@ -19,6 +19,10 @@ class Value
     return @frame.proto
   end
 
+  def slots()
+    return @frame.slots
+  end
+
   def eval_(receiver, args, locals)
     trace "Value::eval()"
     
