@@ -7,21 +7,21 @@ class NumberProto < Frame
 
   def initialize()
     super(ObjectProto.instance)
-
-    self.set_slot(:add, FunctionProto.new(self.method(:add_)))
-    self.set_slot(:sin, FunctionProto.new(self.method(:sin)))
-    self.set_slot(:pow, FunctionProto.new(self.method(:pow_)))
+    
+    self.add_method(:add, FunctionProto.new(self.method(:add_)))
+    self.add_method(:sin, FunctionProto.new(self.method(:sin)))
+    self.add_method(:pow, FunctionProto.new(self.method(:pow_)))
   end
 
-  def add_(receiver, args, locals)
+  def add_(receiver, args)
     return Value.new(receiver.float + args[0].float)
   end
 
-  def sin(receiver, args, locals)
+  def sin(receiver, args)
     return Value.new(Math.sin(receiver.float))
   end
 
-  def pow_(receiver, args, locals)
+  def pow_(receiver, args)
     return Value.new(receiver.float ** args[0].float)
   end
 

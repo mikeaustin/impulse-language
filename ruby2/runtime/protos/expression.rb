@@ -1,6 +1,8 @@
 
 class ExpressionProto < Frame
 
+  attr :messages
+
   def initialize(messages)
     super(ObjectProto.instance)
     
@@ -9,10 +11,12 @@ class ExpressionProto < Frame
   
   def eval_(receiver, args, locals)
     trace "ExpressionProto::eval()"
-    
-    return @messages.reduce(locals) do |receiver, value|
+
+    result = @messages.reduce(locals) do |receiver, value|
       value.eval_(receiver, [], locals)
     end
+    
+    return result
   end
 
   def inspect()

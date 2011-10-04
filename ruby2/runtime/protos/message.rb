@@ -1,23 +1,16 @@
+#
+# class MessageProto
+#
 
 class MessageProto < Frame
 
   attr :selector, true
   attr :args, true
-
+  
   def initialize(selector, args)
     super(ObjectProto.instance)
-    
+
     @selector, @args = selector, args
-  end
-
-  def eval_(receiver, args, locals)
-    trace "MessageProto::eval()"
-
-    messageArgs = @args.map do |value|
-      value.eval_(locals, [], locals)
-    end
-
-    return receiver.send_(@selector, messageArgs)
   end
 
   def inspect()
@@ -27,7 +20,41 @@ class MessageProto < Frame
   def to_s()
     return "#{@selector}" + (@args.empty? ? "" : ": #{@args}")
   end
+
+end
+
+
+class SendMessage < MessageProto
+
+  def initialize(selector, args)
+    super(selector, args)
+  end
+
+  def eval_(receiver, args, locals)
+    trace "MessageProto::eval()"
+
+    messageArgs = @args.map do |value|
+      value.eval_(locals, [], locals)
+    end
+
+    result = receiver.send_(@selector, messageArgs)
+
+    return result
+  end
   
+end
+
+
+class AssignMessage < MessageProto
+
+  def initialize(symbol, args)
+    super(:assign, [symbol, args])
+  end
+
+  def eval_(receiver, args, locals)
+  	return receiver.set_slot(@args[0].float, @args[1])
+  end
+
 end
 
 
@@ -40,7 +67,7 @@ class LocalMessage < MessageProto
   def eval_(receiver, args, locals)
     trace "LocalMessage::eval()"
 
-    return receiver.slots[@selector]
+    return receiver.find_slot(@selector)
   end
 
 end
@@ -50,7 +77,6 @@ class BlockMessage < MessageProto
 
   attr :expressions, true
   attr :argnames, true
-  attr :locals, true
 
   def initialize(argnames, expressions)
     super(:block, [])
