@@ -1,3 +1,6 @@
+#
+# frame.rb
+#
 
 class Hash
 
@@ -13,8 +16,8 @@ class Hash
     
     if value
       return value
-    else
-      raise "Slot not found: " + self.class.name + "." + symbol.to_s
+    #else
+    #  raise "Slot not found: " + self.class.name + "." + symbol.to_s
     end
 
     return nil
@@ -40,8 +43,10 @@ class Frame < Object
     
     if @proto != nil
       @slots.parent = @proto.slots
+      @_methods.parent = @proto._methods
     else
       @slots.parent = nil
+      @_methods.parent = nil
     end
   end
 
@@ -57,8 +62,13 @@ class Frame < Object
   end
 
   def find_slot(symbol)
-    #return self.find_symbol(:slots, symbol)
-    return @slots.find(symbol)
+    value = @slots.find(symbol)
+    
+    if value
+      return value
+    else
+      raise "Slot not found: " + self.class.name + "." + symbol.to_s
+    end
   end
 
   def add_method(symbol, value)
@@ -69,31 +79,23 @@ class Frame < Object
     return @_methods[symbol]
   end
 
-  def xsend_(selector, receiver, args)
-    method = find_symbol(:_methods, selector)
-    
+  def find_method(symbol)
+    method = @_methods.find(symbol)
+
     if method
-      return method.eval_(receiver, args, nil)
+      return method
+    else
+      raise "Method not found: " + self.class.name + "." + selector.to_s
     end
-    
-    return nil
   end
 
   def send_(selector, receiver, args)
-    trace "Frame::send()"
-
-    frame = receiver
-
-    begin
-      value = frame.get_method(selector)
-      frame = frame.proto
-    end while value == nil && frame != nil
+    method = find_method(selector)
     
-    if value
-      #return value.eval_(receiver, args, nil)
-      return value.frame.call_(receiver, args)
+    if method
+      return method.frame.call_(receiver, args)
     else
-      raise "Slot not found: " + self.class.name + "." + selector.to_s
+      raise "Send failed"
     end
     
     return nil

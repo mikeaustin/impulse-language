@@ -1,22 +1,18 @@
+#
+# impulse.rb
+#
 
 require './core/value.rb'
 require './core/frame.rb'
 
 require './core/protos/object.rb'
+require './core/protos/symbol.rb'
+require './core/protos/lobby.rb'
 require './core/protos/block.rb'
 require './core/protos/number.rb'
 
 require './runtime/protos/message.rb'
 require './runtime/protos/expression.rb'
-
-
-class LobbyProto < Frame
-
-  #def initialize()
-  #  super(ObjectProto.instance)
-  #end
-  
-end
 
 
 class LocalsProto < Frame
@@ -39,7 +35,8 @@ class Array
 
   def to_s
     return self.map do |item|
-      ((item.class == Value && item.float.is_a?(Symbol)) ? "'" : "") + item.to_s
+      ((item.float.is_a? Symbol) ? "'" : "") + item.to_s rescue item.to_s
+      #((item.class == Value && item.float.is_a?(Symbol)) ? "'" : "") + item.to_s
     end.join ", "
   end
 

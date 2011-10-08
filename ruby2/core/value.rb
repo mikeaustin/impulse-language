@@ -1,3 +1,6 @@
+#
+# value.rb
+#
 
 class Value
 
@@ -66,7 +69,7 @@ class Value
     when NumberValue.instance.frame
       return "#{@float}"
     else
-      return @frame.inspect()
+      return @frame.inspect(self)
     end
   end
 

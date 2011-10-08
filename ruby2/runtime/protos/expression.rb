@@ -19,8 +19,8 @@ class ExpressionProto < Frame
     return result
   end
 
-  def inspect()
-    messages = @messages.map do |message|
+  def inspect(value)
+    messages = value.frame.messages.map do |message|
       message.inspect()
     end
     

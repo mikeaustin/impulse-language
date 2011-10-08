@@ -13,8 +13,8 @@ class MessageProto < Frame
     @selector, @args = selector, args
   end
 
-  def inspect()
-    return "#<#{self.class.name} @selector=#{@selector} @args=#{@args.inspect}>"
+  def inspect(value)
+    return "#<#{value.frame.class.name} @selector=#{value.frame.selector} @args=#{value.frame.args.inspect}>"
   end
 
   def to_s()
