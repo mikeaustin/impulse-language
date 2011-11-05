@@ -32,6 +32,9 @@ class Frame < Object
   attr :slots, true
   attr :_methods, true
 
+  alias _to_s    to_s
+  alias _inspect inspect
+
   def self.new(*args)
     result = super(*args)
     
@@ -48,6 +51,14 @@ class Frame < Object
       @slots.parent = nil
       @_methods.parent = nil
     end
+  end
+
+  def to_s(value = nil)
+    return self._to_s()
+  end
+
+  def inspect(value = nil)
+    return self._inspect()
   end
 
   def init_slots()
@@ -85,7 +96,7 @@ class Frame < Object
     if method
       return method
     else
-      raise "Method not found: " + self.class.name + "." + selector.to_s
+      raise "Method not found: " + self.class.name + "." + symbol.to_s
     end
   end
 

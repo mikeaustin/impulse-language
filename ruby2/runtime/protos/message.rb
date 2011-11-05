@@ -17,8 +17,8 @@ class MessageProto < Frame
     return "#<#{value.frame.class.name} @selector=#{value.frame.selector} @args=#{value.frame.args.inspect}>"
   end
 
-  def to_s()
-    return "#{@selector}" + (@args.empty? ? "" : ": #{@args}")
+  def to_s(value)
+    return "#{value.frame.selector}" + (value.frame.args.empty? ? "" : ": #{value.frame.args}")
   end
 
 end
@@ -88,8 +88,8 @@ class BlockMessage < MessageProto
     return BlockProto.new(@argnames, @expressions, locals)
   end
 
-  def to_s()
-    argnames = @argnames.map(&:to_s).join(",")
+  def to_s(value)
+    argnames = value.frame.argnames.map(&:to_s).join(",")
     
     return "(|#{argnames}| #{expressions})"
   end

@@ -27,8 +27,8 @@ class ExpressionProto < Frame
     return messages
   end
 
-  def to_s()
-    messages = @messages.map do |message|
+  def to_s(value)
+    messages = value.frame.messages.map do |message|
       message.to_s
     end
     

@@ -9,10 +9,12 @@ class Value
 
   def initialize(value)
     case value
-    when Numeric, TrueClass, FalseClass, Symbol
+    when Numeric, TrueClass, FalseClass
       @frame, @float = NumberValue.instance.frame, value
+    when Symbol
+      @frame, @float = SymbolValue.instance.frame, value
     when Value
-      @frame = value.frame
+      @frame, @float = value.frame, value.float
     else
       @frame = value
     end
@@ -40,6 +42,14 @@ class Value
     return @frame.eval_(receiver, args, locals)
   end
 
+  def value()
+    if @frame == NumberValue.instance.frame
+      return self.float
+    end
+    
+    return self
+  end
+
   def send_(selector, args)
     return @frame.send_(selector, self, args)
   end
@@ -65,21 +75,11 @@ class Value
   end
 
   def inspect()
-    case @frame
-    when NumberValue.instance.frame
-      return "#{@float}"
-    else
-      return @frame.inspect(self)
-    end
+    return @frame.inspect(self)
   end
 
   def to_s()
-    case @frame
-    when NumberValue.instance.frame
-      return @float.to_s
-    else
-      return @frame.to_s
-    end
+    return @frame.to_s(self)
   end
 
 end

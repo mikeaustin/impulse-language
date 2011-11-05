@@ -33,18 +33,17 @@ end
 
 class Array
 
-  def to_s
-    return self.map do |item|
-      ((item.float.is_a? Symbol) ? "'" : "") + item.to_s rescue item.to_s
-      #((item.class == Value && item.float.is_a?(Symbol)) ? "'" : "") + item.to_s
-    end.join ", "
+  attr :args, true
+
+  def to_s()
+    return self.map do |item| item.to_s end.join ", "
   end
 
 end
 
 
 def assert(expression, operator, expected)
-  if expression.eval_($lobby, [], $lobby).float.send(operator, expected)
+  if expression.eval_($lobby, [], $lobby).value.send(operator, expected)
     print "\x1b[32m\x1b[1mpass\x1b[0m"
   else
     print "\x1b[31m\x1b[1mfail\x1b[0m"
@@ -59,7 +58,6 @@ end
 
 
 # x = 5
-#messages = [SendMessage.new(:assign, [Value.new(:x), Value.new(5)])]
 messages = [AssignMessage.new(Value.new(:x), Value.new(5))]
 assert(ExpressionProto.new(messages), :==, 5)
 
@@ -79,7 +77,11 @@ assert(ExpressionProto.new(messages), :==, 100)
 # |y| (x add: 5) pow: (y add: 1)
 messages = [BlockMessage.new([:y], [ExpressionProto.new(messages)])]
 
-# (|y| (x add: 5) pow: (y add: 1)) eval: 2
+# block eval: 2
 messages = [ExpressionProto.new(messages), SendMessage.new(:eval, [Value.new(2)])]
 assert(ExpressionProto.new(messages), :==, 1000)
+
+messages = [LocalMessage.new(:self)]
+$lobby.set_slot(:self, $lobby)
+assert(ExpressionProto.new(messages), :==, $lobby)
 

@@ -37,6 +37,14 @@ class NumberValue < Frame
   def initialize()
     super(NumberProto.instance)
   end
+
+  def to_s(value)
+    return value.float.to_s
+  end
+  
+  def inspect(value)
+    return value.float.inspect
+  end
   
 end
 
