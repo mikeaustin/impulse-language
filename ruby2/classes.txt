@@ -1,0 +1,45 @@
+
+class Value	A Value is a wrapper around a float value or pointer to a Frame
+
+class Frame	A Frame contains local and method maps
+
+  initialize(proto)
+  init_slots()
+
+  set_slot(symbol, value)
+  get_slot(symbol)
+  find_slot(symbol)
+  find_symbol(symbol)
+  add_method(symbol, value)
+  get_method(symbol)
+
+  send(selector, receiver, args)
+  eval_(receiver, args, locals)
+
+class ExpressionProto
+
+  initialize(messages)
+
+  eval_(receiver, args, locals)
+
+  inspect()
+  to_s()
+
+class MessageProto
+
+  initialize(selector, args)
+
+  eval_(receiver, args, locals)
+
+  inspect()
+  to_s()
+
+class Object
+
+  initialize()
+  init_slots()
+
+  id(receiver, args, locals)
+  is_a(receiver, args, locals)
+  assign(receiver, args, locals)
+

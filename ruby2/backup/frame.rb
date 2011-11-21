@@ -32,13 +32,10 @@ class Frame < Object
   attr :slots, true
   attr :_methods, true
 
-  alias _to_s    to_s
-  alias _inspect inspect
-
   def self.new(*args)
     result = super(*args)
     
-    return Value(result)
+    return Value.new(result)
   end
 
   def initialize(proto = nil)
@@ -51,14 +48,6 @@ class Frame < Object
       @slots.parent = nil
       @_methods.parent = nil
     end
-  end
-
-  def to_s(value = nil)
-    return self._to_s()
-  end
-
-  def inspect(value = nil)
-    return self._inspect() + @slots.to_s()
   end
 
   def init_slots()
@@ -91,15 +80,7 @@ class Frame < Object
   end
 
   def find_method(symbol)
-    method = @_methods.find(symbol)
-
-    if method
-      return method
-    else
-      raise "Method not found: " + self.class.name + "." + symbol.to_s
-    end
-    
-    return nil
+    return @_methods.find(symbol)
   end
 
   def send_(selector, receiver, args)
@@ -108,14 +89,34 @@ class Frame < Object
     if method
       return method.frame.call_(receiver, args)
     else
-      raise "Send failed"
+      raise "Method not found: " + self.class.name + "." + selector.to_s
+    end
+    
+    return nil
+  end
+
+  def xsend_(selector, receiver, args)
+    trace "Frame::send()"
+
+    frame = receiver
+
+    begin
+      value = frame.get_method(selector)
+      frame = frame.proto
+    end while value == nil && frame != nil
+    
+    if value
+      #return value.eval_(receiver, args, nil)
+      return value.frame.call_(receiver, args)
+    else
+      raise "Slot not found: " + self.class.name + "." + selector.to_s
     end
     
     return nil
   end
 
   def eval_(receiver, args, locals)
-    return Value(self)
+    return Value.new(self)
   end
   
 end

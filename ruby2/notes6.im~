@@ -1,0 +1,111 @@
+
+arrray
+Ordered map
+Ordered set
+
+
+Array
+
+~	Concatination
+<<	Append
+
+
+Set
+
+|	union
+\	difference (complement)
+&	intersection
+^	symmetric difference
+
+
+Vector
+
+vector + vector => vector	Vector vector addition
+	vector == vector
+	vector size
+-	Vector vector subtraction
+*	Vector scalar multiplication
+/	Vector Scalar division
+	vector length
+	vector distance-to: vector => vector
+x	vector cross-product: vector => vector
+.	vector dot-product: scalar => scalar
+	vector normalize
+	[vector] map: block
+
+<|2 3|> distance-to: <|3 4|> == <|1 1|>
+
+
+Array  [1, 2, 3]
+
+Set    {1, 2, 3}  or  [<1 2 3>]  <set> [1, 2, 3]
+
+Map    {1: "a", 2: "b", 3: "c"}  or  {1 => "a", 2 => "b", 3 => "c"}
+
+Vector <|1 2 3|>  or  or [|1 2 3|]  <vector> [1, 2, 3]
+
+Range  100..1000
+
+Bytes
+
+
+object <mouse-event>
+
+   method dispatch-event: event
+      if view contains: event point
+         view send-event: <event> type: event.type, point: event.point - view.origin
+      end
+   end
+
+end
+
+
+object <mouse-event>
+
+   method dispatch-event |event|
+      if view.contains event.point
+         view.send-event (<mouse-event> type: event.type, point: event.point - view.origin)
+      end
+   end
+
+end
+
+
+object <mouse-event>
+
+   method dispatch-event( event )
+      if view.contains( event.point )
+         view.send-event( <mouse-event>( type: event.type, point: event.point - view.origin ))
+      end
+   end
+
+end
+
+
+object <mouse-event>
+
+   method dispatch-event (event)
+      if view.contains (event.point)
+         view.send-event (<mouse-event> (type: event.type, point: event.point - view.origin))
+      end
+   end
+
+end
+
+
+
+print "Hello, world"
+
+print: "Hello, world"
+
+canvas draw-text: "Hello, world", size: 16px, weight: 'bold
+
+canvas | draw-text "Hello, world", size: 16.px, weight: 'bold
+
+
+"a b c" | split " " | join ","
+
+method capitalize
+   "abc" | head upper-case ~ tail
+end
+

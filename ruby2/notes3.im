@@ -1,0 +1,63 @@
+
+module collection
+
+object <state>
+
+   method set-state: state
+      self.proto finish
+      self.proto = state
+      self.proto start
+   end
+
+   method start
+   end
+   
+   method finish
+   end
+   
+end
+
+
+object <foo>
+
+   method bar: value
+      ...
+   end
+
+   proxy private: self
+      method private.foo
+      end
+   end
+   
+   object walking
+      method advance
+      end
+   end
+   
+   self set-state: walking
+
+   self advance
+   
+   proxy
+   state
+   trait
+   
+end
+
+
+
+
+method count-words: text
+  return text split: " " $ fold: |hash, word| do
+     hash[word] += 1; hash
+  end, with: [:] default: 0
+end
+
+
+
+method count-words: text
+  return text.split " " $ fold |hash, word| do
+     hash set (word, hash[word] + 1)
+  end, with: [:] default: 0
+end
+

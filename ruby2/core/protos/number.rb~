@@ -2,8 +2,6 @@
 # core/protos/number.rb
 #
 
-require './core/frame.rb'
-
 class NumberProto < Frame
 
   def self.instance()
