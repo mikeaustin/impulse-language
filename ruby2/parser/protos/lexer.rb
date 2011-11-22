@@ -55,7 +55,7 @@ class Lexer < Frame
     #  token || klass.read(@stream)
     #end
     
-    read [NumberToken, StringToken, IdentifierToken]
+    @token = read [NumberToken, StringToken, IdentifierToken]
     
     return @token
   end

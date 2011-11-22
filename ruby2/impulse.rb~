@@ -113,7 +113,7 @@ ExpressionProto(messages).eval_($lobby, [], $lobby)
 
 
 lexer = Lexer.new(STDIN)
-parser = Parser.new(lexer)
+parser = ExpressionParser.new(lexer)
 
 while true
   #token = lexer.frame.next_token()

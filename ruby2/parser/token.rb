@@ -22,8 +22,6 @@ end
 
 class NumberToken < Token
 
-  PARSER = "lit_number"
-
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/\d/)
 

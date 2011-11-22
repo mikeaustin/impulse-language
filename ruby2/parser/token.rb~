@@ -22,6 +22,10 @@ end
 
 class NumberToken < Token
 
+  def parser
+    return :lit_number
+  end
+
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/\d/)
 

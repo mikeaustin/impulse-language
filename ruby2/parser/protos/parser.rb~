@@ -11,49 +11,76 @@ class Parser < Frame
     @lexer = lexer
   end
 
-  def parse()
-    ExpressionParser.new(@lexer).frame.parse()
+  def peek_token()
+    return @lexer.frame.peek_token()
+  end
+  
+  def next_token()
+    return @lexer.frame.next_token()
   end
 
+  def expect(token)
+    if peek_token.instance_of?(Token) && !peek_token().instance_of?(token)
+      puts "*** Expected #{token}, found #{next_token()}"
+      
+      return nil
+    end
+
+    if peek_token().instance_of? Parser
+      return parser.new(@lexer).frame.parse()
+    end
+    
+    if !peek_token().instance_of? NewlineToken
+      return next_token()
+    end
+  end
+
+  def option(token)
+    if !peek_token().instance_of? token
+      return nil
+    end
+    
+    return next_token()
+  end
+
+  def switch()
+    return peek_token()
+  end
+
+  def parse(type)
+    return type.new(@lexer).frame.parse()
+  end
+
+end
+
+class StatementParser < Parser
+
+  def parse()
+    #expression = ExpressionParser.new(@lexer).frame.parse()
+    expression = ExpressionParser(@lexer)
+
+    #expect(NewlineToken)
+    
+    return expression
+  end
+  
+end
+
+
+def ExpressionParser(lexer)
+
+  return ExpressionParser.new(lexer).frame.parse()
 
 end
 
 class ExpressionParser < Parser
 
   def parse()
-    #token = lexer.frame.peek_token()
-    #token = NumberParser.parse(lexer)
-
-    @lexer.frame.next_token()
-  end
-
-  def lit_number()
-    token = @lexer.next_token()
-    
-    return token;
-  end
+    case switch()
+      when NumberToken;		return next_token()
+      when IdentifierToken;	return next_token()
+    end
+  end    
   
-end
-
-class NumberParser < Parser
-
-  def parse()
-    if @lexer.frame.peek_token().instance_of? NumberToken
-      token = @lexer.frame.next_token()
-      return token
-    end
-  end
-
-end
-
-class IdentifierParser < Parser
-
-  def parse()
-    if @lexer.frame.peek_token().instance_of? IdentifierToken
-      token = @lexer.frame.next_token()
-      return token
-    end
-  end
-
 end
 
