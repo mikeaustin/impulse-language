@@ -40,22 +40,13 @@ class Lexer < Frame
   def peek_token()
     return @token if @token
 
-    if @stream.peek().chr.match(/\n/)
-      @stream.getc()
-      
-      return NewlineToken.new("\\n")
-    end
+    return nil if @stream.peek() == nil
 
     while @stream.peek().chr.match(/[ \t]/)
       @stream.getc()
-    end
+    end rescue nil
     
-    #@token = NumberToken.read(@stream) || StringToken.read(@stream) || IdentifierToken.read(@stream)
-    #@token = [NumberToken, StringToken, IdentifierToken].reduce(nil) do |token, klass|
-    #  token || klass.read(@stream)
-    #end
-    
-    @token = read [NumberToken, StringToken, IdentifierToken]
+    @token = read [NewlineToken, NumberToken, StringToken, IdentifierToken, CommaToken, VerticalBarToken]
     
     return @token
   end

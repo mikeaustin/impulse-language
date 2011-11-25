@@ -99,7 +99,7 @@ class BlockMessage < MessageProto
   attr :argnames, true
 
   def initialize(argnames, expressions)
-    super(:block, [])
+    super(:block, [argnames, expressions])
     
     @argnames, @expressions = argnames, expressions
   end
@@ -154,7 +154,7 @@ class MethodMessage < MessageProto
     
     receiver.add_method(@args[0], block)
     
-    return nil
+    return block
   end
 
 end

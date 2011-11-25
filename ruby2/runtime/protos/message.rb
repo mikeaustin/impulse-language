@@ -99,7 +99,7 @@ class BlockMessage < MessageProto
   attr :argnames, true
 
   def initialize(argnames, expressions)
-    super(:block, [])
+    super(:block, [argnames, expressions])
     
     @argnames, @expressions = argnames, expressions
   end

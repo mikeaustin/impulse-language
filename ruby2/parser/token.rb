@@ -54,7 +54,45 @@ class IdentifierToken < Token
 
 end
 
+class XOperatorToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[+-]/)
+    
+    return self.read_helper(stream, /[+-]/, :to_sym)
+  end
+
+end
+
+class CommaToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[,]/)
+    
+    return self.read_helper(stream, /[,]/, :to_sym)
+  end
+
+end
+
+class VerticalBarToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[|]/)
+    
+    return self.new(stream.getc().to_sym)
+  end
+
+end
+
 class NewlineToken < Token
+
+  def self.read(stream)
+    return nil if !stream.peek().chr.match(/\n/)
+    
+    stream.getc()
+    
+    return NewlineToken.new("\\n".to_sym)
+  end
 
 end
 
