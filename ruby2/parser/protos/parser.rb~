@@ -16,14 +16,12 @@ class Parser < Frame
   end
   
   def next_token()
-    $token = @lexer.frame.next_token()
-
-    return $token
+    return $token = @lexer.frame.next_token()
   end
 
-  def expect(token)
+  def expect(token, message = "")
     if !peek_token().instance_of?(token)
-      puts "*** Unexpected #{peek_token()} after #{$token}"
+      puts "*** Syntax Error | Unexpected token #{peek_token()} after #{$token}. #{message}"
       
       exit
     end
@@ -31,12 +29,26 @@ class Parser < Frame
     return next_token()
   end
 
+  def expect2(parser, message = "")
+    token = parser.new(@lexer).frame.parse()
+    
+    if !token
+      #expect(Token, message)
+    end
+    
+    return token
+   end
+
   def option(token)
     if !peek_token().instance_of?(token)
       return nil
     end
     
     return next_token()
+  end
+
+  def option2(parser)
+    return parser.new(@lexer).frame.parse()
   end
 
   def repeat(token)
@@ -56,11 +68,11 @@ class PrimaryParser < Parser
 
   def parse()
     case peek_token()
-      when NumberToken;      return next_token()
-      when StringToken;      return next_token()
+      when LitNumberToken;   return next_token()
+      when LitStringToken;   return next_token()
       when IdentifierToken;  return LocalMessage(next_token())
       when VerticalBarToken; return BlockParser.new(@lexer).frame.parse()
-      #else expect(Token)
+      else expect(Token, "Expected an expression")
     end
   end
 
@@ -75,7 +87,9 @@ class MessageParser < Parser
 
   def parse()
     case peek_token()
-      when IdentifierToken; return SendMessage(next_token(), [])
+      when IdentifierToken; return SendMessage(next_token().float, [])
+      when NewlineToken;    return nil;
+      else expect(Token, "Expected a message.")
     end
   end
   
@@ -85,11 +99,11 @@ end
 class StatementParser < Parser
 
   def parse()
-    expression = ExpressionParser(@lexer)
+    messages = ExpressionParser(@lexer)
     
-    expect(NewlineToken)
+    expect(NewlineToken, "Expecting a message.")
     
-    return expression
+    return messages
   end
   
 end
@@ -102,9 +116,9 @@ end
 class ExpressionParser < Parser
 
   def parse(messages = [])
-    messages << PrimaryParser(@lexer)
+    messages << expect2(PrimaryParser, "Expecting an expression.")
     
-    while message = MessageParser(@lexer)
+    while message = option2(MessageParser)
       messages << message
     end
  
@@ -117,13 +131,13 @@ end
 class BlockParser < Parser
 
   def parse(argnames = [])
-    expect(VerticalBarToken)
+    expect(VerticalBarToken, "foo")
 
     begin repeat(IdentifierToken) do |argname|
       argnames << argname
     end end while option(CommaToken)
 
-    expect(VerticalBarToken)
+    expect(VerticalBarToken, "Expected block arguments.")
     
     return BlockMessage(argnames, [ExpressionParser(@lexer)])
   end

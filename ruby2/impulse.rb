@@ -47,6 +47,10 @@ class Array
 end
 
 
+messages = [Value(5), SendMessage(:sin, [])]
+p ExpressionProto(messages).eval_($lobby, [], $lobby)
+
+
 lexer = Lexer.new(STDIN)
 #lexer = Lexer.new(File.open("test.im"))
 parser = StatementParser.new(lexer)
@@ -55,7 +59,7 @@ while true
   #token = lexer.frame.next_token()
   #p token
   print "] "
-  result = parser.frame.parse()
-  print "= " + result.inspect + "\n"
+  messages = parser.frame.parse()
+  print "= " + ExpressionProto(messages).eval_($lobby, [], $lobby).to_s + "\n"
 end
 

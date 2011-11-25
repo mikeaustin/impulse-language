@@ -27,6 +27,8 @@ end
 
 class Lexer < Frame
 
+  READERS = [LitNumberToken, LitStringToken, IdentifierToken, CommaToken, VerticalBarToken, NewlineToken]
+
   def initialize(stream)
     @stream = stream
   end
@@ -46,7 +48,15 @@ class Lexer < Frame
       @stream.getc()
     end rescue nil
     
-    @token = read [NewlineToken, NumberToken, StringToken, IdentifierToken, CommaToken, VerticalBarToken]
+    @token = READERS.reduce(nil) do |token, klass|
+      token || klass.read(@stream)
+    end
+    
+    if !@token
+      puts "*** Unknown token #{@stream.peek()} after #{$token}"
+      
+      exit
+    end
     
     return @token
   end

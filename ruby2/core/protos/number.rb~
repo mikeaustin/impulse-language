@@ -2,6 +2,8 @@
 # core/protos/number.rb
 #
 
+require './core/frame.rb'
+
 class NumberProto < Frame
 
   def self.instance()
@@ -13,6 +15,7 @@ class NumberProto < Frame
     
     self.add_method(:add, FunctionProto(self.method(:add_)))
     self.add_method(:sin, FunctionProto(self.method(:sin)))
+    self.add_method(:cos, FunctionProto(self.method(:cos)))
     self.add_method(:pow, FunctionProto(self.method(:pow_)))
   end
 
@@ -22,6 +25,10 @@ class NumberProto < Frame
 
   def sin(receiver, args)
     return Value(Math.sin(receiver.float))
+  end
+
+  def cos(receiver, args)
+    return Value(Math.cos(receiver.float))
   end
 
   def pow_(receiver, args)

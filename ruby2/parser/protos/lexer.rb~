@@ -27,6 +27,8 @@ end
 
 class Lexer < Frame
 
+  READERS = [LitNumberToken, LitStringToken, IdentifierToken, CommaToken, VerticalBarToken, NewlineToken]
+
   def initialize(stream)
     @stream = stream
   end
@@ -45,21 +47,16 @@ class Lexer < Frame
     while @stream.peek().chr.match(/[ \t]/)
       @stream.getc()
     end rescue nil
-
-#    if @stream.peek().chr.match(/\n/)
- #     @stream.getc()
-  #    
-   #   @token = NewlineToken.new("\\n")
-    #  
-     # return @token
-    #end
     
-    #@token = NumberToken.read(@stream) || StringToken.read(@stream) || IdentifierToken.read(@stream)
-    #@token = [NumberToken, StringToken, IdentifierToken].reduce(nil) do |token, klass|
-    #  token || klass.read(@stream)
-    #end
+    @token = READERS.reduce(nil) do |token, klass|
+      token || klass.read(@stream)
+    end
     
-    @token = read [NewlineToken, NumberToken, StringToken, IdentifierToken, CommaToken, VerticalBarToken]
+    if !@token
+      puts "*** Unknown token #{peek_token()} after #{$token}"
+      
+      exit
+    end
     
     return @token
   end

@@ -2,6 +2,8 @@
 # symbol.rb
 #
 
+require './core/frame.rb'
+
 class SymbolProto < Frame
 
   def self.instance()

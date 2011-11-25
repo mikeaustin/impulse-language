@@ -20,7 +20,7 @@ class Token < Value
 
 end
 
-class NumberToken < Token
+class LitNumberToken < Token
 
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/\d/)
@@ -30,7 +30,7 @@ class NumberToken < Token
   
 end
 
-class StringToken < Token
+class LitStringToken < Token
 
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/["]/)

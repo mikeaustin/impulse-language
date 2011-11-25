@@ -18,9 +18,13 @@ class Token < Value
     return self.new(buffer.send(cast))
   end
 
+  def self.read(stream)
+    return Token.new(stream.getc().to_sym)
+  end
+
 end
 
-class NumberToken < Token
+class LitNumberToken < Token
 
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/\d/)
@@ -30,7 +34,7 @@ class NumberToken < Token
   
 end
 
-class StringToken < Token
+class LitStringToken < Token
 
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/["]/)
@@ -89,7 +93,9 @@ class NewlineToken < Token
   def self.read(stream)
     return nil if !stream.peek().chr.match(/\n/)
     
-    return NewlineToken.new(stream.getc().to_sym)
+    stream.getc()
+    
+    return NewlineToken.new("\\n".to_sym)
   end
 
 end
