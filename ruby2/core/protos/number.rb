@@ -7,16 +7,14 @@ require './core/frame.rb'
 class NumberProto < Frame
 
   def self.instance()
-    return @instance ||= NumberProto.new()
-  end
+    @instance ||= NumberProto.new(ObjectProto.instance)
 
-  def initialize()
-    super(ObjectProto.instance)
+    @instance.add_method(:add, FunctionProto(@instance.frame.method(:add_)))
+    @instance.add_method(:sin, FunctionProto(@instance.frame.method(:sin)))
+    @instance.add_method(:cos, FunctionProto(@instance.frame.method(:cos)))
+    @instance.add_method(:pow, FunctionProto(@instance.frame.method(:pow_)))
     
-    self.add_method(:add, FunctionProto(self.method(:add_)))
-    self.add_method(:sin, FunctionProto(self.method(:sin)))
-    self.add_method(:cos, FunctionProto(self.method(:cos)))
-    self.add_method(:pow, FunctionProto(self.method(:pow_)))
+    return @instance
   end
 
   def add_(receiver, args)
@@ -35,24 +33,24 @@ class NumberProto < Frame
     return Value(receiver.float ** args[0].float)
   end
 
+  def frame_inspect(value)
+    return Value("<number>")
+  end
+
 end
 
 
 class NumberValue < Frame
 
   def self.instance()
-    return @instance ||= NumberValue.new()
+    return @instance ||= NumberValue.new(NumberProto.instance)
   end
   
-  def initialize()
-    super(NumberProto.instance)
-  end
-
-  def to_s(value)
+  def frame_to_s(value)
     return value.float.to_s
   end
   
-  def inspect(value)
+  def frame_inspect(value)
     return value.float.inspect
   end
   

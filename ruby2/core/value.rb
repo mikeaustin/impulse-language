@@ -20,7 +20,7 @@ class Value
     when Value
       @frame, @float = value.frame, value.float
     when String
-      @frame, @float = StringProto.new(value).frame, nil
+      @frame, @float = StringProto.instance.frame.create(value).frame, nil
     else
       @frame = value
     end
@@ -30,8 +30,8 @@ class Value
     return @frame.proto
   end
 
-  def slots()
-    return @frame.slots
+  def frame_locals()
+    return @frame.frame_locals
   end
 
   def _methods()
@@ -60,16 +60,16 @@ class Value
     return @frame.send_(selector, self, args)
   end
 
-  def set_slot(symbol, value)
-    return @frame.set_slot(symbol, value)
+  def set_local(symbol, value)
+    return @frame.set_local(symbol, value)
   end
   
-  def get_slot(symbol)
-    return @frame.get_slot(symbol)
+  def get_local(symbol)
+    return @frame.get_local(symbol)
   end
 
-  def find_slot(symbol)
-    return @frame.find_slot(symbol)
+  def find_local(symbol)
+    return @frame.find_local(symbol)
   end
 
   def add_method(symbol, value)
@@ -80,12 +80,12 @@ class Value
     return @frame.get_method(symbol)
   end
 
-  def inspect()
-    return @frame.inspect(self)
+  def to_s()
+    return @frame.frame_to_s(self)
   end
 
-  def to_s()
-    return @frame.to_s(self)
+  def inspect()
+    return @frame.frame_inspect(self)
   end
 
 end

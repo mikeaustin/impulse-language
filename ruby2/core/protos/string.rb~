@@ -9,27 +9,40 @@ class StringProto < Frame
   attr :string, true
 
   def self.instance()
-    return @instance ||= StringProto.new()
+    @instance ||= StringProto.new(ObjectProto.instance)
+
+    @instance.add_method(:size, FunctionProto(@instance.frame.method(:size_)))
+    @instance.add_method(:capitalize, FunctionProto(@instance.frame.method(:capitalize)))
+
+    return @instance
   end
 
-  def initialize(string)
-    super(ObjectProto.instance)
+  def create(string)
+    object = StringProto.new(Value(self))
     
-    @string = string
+    object.frame.string = string
     
-    self.add_method(:size, FunctionProto(self.method(:size_)))
+    return object
   end
 
-  def to_s(value)
-    return value
+  def frame_to_s(value)
+    return value.frame.string
   end
   
-  def inspect(value)
-    return '"' + value.frame.string + '"'
+  def frame_inspect(value)
+    if value.frame == StringProto.instance.frame
+      return Value("<string>")
+    end
+    
+    return "\"#{value.frame.string}\""
   end
 
   def size_(receiver, args)
-    return Value(@string.size)
+    return Value(receiver.frame.string.size)
+  end
+
+  def capitalize(receiver, args)
+    return Value(receiver.frame.string[0].upcase + receiver.frame.string[1..-1])
   end
 
 end

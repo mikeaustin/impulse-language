@@ -1,5 +1,5 @@
 #
-# frame.rb
+# core/frame.rb
 #
 
 class Hash
@@ -29,11 +29,8 @@ end
 class Frame < Object
 
   attr :proto, true
-  attr :slots, true
+  attr :frame_locals, true
   attr :_methods, true
-
-  alias _to_s    to_s
-  alias _inspect inspect
 
   def self.new(*args)
     result = super(*args)
@@ -42,43 +39,39 @@ class Frame < Object
   end
 
   def initialize(proto = nil)
-    @proto, @slots, @_methods = proto, {}, {}
+    @proto, @frame_locals, @_methods = proto, {}, {}
     
     if @proto != nil
-      @slots.parent = @proto.slots
+      @frame_locals.parent = @proto.frame_locals
       @_methods.parent = @proto._methods
     else
-      @slots.parent = nil
+      @frame_locals.parent = nil
       @_methods.parent = nil
     end
   end
 
-  def to_s(value = nil)
-    return self._to_s()
-  end
-
-  def inspect(value = nil)
-    return self._inspect() + @slots.to_s()
+  def frame_inspect(value)
+    return self.inspect() + @frame_locals.to_s()
   end
 
   def init_slots()
   end
 
-  def set_slot(symbol, value)
-    return @slots[symbol] = value
+  def set_local(symbol, value)
+    return @frame_locals[symbol] = value
   end
 
-  def get_slot(symbol)
-    return @slots[symbol]
+  def get_local(symbol)
+    return @frame_locals[symbol]
   end
 
-  def find_slot(symbol)
-    value = @slots.find(symbol)
+  def find_local(symbol)
+    value = @frame_locals.find(symbol)
     
     if value
       return value
     else
-      raise "Slot not found: " + self.class.name + "." + symbol.to_s
+      raise "Local not found: " + self.class.name + "." + symbol.to_s
     end
   end
 

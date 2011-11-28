@@ -26,11 +26,11 @@ class SymbolValue < Frame
     super(SymbolProto.instance)
   end
 
-  def to_s(value)
+  def frame_to_s(value)
     return "'" + value.float.to_s
   end
 
-  def inspect(value)
+  def frame_inspect(value)
     return value.float.inspect
   end
 

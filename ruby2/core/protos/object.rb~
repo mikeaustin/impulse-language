@@ -2,7 +2,11 @@
 class ObjectProto < Frame
 
   def self.instance()
-    return @instance ||= ObjectProto.new()
+    @instance ||= ObjectProto.new()
+
+    #@instance.add_method(:id,     FunctionProto(@instance.frame.method(:id)))
+    
+    return @instance
   end
   
   def initialize()
@@ -10,17 +14,21 @@ class ObjectProto < Frame
   end
   
   def init_slots()
-    self.add_method(:id,     FunctionProto.new(self.method(:id)))
-    self.add_method(:is_a,   FunctionProto.new(self.method(:is_a)))
-    self.add_method(:assign, FunctionProto.new(self.method(:assign_)))
+    self.add_method(:type,   FunctionProto(self.method(:type)))
+    self.add_method(:is_a,   FunctionProto(self.method(:is_a)))
+    self.add_method(:assign, FunctionProto(self.method(:assign_)))
   end
 
   def id(receiver, args)
-    return Value.new(receiver.object_id)
+    return Value(receiver.frame.object_id)
+  end
+
+  def type(receiver, args)
+    return receiver.proto
   end
 
   def is_a(receiver, args)
-    return Value.new(receiver.proto.frame == args[0].frame)
+    return Value(receiver.proto.frame == args[0].frame)
   end
 
   def assign_(receiver, args)

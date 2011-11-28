@@ -21,7 +21,7 @@ class Parser < Frame
 
   def expect(token, message = "")
     if !peek_token().instance_of?(token)
-      puts "*** Syntax Error | Unexpected token #{peek_token()} after #{$token}. #{message}"
+      puts "*** Syntax Error: Unexpected token '#{peek_token()}'. #{message}"
       
       exit
     end
@@ -68,9 +68,12 @@ class PrimaryParser < Parser
 
   def parse()
     case peek_token()
-      when LitNumberToken;   return next_token()
-      when LitStringToken;   return next_token()
-      when IdentifierToken;  return LocalMessage(next_token())
+      when LitNumberToken;   return Value(next_token().float)
+      #when LitStringToken;   return StringProto.new(next_token().frame)
+      #when LitStringToken;   return next_token()
+      when LitStringToken;
+         return StringProto.instance.frame.create(next_token().frame.string)
+      when IdentifierToken;  return LocalMessage(next_token().float)
       when VerticalBarToken; return BlockParser.new(@lexer).frame.parse()
       else expect(Token, "Expected an expression.")
     end

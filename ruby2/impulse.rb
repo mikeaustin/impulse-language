@@ -38,8 +38,6 @@ end
 
 class Array
 
-  attr :args, true
-
   def to_s()
     return self.map do |item| item.to_s end.join ", "
   end
@@ -47,9 +45,10 @@ class Array
 end
 
 
-messages = [Value(5), SendMessage(:sin, [])]
-p ExpressionProto(messages).eval_($lobby, [], $lobby)
-
+messages = [Value(5), SendMessage(:type, [])]
+expr = ExpressionProto(messages)
+value = expr.eval_($lobby, [], $lobby)
+#p value
 
 lexer = Lexer.new(STDIN)
 #lexer = Lexer.new(File.open("test.im"))
@@ -60,6 +59,6 @@ while true
   #p token
   print "] "
   messages = parser.frame.parse()
-  print "= " + ExpressionProto(messages).eval_($lobby, [], $lobby).to_s + "\n"
+  print "= ", ExpressionProto(messages).eval_($lobby, [], $lobby).inspect(), "\n"
 end
 

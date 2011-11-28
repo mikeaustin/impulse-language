@@ -17,11 +17,11 @@ class MessageProto < Frame
     @selector, @args = selector, args
   end
 
-  def inspect(value)
+  def frame_inspect(value)
     return "#<#{value.frame.class.name} @selector=#{value.frame.selector} @args=#{value.frame.args.inspect}>"
   end
 
-  def to_s(value)
+  def frame_to_s(value)
     return "#{value.frame.selector}" + (value.frame.args.empty? ? "" : ": #{value.frame.args}")
   end
 
@@ -64,7 +64,7 @@ class AssignMessage < MessageProto
   end
 
   def eval_(receiver, args, locals)
-  	return receiver.set_slot(@args[0].float, @args[1])
+  	return receiver.set_local(@args[0].float, @args[1])
   end
 
 end
@@ -83,7 +83,7 @@ class LocalMessage < MessageProto
   def eval_(receiver, args, locals)
     trace "LocalMessage::eval()"
 
-    return receiver.find_slot(@selector)
+    return receiver.find_local(@selector)
   end
 
 end

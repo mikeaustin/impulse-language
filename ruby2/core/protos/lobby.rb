@@ -16,12 +16,17 @@ class LobbyProto < Frame
     super(nil)
     
     self.add_method(:print, FunctionProto(self.method(:print_)))
+    self.set_local(:exit, FunctionProto(self.method(:exit)))
   end
   
   def print_(receiver, args)
   	puts args[0]
   	
     return nil
+  end
+
+  def exit(receiver, args)
+    exit
   end
   
 end

@@ -26,7 +26,7 @@ class ExpressionProto < Frame
     return result
   end
 
-  def inspect(value)
+  def frame_inspect(value)
     messages = value.frame.messages.map do |message|
       message.inspect()
     end
@@ -34,7 +34,7 @@ class ExpressionProto < Frame
     return messages
   end
 
-  def to_s(value)
+  def frame_to_s(value)
     messages = value.frame.messages.map do |message|
       message.to_s
     end

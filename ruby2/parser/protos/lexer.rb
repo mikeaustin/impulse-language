@@ -53,7 +53,7 @@ class Lexer < Frame
     end
     
     if !@token
-      puts "*** Unknown token #{@stream.peek()} after #{$token}"
+      puts "*** Syntax Error: Unknown character '#{@stream.peek()}'"
       
       exit
     end
