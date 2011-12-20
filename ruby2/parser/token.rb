@@ -49,17 +49,29 @@ class IdentifierToken < Token
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/[a-zA-Z]/)
 
-    return self.read_helper(stream, /[a-zA-Z\d-]/, :to_sym)
+    token = self.read_helper(stream, /[a-zA-Z\d-]/, :to_sym)
+    
+    if stream.peek().chr.match(/[:]/)
+      stream.getc();
+
+      return KeywordToken.new(token.float)
+    end
+    
+    return token
   end
 
 end
 
-class XOperatorToken < Token
+class KeywordToken < Token
+
+end
+
+class OperatorToken < Token
 
   def self.read(stream, buffer = "")
-    return nil if !stream.peek().chr.match(/[+-]/)
+    return nil if !stream.peek().chr.match(/[\+\-\*\/%]/)
     
-    return self.read_helper(stream, /[+-]/, :to_sym)
+    return self.read_helper(stream, /[\+\-\*\/%]/, :to_sym)
   end
 
 end
@@ -78,6 +90,66 @@ class VerticalBarToken < Token
 
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/[|]/)
+    
+    return self.new(stream.getc().to_sym)
+  end
+
+end
+
+class DollarSignToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[$]/)
+    
+    return self.new(stream.getc().to_sym)
+  end
+
+end
+
+class AssignToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[=]/)
+    
+    return self.new(stream.getc().to_sym)
+  end
+
+end
+
+class OpenParenToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[(]/)
+    
+    return self.new(stream.getc().to_sym)
+  end
+
+end
+
+class CloseParenToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[)]/)
+    
+    return self.new(stream.getc().to_sym)
+  end
+
+end
+
+class OpenBracketToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[\[]/)
+    
+    return self.new(stream.getc().to_sym)
+  end
+
+end
+
+class CloseBracketToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[\]]/)
     
     return self.new(stream.getc().to_sym)
   end

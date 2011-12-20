@@ -21,27 +21,6 @@ circle = <circle>.clone (color: <color>.white)
 object <enumerable>
 
    method size
-      return self.fold |size, n| size + n, with: 0
-   end
-
-   method map (block)
-      return self.fold |enum, item| enum << block [item]
-   end
-
-   method max
-     return self.fold |max, item| item if item > max else max
-     return self.fold |max, n| item > max ? item : max
-   end
-
-   method any (value)
-      self.fold |enum, item| item == value ? return true
-   end
-
-end
-
-object <enumerable>
-
-   method size
       return self fold: |size, n| size + n, with: 0
    end
 
@@ -55,89 +34,8 @@ object <enumerable>
    end
 
    method any: value
-      self fold |enum, item| item == value ? return true
+      self fold: |enum, item| item == value ? return true
    end
 
 end
-
-
-
-
-module <value>
-
-   required clone
-
-   method clone
-      // Do a deep clone
-   end
-
-end
-
-
-object <point>
-
-   trait <value>
-   trait <comparable>
-
-   field x = 0.0, public: true
-   field y = 0.0, public: true
-   
-   method distance (point)
-      return self.x * point.x + self.y * point.y | sqrt
-   end
-
-end
-
-point = <point> (x: 10, y: 20)
-
-object <view>
-
-   field origin = <point> (x: 10, y: 10)
-   field size = <point> (x: 100, y: 100)
-   field superview = nil
-   field subviews = []
-   
-   method add-subview (subview)
-   end
-
-end
-
-
-
-references vs value types
-
-
-
-
-
-object <bank-account>
-
-   field name        : reader, required
-   field balance = 0 : reader
-
-   method deposit (amount)
-      self.account-balance += amount
-   end
-
-end
-
-
-
-object <integer> :: <integer>
-
-   method px
-      return <meausurement> (unit: #pixels, value: self)
-   end
-
-end
-
-canvas.draw-text ("Hello, world!", size: 16.px, weight: #bold)
-
-canvas.draw-text "Hello, world!", size: 16.px, weight: #bold
-
-canvas draw-text: "Hello, world!", size: 16px, weight: #bold
-
-window.title = "New Window"
-
-window title: "New Winow"
 

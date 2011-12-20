@@ -64,7 +64,10 @@ class AssignMessage < MessageProto
   end
 
   def eval_(receiver, args, locals)
-  	return receiver.set_local(@args[0].float, @args[1])
+    symbol = @args[0].float
+    value  = @args[1].eval_(locals, [], locals)
+    
+  	return receiver.set_local(symbol, value)
   end
 
 end
@@ -84,6 +87,27 @@ class LocalMessage < MessageProto
     trace "LocalMessage::eval()"
 
     return receiver.find_local(@selector)
+  end
+
+end
+
+
+def ArrayMessage(items)
+  return ArrayMessage.new(items)
+end
+
+class ArrayMessage < MessageProto
+
+  def initialize(items)
+    super(:array, [items])
+  end
+
+  def eval_(receiver, args, locals)
+    messageArgs = @args[0].map do |value|
+      value.eval_(locals, [], locals)
+    end
+
+    return ArrayProto.instance.frame.create(messageArgs)
   end
 
 end

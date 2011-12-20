@@ -8,7 +8,7 @@ class Hash
   
   def find(symbol)
     hash = self
-    
+
     begin
       value = hash[symbol]
       hash  = hash.parent
@@ -30,7 +30,7 @@ class Frame < Object
 
   attr :proto, true
   attr :frame_locals, true
-  attr :_methods, true
+  attr :frame_methods, true
 
   def self.new(*args)
     result = super(*args)
@@ -39,19 +39,23 @@ class Frame < Object
   end
 
   def initialize(proto = nil)
-    @proto, @frame_locals, @_methods = proto, {}, {}
+    @proto, @frame_locals, @frame_methods = proto, {}, {}
     
     if @proto != nil
       @frame_locals.parent = @proto.frame_locals
-      @_methods.parent = @proto._methods
+      @frame_methods.parent = @proto.frame_methods
     else
       @frame_locals.parent = nil
-      @_methods.parent = nil
+      @frame_methods.parent = nil
     end
   end
 
   def frame_inspect(value)
     return self.inspect() + @frame_locals.to_s()
+  end
+  
+  def frame_to_s(value)
+    return self.to_s()
   end
 
   def init_slots()
@@ -76,32 +80,24 @@ class Frame < Object
   end
 
   def add_method(symbol, value)
-    return @_methods[symbol] = value
+    return @frame_methods[symbol] = value
   end
 
   def get_method(symbol)
-    return @_methods[symbol]
+    return @frame_methods[symbol]
   end
 
   def find_method(symbol)
-    method = @_methods.find(symbol)
-
-    if method
-      return method
-    else
-      raise "Method not found: " + self.class.name + "." + symbol.to_s
-    end
-    
-    return nil
+    return frame_methods.find(symbol)
   end
 
   def send_(selector, receiver, args)
     method = find_method(selector)
     
     if method
-      return method.frame.call_(receiver, args)
+      return method.frame._call(receiver, args)
     else
-      raise "Send failed"
+      raise "*** Send failed: #{receiver}.#{selector}"
     end
     
     return nil

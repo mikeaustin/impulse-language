@@ -1,16 +1,8 @@
 
-
 What is Impulse
-
-
-
 
 * Simple, clean syntax with prototype inheritance
 * Methods require 'return' to return a value, blocks do not
-
-
-
-
 
 object <array> :: <collection>
 
@@ -129,7 +121,7 @@ object <block-proto> :: <function-proto>
    field locals,        required: true, public: true
    
    method init
-      super (self method: #eval-block)
+      super init: (self method: #eval-block)
       
       self set-slot: #eval, <function-proto> with-block: (self method: #eval)
    end
@@ -137,11 +129,11 @@ object <block-proto> :: <function-proto>
    method eval-block: receiver, args, locals
       local locals = <locals-proto> with-proto: locals
     
-      self argnames each with-index: |argname, i|
-         locals set-slot: argname, value: args[i]
+      self.argnames each with-index: |argname, i|
+         locals.set-slot: argname, value: args[i]
       end
     
-      return self expressions fold: |receiver, expression|
+      return self.expressions fold: |receiver, expression|
          expression eval: receiver, [], locals
       end, with: locals
    end
@@ -152,8 +144,8 @@ object <block-proto> :: <function-proto>
 
 end
 
-<block-proto> create: (argnames: [#x, #y], expression: nil, locals: nil)
 
+<block-proto> :create: argnames: [#x, #y], expression: nil, locals: nil
 
 
 * How to assign fields directly from constructor?

@@ -1,5 +1,5 @@
 #
-# value.rb
+# core/value.rb
 #
 
 def Value(value)
@@ -10,6 +10,8 @@ class Value
 
   attr :frame, true
   attr :float, true
+  attr :x, true
+  attr :y, true
 
   def initialize(value)
     case value
@@ -17,10 +19,10 @@ class Value
       @frame, @float = NumberValue.instance.frame, value
     when Symbol
       @frame, @float = SymbolValue.instance.frame, value
-    when Value
-      @frame, @float = value.frame, value.float
     when String
       @frame, @float = StringProto.instance.frame.create(value).frame, nil
+    when Value
+      @frame, @float = value.frame, value.float
     else
       @frame = value
     end
@@ -34,8 +36,8 @@ class Value
     return @frame.frame_locals
   end
 
-  def _methods()
-    return @frame._methods
+  def frame_methods()
+    return @frame.frame_methods
   end
 
   def eval_(receiver, args, locals)
@@ -48,7 +50,7 @@ class Value
     return @frame.eval_(receiver, args, locals)
   end
 
-  def value()
+  def raw_value()
     if @frame == NumberValue.instance.frame
       return self.float
     end

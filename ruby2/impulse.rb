@@ -5,11 +5,13 @@
 require './core/value.rb'
 require './core/frame.rb'
 
+require './core/protos/nil.rb'
 require './core/protos/object.rb'
 require './core/protos/symbol.rb'
 require './core/protos/lobby.rb'
 require './core/protos/block.rb'
 require './core/protos/number.rb'
+require './core/protos/array.rb'
 
 require './runtime/protos/message.rb'
 require './runtime/protos/expression.rb'
@@ -29,6 +31,10 @@ ObjectProto.instance.frame.init_slots()
 
 $lobby = LobbyProto()
 
+$lobby.set_local(:nil, NilProto.instance)
+$lobby.set_local(:block, BlockProto.instance)
+
+
 def trace(string)
   if ARGV[0] == "-t"
     puts string
@@ -44,6 +50,8 @@ class Array
 
 end
 
+#require './tests.rb'
+require './core/protos/point.rb'
 
 messages = [Value(5), SendMessage(:type, [])]
 expr = ExpressionProto(messages)
@@ -55,8 +63,6 @@ lexer = Lexer.new(STDIN)
 parser = StatementParser.new(lexer)
 
 while true
-  #token = lexer.frame.next_token()
-  #p token
   print "] "
   messages = parser.frame.parse()
   print "= ", ExpressionProto(messages).eval_($lobby, [], $lobby).inspect(), "\n"

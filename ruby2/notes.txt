@@ -1,27 +1,37 @@
 
 block = |a, b| a + b
-block apply: 2, 3
-
-block = |a, b| a + b
 block [2, 3]
-
-block = |a, b| a + b
-block (2, 3)
 
 list sort: |a, b| a < b
 
-list.sort (|a, b| a < b)
 
-list.sort |a, b| a < b
+"a,b,c" split: "," | self join: " " | reverse
 
-method map: block
-  local array = []
-  
-  self each: |item|
-    array << block (item)
-  end
-  
-  return array
+method capitalize
+   "abc" | self head upper-case ~ self tail
+end
+
+evens-squared = [1..10] map: |n| n even ? n * n
+
+canvas draw-text: "Hello, world", size: 16px, weight: 'bold
+
+method count-words: text
+  return text.split " " | fold |hash, word| do
+     hash set: word => (hash[word] || 0) + 1
+  end, with: [:]
+end
+
+
+<io> print: "Hello, world"
+
+"foo" self head upper ~ self tail
+
+"a,b,c" split: "," | self join: "," | self reverse
+
+<system> exit
+
+<io> open: "test.txt", each: |line| do
+  <io> print: line
 end
 
 
@@ -35,51 +45,12 @@ method map: block
   return array
 end
 
-method map: block
-  return self fold: |acc, item|
-    block [item]
-  end, with: []
-end
-
-method map (block)
-  return self.fold |acc, item|
-    block (item)
-  end, with: []
-end
-
-print ("Hello, world!")
-
-canvas.draw-text "Hello", size: 16.px, weight: #bold
-
-canvas.draw-text ("Hello", size: 16.px, weight: <font>.bold)
-
-define method map (block)
-  return self.fold (method (acc, item)
-                      block (item)
-                    end, with: []),
-end
-
-
-object <collection>
-
-  method private.modify-data
-    ...
-  end
-  
-  method public-method
-    self private private-method
-  end
-
-end
-
 
 method collided-with: <rock> rock
 
-method collided-with; rock :: <rock>
+method collided-with: rock :: <rock>
 
 local rock :: <rock>
 
 local <rock> rock
-
-
 

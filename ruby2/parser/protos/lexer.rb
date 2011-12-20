@@ -27,16 +27,13 @@ end
 
 class Lexer < Frame
 
-  READERS = [LitNumberToken, LitStringToken, IdentifierToken, CommaToken, VerticalBarToken, NewlineToken]
+  READERS = [OpenParenToken, CloseParenToken, OpenBracketToken, CloseBracketToken,
+             LitNumberToken, LitStringToken, IdentifierToken, OperatorToken,
+             CommaToken, VerticalBarToken, DollarSignToken, AssignToken,
+             NewlineToken]
 
   def initialize(stream)
     @stream = stream
-  end
-
-  def read(klasses)
-    return klasses.reduce(nil) do |token, klass|
-      token || klass.read(@stream)
-    end
   end
 
   def peek_token()
