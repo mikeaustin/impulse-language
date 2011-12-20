@@ -1,0 +1,77 @@
+
+object <bank-account>
+
+   method deposit: amount
+     self balance: self balance + amount
+   end
+   
+   method withdraw: amount
+     if amount > balance
+       return nil
+     end
+     
+     self balance: self balance - amount
+   end
+
+end
+
+
+window title
+window title: "impulse"
+
+
+object <point> :: <object>
+
+   field x = 0, :public
+   field y = 0, :public
+
+   method distance-to: point
+      return self x * point x + self y * point y | sqrt
+   end
+
+end
+
+
+
+object <view> :: <object>
+
+   field superview, :public
+   field subviews,  :reader
+   
+   field origin = <point> [0, 0],     :public
+   field size   = <point> [100, 100], :public
+
+   method add-subview: subview
+      subview superview: self
+     
+      self.subviews add: subview
+   end
+
+   method send-event: event
+      event dispatch: self
+   end
+
+   method mouse-down: point
+     <io> print: "mouse-down"
+   end
+
+end
+
+
+object <mouse-event> :: <event>
+
+   method dispatch: view
+      if view contains: self point
+         local point = self point - view origin
+         local event = <event> :clone type: self type, point: point
+         
+         return view send-event: event
+      end
+
+      view send: self type, args: [self origin]
+      
+      return view
+   end
+
+end
+
