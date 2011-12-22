@@ -13,7 +13,7 @@ class LobbyProto < Frame
   #end
 
   def initialize()
-    super(nil)
+    super(ObjectProto.instance)
     
     self.add_method(:print, FunctionProto(self.method(:_print_)))
     self.add_method(:exit, FunctionProto(self.method(:_exit)))
@@ -24,7 +24,7 @@ class LobbyProto < Frame
   end
   
   def _print_(receiver, args)
-  	puts args[0]
+  	puts args[0].to_s
   	
     return nil
   end

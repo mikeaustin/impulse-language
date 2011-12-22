@@ -25,7 +25,21 @@ class LitNumberToken < Token
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/\d/)
 
-    return self.read_helper(stream, /\d/, :to_f)
+    while stream.peek().chr.match(/\d/)
+      buffer << stream.getc()
+    end rescue nil
+
+    if stream.peek().chr.match(/\./)
+      buffer << stream.getc()
+      
+      while stream.peek().chr.match(/\d/)
+        buffer << stream.getc()
+      end rescue nil
+
+      return self.new(buffer.to_f)
+    end
+
+    return self.new(buffer.to_i)
   end
   
 end
@@ -44,12 +58,24 @@ class LitStringToken < Token
 
 end
 
+class LitSymbolToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[\#]/)
+    
+    stream.getc()
+    
+    return self.read_helper(stream, /[a-zA-Z\d\+\-\*\/\<\>\=]/, :to_sym)
+  end
+
+end
+
 class IdentifierToken < Token
 
   def self.read(stream, buffer = "")
-    return nil if !stream.peek().chr.match(/[a-zA-Z]/)
+    return nil if !stream.peek().chr.match(/[a-zA-Z\<\>]/)
 
-    token = self.read_helper(stream, /[a-zA-Z\d-]/, :to_sym)
+    token = self.read_helper(stream, /[a-zA-Z\d\-\<\>]/, :to_sym)
     
     if stream.peek().chr.match(/[:]/)
       stream.getc();
@@ -69,9 +95,22 @@ end
 class OperatorToken < Token
 
   def self.read(stream, buffer = "")
-    return nil if !stream.peek().chr.match(/[\+\-\*\/%]/)
+    return nil if !stream.peek().chr.match(/[\+\-\*\/%\<\>\@\=]/)
+
+    char = stream.getc()
+    peek = stream.peek()
+
+    stream.ungetc(char)
+
+    if peek.chr.match(/[a-zA-Z\d]/)
+      return IdentifierToken.read(stream)
+    end
+
+    if char == "=" && !peek.chr.match(/[\+\-\*\/%\<\>\@\=]/)
+      return AssignToken.read(stream)
+    end
     
-    return self.read_helper(stream, /[\+\-\*\/%]/, :to_sym)
+    return self.read_helper(stream, /[\+\-\*\/%\<\>\@\=]/, :to_sym)
   end
 
 end

@@ -69,6 +69,9 @@ class PrimaryParser < Parser
         string = next_token().frame.string
         
         return [StringProto.instance.frame.create(string)]
+      when LitSymbolToken
+        #p ">>>", peek_token().float, "<<<"
+        return [Value(next_token().float)]
       when IdentifierToken
         identifier = next_token()
         
@@ -183,7 +186,7 @@ class StatementParser < Parser
     else
       messages += PrimaryParser(@lexer)
     end
-    
+
     begin
       while (message = MessageParser(@lexer)) != []
         messages += message
@@ -191,6 +194,10 @@ class StatementParser < Parser
     end while option(VerticalBarToken) || option(DollarSignToken)
 
     expect(NewlineToken, "Expected a message [2].")
+
+    if messages == []
+      messages << nil
+    end
       
     return messages
   end
@@ -227,12 +234,16 @@ class ExpressionParser < Parser
       messages += PrimaryParser(@lexer)
     end
     
-    if messages == []
-      expect(Token, "Expected a message [3].")
-    end
+    #if messages == []
+    #  expect(Token, "Expected a message [3].")
+    #end
 
     while (message = @messageParser.call(@lexer)) != []
       messages += message
+    end
+
+    if messages == []
+      messages << nil
     end
       
     return messages

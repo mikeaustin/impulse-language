@@ -44,7 +44,8 @@ class BlockProto < FunctionProto
     @instance.frame.proto = ObjectProto.instance
 
     @instance.add_method(:arity, FunctionProto(@instance.frame.method(:_arity)))
-    @instance.add_method(:slice,  FunctionProto(@instance.frame.method(:_call)))
+    @instance.add_method(:call,  FunctionProto(@instance.frame.method(:call_block2)))
+    @instance.add_method(:slice, FunctionProto(@instance.frame.method(:call_block2)))
     
     return @instance
   end
@@ -62,8 +63,22 @@ class BlockProto < FunctionProto
   end
 
   def call_block(receiver, args)
-    locals = LocalsProto(receiver.frame.locals)
+    locals = LocalsProto(@locals)
 
+    @argnames.each.with_index do |argname, i|
+      locals.set_local(argname, args[i])
+    end
+
+    result = @expressions.reduce(locals) do |receiver, expression|
+      expression.eval_(receiver, [], locals)
+    end
+    
+    return result
+  end
+
+  def call_block2(receiver, args)
+    locals = LocalsProto(receiver.frame.locals)
+	
     receiver.frame.argnames.each.with_index do |argname, i|
       locals.set_local(argname, args[i])
     end

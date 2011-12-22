@@ -5,17 +5,16 @@ object <circle>
    field radius
    field color
    
-   trait <circle-trait>, hash: circle-hash
-   trait <color-trait>,  hash: color-hash
+   include <circle-trait>, rename: [hash => circle-hash]
+   include <color-trait>,  rename: [hash => color-hash]
 
    method hash
-      return self.circle-hash.xor (self.color-hash)
+      return self circle-hash.xor: self.color-hash
    end
 
 end
 
-circle = <circle>.clone (color: <color>.white)
-
+circle = <circle> :clone color: <color> white
 
 
 object <enumerable>
@@ -25,11 +24,10 @@ object <enumerable>
    end
 
    method map: block
-      return self fold: |enum, item| enum << block [item]
+      return self fold: |enum, item| enum append: block [item]
    end
 
    method max
-     return self fold: |max, item| item if item > max else max
      return self fold: |max, item| item > max ? item : max
    end
 

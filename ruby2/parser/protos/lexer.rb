@@ -28,7 +28,7 @@ end
 class Lexer < Frame
 
   READERS = [OpenParenToken, CloseParenToken, OpenBracketToken, CloseBracketToken,
-             LitNumberToken, LitStringToken, IdentifierToken, OperatorToken,
+             LitNumberToken, LitStringToken, LitSymbolToken, OperatorToken, IdentifierToken,
              CommaToken, VerticalBarToken, DollarSignToken, AssignToken,
              NewlineToken]
 
@@ -50,7 +50,7 @@ class Lexer < Frame
     end
     
     if !@token
-      puts "*** Syntax Error: Unknown character '#{@stream.peek()}'"
+      puts "*** Syntax Error: Invalid character '#{@stream.peek()}' after '#{@last_token.inspect}'"
       
       exit
     end
@@ -61,6 +61,7 @@ class Lexer < Frame
   def next_token()
     token = peek_token()
     
+    @last_token = @token
     @token = nil
     
     return token

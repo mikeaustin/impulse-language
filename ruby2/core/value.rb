@@ -43,7 +43,8 @@ class Value
   def eval_(receiver, args, locals)
     trace "Value::eval()"
     
-    if @frame == NumberValue.instance.frame
+    #if @frame == NumberValue.instance.frame
+    if @float != nil
       return self
     end
 
@@ -77,17 +78,21 @@ class Value
   def add_method(symbol, value)
     return @frame.add_method(symbol, value)
   end
+
+  def add_method2(symbol, arg_types, &block)
+    return @frame.add_method2(symbol, arg_types, &block)
+  end
   
   def get_method(symbol)
     return @frame.get_method(symbol)
   end
 
   def to_s()
-    return @frame.frame_to_s(self)
+    return @frame && @frame.frame_to_s(self)
   end
 
   def inspect()
-    return @frame.frame_inspect(self)
+    return @frame && @frame.frame_inspect(self)
   end
 
 end

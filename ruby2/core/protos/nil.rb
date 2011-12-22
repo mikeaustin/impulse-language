@@ -12,6 +12,10 @@ class NilProto < Frame
     return Value(self)
   end
 
+  def frame_to_s(value)
+    return "nil"
+  end
+
   def frame_inspect(value)
     return "nil"
   end

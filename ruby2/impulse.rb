@@ -26,6 +26,7 @@ end
 class LocalsProto < Frame
 end
 
+puts "Ruby Impulse 0.1 (Genesis) | Copyright 2011 Mike Austin"
 
 ObjectProto.instance.frame.init_slots()
 
@@ -53,11 +54,6 @@ end
 #require './tests.rb'
 require './core/protos/point.rb'
 
-messages = [Value(5), SendMessage(:type, [])]
-expr = ExpressionProto(messages)
-value = expr.eval_($lobby, [], $lobby)
-#p value
-
 lexer = Lexer.new(STDIN)
 #lexer = Lexer.new(File.open("test.im"))
 parser = StatementParser.new(lexer)
@@ -65,6 +61,10 @@ parser = StatementParser.new(lexer)
 while true
   print "] "
   messages = parser.frame.parse()
-  print "= ", ExpressionProto(messages).eval_($lobby, [], $lobby).inspect(), "\n"
+  result = ExpressionProto(messages).eval_($lobby, [], $lobby)
+
+  if result
+    print "= ", result.inspect(), "\n"
+  end
 end
 

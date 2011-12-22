@@ -11,16 +11,16 @@ class StringProto < Frame
   def self.instance()
     @instance ||= StringProto.new(ObjectProto.instance)
 
-    @instance.add_method(:size, FunctionProto(@instance.frame.method(:size_)))
-    @instance.add_method(:capitalize, FunctionProto(@instance.frame.method(:capitalize)))
-    @instance.add_method(:split, FunctionProto(@instance.frame.method(:_split)))
-    @instance.add_method(:"++", FunctionProto(@instance.frame.method(:_concatenate)))
+    @instance.add_method2(:"size", [])           { |receiver, args| receiver.frame.size }
+    @instance.add_method2(:"capitalize", [])     { |receiver, args| receiver.frame.capitalize }
+    @instance.add_method2(:"split", [@instance]) { |receiver, args| receiver.frame.split(args[0].frame.string) }
+    @instance.add_method2(:"++", [])    { |receiver, args| receiver.frame.concatenate(args[0].frame.string) }
 
     return @instance
   end
 
   def create(string)
-    object = StringProto.new(Value(self))
+    object = StringProto.new(StringProto.instance)
     
     object.frame.string = string
     
@@ -39,30 +39,24 @@ class StringProto < Frame
     return "\"#{value.frame.string}\""
   end
 
-  def size_(receiver, args)
-    return Value(receiver.frame.string.size)
+  def size
+    return self.string.size
   end
 
-  def capitalize(receiver, args)
-    return Value(receiver.frame.string[0].upcase + receiver.frame.string[1..-1])
+  def capitalize
+    return self.string[0].upcase + self.string[1..-1]
   end
 
-  def _split(receiver, args)
-    string = receiver.frame.string
-    separator = args[0].frame.string
-    
-    result = string.split(separator).map do |string|
-      StringProto.instance.frame.create(string)
+  def split(separator)
+    result = self.string.split(separator).map do |item|
+      StringProto.instance.frame.create(item)
     end
 
     return ArrayProto.instance.frame.create(result)
   end
 
-  def _concatenate(receiver, args)
-    string = receiver.frame.string
-    other = args[0].frame.string
-    
-    return Value(string + other)
+  def concatenate(other)
+    return StringProto.instance.frame.create(self.string + other)
   end
 
 end

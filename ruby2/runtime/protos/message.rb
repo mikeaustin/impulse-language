@@ -22,7 +22,13 @@ class MessageProto < Frame
   end
 
   def frame_to_s(value)
-    return "#{value.frame.selector}" + (value.frame.args.empty? ? "" : ": #{value.frame.args}")
+    if value.frame.selector.match(/\+|\-|\*|\//)
+      return "#{value.frame.selector} #{value.frame.args}"
+    elsif value.frame.selector == :block
+      return "|#{args[0]}| #{value.frame.args[1..-1]}"
+    else
+      return "#{value.frame.selector}" + (value.frame.args.empty? ? "" : ": #{value.frame.args}")
+    end
   end
 
 end
@@ -45,7 +51,7 @@ class SendMessage < MessageProto
       value.eval_(locals, [], locals)
     end
 
-    result = receiver.send_(@selector, messageArgs)
+    result = receiver && receiver.send_(@selector, messageArgs)
 
     return result
   end
@@ -67,7 +73,9 @@ class AssignMessage < MessageProto
     symbol = @args[0].float
     value  = @args[1].eval_(locals, [], locals)
     
-  	return receiver.set_local(symbol, value)
+    #if value
+  	  return receiver.set_local(symbol, value)
+  	#end
   end
 
 end
@@ -155,7 +163,7 @@ class ObjectMessage < MessageProto
 	block = @args[0].eval_(locals, [], locals)
 	
     object = Frame.new(ObjectProto.instance)
-    block.frame.call_(locals, [object])
+    block.frame._call(receiver, [object])
     
     return object
   end
@@ -178,7 +186,7 @@ class MethodMessage < MessageProto
     
     receiver.add_method(@args[0], block)
     
-    return block
+    return nil
   end
 
 end

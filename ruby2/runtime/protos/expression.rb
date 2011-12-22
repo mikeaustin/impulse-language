@@ -18,11 +18,11 @@ class ExpressionProto < Frame
   
   def eval_(receiver, args, locals)
     trace "ExpressionProto::eval()"
-
-    result = @messages.reduce(locals) do |receiver, value|
-      value.eval_(receiver, [], locals)
-    end
     
+    result = @messages.reduce(locals) do |receiver, value|
+      value && value.eval_(receiver, [], locals)
+    end
+
     return result
   end
 
@@ -39,6 +39,7 @@ class ExpressionProto < Frame
       message.to_s
     end
     
+    #return messages.join(" ")
     return "(" + messages.join(" ") + ")"
   end
 

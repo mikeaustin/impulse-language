@@ -7,31 +7,43 @@ require './core/frame.rb'
 class SymbolProto < Frame
 
   def self.instance()
-    return @instance ||= SymbolProto.new()
-  end
+    @instance ||= SymbolProto.new(ObjectProto.instance)
+    
+    @instance.add_method(:slice, FunctionProto(@instance.frame.method(:_slice)))
 
-  def initialize()
-    super(ObjectProto.instance)
-  end
-
-end
-
-class SymbolValue < Frame
-
-  def self.instance()
-    return @instance ||= SymbolValue.new()
-  end
-
-  def initialize()
-    super(SymbolProto.instance)
+    return @instance
   end
 
   def frame_to_s(value)
-    return "'" + value.float.to_s
+    return "#" + value.float.to_s
   end
 
   def frame_inspect(value)
-    return value.float.inspect
+    if value.frame == SymbolProto.instance.frame
+      return Value("<symbol>")
+    else
+      return "##{value.float.to_s}"
+    end
+  end
+
+  def _call(receiver, args)
+    return args[0].send_(receiver.float, args[1..-1])
+  end
+
+  def _slice(receiver, args)
+    selector = receiver.float
+    
+    return ArrayProto.instance.frame.create(args.map do |item|
+      item.send_(selector, [])
+    end)
+  end
+  
+end
+
+class SymbolValue < SymbolProto
+
+  def self.instance()
+    return @instance ||= SymbolValue.new(SymbolProto.instance)
   end
 
 end

@@ -13,9 +13,11 @@ class ArrayProto < Frame
   def self.instance()
     @instance ||= ArrayProto.new(ObjectProto.instance)
 
-    @instance.add_method(:size,  FunctionProto(@instance.frame.method(:_size)))
+    @instance.add_method2(:"size", [])       { |receiver, args| Value(receiver.frame.size) }
+
     @instance.add_method(:slice, FunctionProto(@instance.frame.method(:_slice)))
     @instance.add_method(:slice_assign, FunctionProto(@instance.frame.method(:_slice_assign)))
+    @instance.add_method(:"++", FunctionProto(@instance.frame.method(:_concatenate)))
     @instance.add_method(:reverse, FunctionProto(@instance.frame.method(:_reverse)))
     @instance.add_method(:map,   FunctionProto(@instance.frame.method(:_map)))
     @instance.add_method(:fold,  FunctionProto(@instance.frame.method(:_fold)))
@@ -33,6 +35,10 @@ class ArrayProto < Frame
     return object
   end
 
+  #
+  # <frame> methods
+  #
+
   def frame_inspect(value)
     if value.frame == ArrayProto.instance.frame
       return Value("<array>")
@@ -41,8 +47,12 @@ class ArrayProto < Frame
     return "#{value.frame.array.inspect} + #{value.frame.hash.inspect}"
   end
 
-  def _size(receiver, args)
-    return Value(receiver.frame.array.size + receiver.frame.hash.size)
+  #
+  # <array> methods
+  #
+
+  def size
+    return self.array.size + self.hash.size
   end
 
   def _slice(receiver, args)
@@ -69,6 +79,13 @@ class ArrayProto < Frame
     end
   end
 
+  def _concatenate(receiver, args)
+    array = receiver.frame.array
+    other = args[0].frame.array
+    
+    return ArrayProto.instance.frame.create(array + other)
+  end
+
   def _reverse(receiver, args)
     array = receiver.frame.array
     
@@ -82,7 +99,7 @@ class ArrayProto < Frame
     result = []
     
     array.each do |item|
-      result.push(BlockProto.instance.frame._call(block, [item]))
+      result.push(block.frame._call(block, [item]))
     end
     
     return ArrayProto.instance.frame.create(result)
@@ -94,12 +111,12 @@ class ArrayProto < Frame
     value = args[1]
     
     if value
-      result = array.reduce(value) do |accumulator, item|
-        BlockProto.instance.frame._call(block, [accumulator, item])
+      result = array.reduce(value) do |accum, item|
+        block.frame._call(block, [accum, item])
       end
     else 
-      result = array.reduce() do |accumulator, item|
-        BlockProto.instance.frame._call(block, [accumulator, item])
+      result = array.reduce() do |accum, item|
+        block.frame._call(block, [accum, item])
       end
     end
     

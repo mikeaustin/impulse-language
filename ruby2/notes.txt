@@ -7,13 +7,8 @@ list sort: |a, b| a < b
 
 "a,b,c" split: "," | self join: " " | reverse
 
-method capitalize
-   "abc" | self head upper-case ~ self tail
-end
+"a,b,c" | split "," | join " " | reverse
 
-evens-squared = [1..10] map: |n| n even ? n * n
-
-canvas draw-text: "Hello, world", size: 16px, weight: 'bold
 
 method count-words: text
   return text.split " " | fold |hash, word| do
@@ -22,27 +17,8 @@ method count-words: text
 end
 
 
-<io> print: "Hello, world"
-
-"foo" self head upper ~ self tail
-
-"a,b,c" split: "," | self join: "," | self reverse
-
-<system> exit
-
 <io> open: "test.txt", each: |line| do
   <io> print: line
-end
-
-
-method map: block
-  local array = []
-  
-  self each: |item|
-    array << block [item]
-  end
-  
-  return array
 end
 
 
@@ -53,4 +29,23 @@ method collided-with: rock :: <rock>
 local rock :: <rock>
 
 local <rock> rock
+
+
+$ add-object: "window", with: |window| do
+  window add-method: "origin", block: |origin| origin
+end
+
+include <callable>
+
+
+"john smith" | split " " | reverse | join ", "
+
+"john smith" | split: " " | reverse | join: ", "
+
+
+[1, 2, 3] map: |n| n sin
+
+[1, 2, 3] map: #sin
+
+#sin [1, 2, 3]
 

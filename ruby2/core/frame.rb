@@ -9,18 +9,23 @@ class Hash
   def find(symbol)
     hash = self
 
-    begin
+    #begin
+    #  value = hash[symbol]
+    #  hash  = hash.parent
+    #end while value == nil && hash != nil
+
+    while hash && !hash.has_key?(symbol)
       value = hash[symbol]
       hash  = hash.parent
-    end while value == nil && hash != nil
+    end
     
-    if value
-      return value
+    if hash && hash.has_key?(symbol)
+      return hash[symbol]
     #else
     #  raise "Slot not found: " + self.class.name + "." + symbol.to_s
     end
 
-    return nil
+    return []
   end
 
 end
@@ -72,7 +77,7 @@ class Frame < Object
   def find_local(symbol)
     value = @frame_locals.find(symbol)
     
-    if value
+    if value != []
       return value
     else
       raise "Local not found: " + self.class.name + "." + symbol.to_s
@@ -80,7 +85,15 @@ class Frame < Object
   end
 
   def add_method(symbol, value)
-    return @frame_methods[symbol] = value
+    @frame_methods[symbol] = value
+    
+    return nil
+  end
+
+  def add_method2(symbol, arg_types, &block)
+    @frame_methods[symbol] = FunctionProto(block, arg_types)
+    
+    return nil
   end
 
   def get_method(symbol)
@@ -92,10 +105,10 @@ class Frame < Object
   end
 
   def send_(selector, receiver, args)
-    method = find_method(selector)
+    block = find_method(selector)
     
-    if method
-      return method.frame._call(receiver, args)
+    if block != []
+      return block.frame._call(receiver, args)
     else
       raise "*** Send failed: #{receiver}.#{selector}"
     end
