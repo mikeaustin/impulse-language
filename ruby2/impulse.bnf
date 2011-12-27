@@ -1,0 +1,56 @@
+
+<lit-number>      = <digit>* ;
+
+<lit-string>      = '"' [^"]* '"' ;
+
+<identifier>      = <letter> [<letter> | <digit>]* ;
+
+<lit-array>       = '[' (<expression> [',' <expression>])* ']' ;
+
+<inline-block>    = "|" (<identifier> ["," <identifier>])* "|" <expression> ;
+
+<do-end-block>    = "|" (<identifier> ["," <identifier>])* "|" "do" "\n"
+                        <statement>*
+                     "end" ;
+
+<lit-block>       = <inline-block> | <do-end-block> ;
+
+
+<primary>         = <lit-number> | <lit-string> | <lit-symbol> | <identifier> | <lit-array> | <lit-block> ;
+
+
+<unary-message>   = <identifier> ;
+
+<assign-message>  = ["self"] <identifier> "=" <expression> ;
+
+<binary-message>  = <operator> <expression> ;
+
+<keyword-message> = <keyword> <expression> ["," <keyword> <expression>] ;
+
+<message>         = <unary-message> | <binary-message> | <keyword-messsage> | <assign-message> ;
+
+
+<expression>      = <primary> [<message> | "$"]* ;
+
+<statement>       = <expression> "\n" ;
+
+
+<def-object>      = "object" <identifier> ["::" <identifier>]
+
+<unary-method>    = "method" " " <identifier> "\n"
+                       <statement>*
+                    "end" ;
+
+<binary-method>   = "method" " " <operator> <identifier> "\n"
+                       <statement>*
+                    "end" ;
+                    
+<keyword-method>  = "method" <keyword> <identifier> ["," <keyword> <identifier>]* "\n"
+                       <statement>*
+                    "end" ;
+
+
+<def-method>      = <unary-method> | <binary-method> | <keyword-method> ;
+
+<def-local>       = "local" <identifier> [", " (":reader" | ":writer" | ":public")] [", ":required"] ;
+
