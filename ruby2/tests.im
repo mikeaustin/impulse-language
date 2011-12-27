@@ -1,0 +1,72 @@
+//
+// tests.im
+//
+
+$ print: "] 3 - 2 + 1", with: 3 - 2 + 1
+
+$ print: "] \"foo\" ++ \"bar\"", with: "foo" ++ "bar"
+
+$ print: "] [1, 3, 3] ++ [4, 5]", with: [1, 3, 3] ++ [4, 5]
+
+$ print: "] [1, 2, 3] == [1, 2, 3]", with: [1, 2, 3] == [1, 2, 3]
+
+$ print: "[1, 2, 3] any: #even", with: [1, 2, 3] any: #even
+
+$ print: "[1, 2, 3] all: |n| n >= 1", with: [1, 2, 3] all: |n| n >= 1
+
+$ print: "] [1, 2, 3] fold: |a, n| a * n", with: [1, 2, 3] fold: |a, n| a * n
+
+
+
+names = ["mark twain", "john smith"]
+
+result = names map: |name| do
+   name split: " " $ map: #capitalize $ reverse $ join: ", "
+end
+
+$ print: "] result == [\"Twain, Mark\", \"Smith, John\"]", with: result == ["Twain, Mark", "Smith, John"]
+
+
+
+$ add-object: #library, with: |library| do
+   library add-field: #join-string, with: ", "
+   
+   library add-method: #index:, with: |names| do
+      result = names map: |name| do
+         // name split: " " $ map: #capitalize $ reverse $ join: self.join-string
+         name split: " " $ map: #capitalize $ reverse $ join: ", "
+      end
+   end
+end
+
+$ print: "] library index: [\"mark twain\", \"john smith\"]", with: library index: ["mark twain", "john smith"]
+
+
+
+/*
+(1..10) step: 2 $ each: |n| n * n
+(1..10) index $ each: |n| n * n
+
+address = company address if-nil: "N/A"
+
+factorial = |n| do
+  n == 0 ? 1 : n * factorial [n - 1]
+end
+*/
+
+/*
+object <array> :: <object>
+
+   method map: block
+      local array = []
+
+      self each: |item| do
+         array append: block [item]
+      end
+      
+      return array
+   end
+
+end
+*/
+
