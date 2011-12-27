@@ -15,8 +15,10 @@ class Value
 
   def initialize(value)
     case value
-    when Numeric, TrueClass, FalseClass
+    when Numeric
       @frame, @float = NumberValue.instance.frame, value
+    when TrueClass, FalseClass
+      @frame, @float = BooleanValue.instance.frame, value
     when Symbol
       @frame, @float = SymbolValue.instance.frame, value
     when String
@@ -40,6 +42,12 @@ class Value
     return @frame.frame_methods
   end
 
+  #def ==(other)
+  #p self.frame.class
+  #p other.frame.class if other
+  #  return other && (@frame == other.frame)
+  #end
+
   def eval_(receiver, args, locals)
     trace "Value::eval()"
     
@@ -57,6 +65,10 @@ class Value
     end
     
     return self
+  end
+
+  def equal(other)
+    return Value(@float == other.float && @frame.equal(other.frame))
   end
 
   def send_(selector, args)

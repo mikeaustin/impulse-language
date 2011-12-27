@@ -4,7 +4,7 @@ object <circle>
    field center
    field radius
    field color
-   
+
    include <circle-trait>, rename: [hash => circle-hash]
    include <color-trait>,  rename: [hash => color-hash]
 
@@ -36,4 +36,21 @@ object <enumerable>
    end
 
 end
+
+
+
+find -name "*~" | xargs rm
+
+
+method find: name = "*", type = #all
+   ...
+end
+
+:find name: "*~" | map: #rm
+
+find name: "*~" | map: #rm
+
+find name: "*~" | map: |item| item delete
+
+find: "*~" | map: #rm
 

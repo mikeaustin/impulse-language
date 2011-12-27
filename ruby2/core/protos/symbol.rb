@@ -1,8 +1,9 @@
 #
-# symbol.rb
+# core/protos/symbol.rb
 #
 
 require './core/frame.rb'
+
 
 class SymbolProto < Frame
 
@@ -20,13 +21,14 @@ class SymbolProto < Frame
 
   def frame_inspect(value)
     if value.frame == SymbolProto.instance.frame
-      return Value("<symbol>")
+      return "<symbol>"
     else
       return "##{value.float.to_s}"
     end
   end
 
-  def _call(receiver, args)
+  def _call(receiver, args, object_self = nil)
+  #p receiver.float
     return args[0].send_(receiver.float, args[1..-1])
   end
 

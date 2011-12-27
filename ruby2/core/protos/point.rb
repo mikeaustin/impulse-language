@@ -2,6 +2,7 @@
 # core/protos/point.rb
 #
 
+
 class PointProto < Frame
 
   def self.instance()
@@ -25,15 +26,15 @@ class PointProto < Frame
   end
 
   def frame_to_s(value)
-    return Value("#{value.x}, #{value.y}")
+    return "#{value.x}, #{value.y}"
   end
   
   def frame_inspect(value)
     if value.frame == PointProto.instance.frame
-      return Value("<point>")
+      return "<point>"
     end
     
-    return Value("<point> [#{value.x.inspect}, #{value.y.inspect}]")
+    return "<point> [#{value.x.inspect}, #{value.y.inspect}]"
   end
 
   #
@@ -57,6 +58,4 @@ class PointValue < PointProto
   end
   
 end
-
-$lobby.set_local(:"<point>", PointProto.instance)
 

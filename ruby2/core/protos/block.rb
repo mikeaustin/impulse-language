@@ -1,3 +1,7 @@
+#
+# core/protos/block.rb
+#
+
 
 def FunctionProto(func, arg_types = [])
   return FunctionProto.new(func, arg_types)
@@ -14,7 +18,7 @@ class FunctionProto < Frame
     @func, @arg_types = func, arg_types
   end
 
-  def _call(receiver, args)
+  def _call(receiver, args, object_self = nil)
     trace "FunctionProto::eval()"
 
     if !@arg_types.empty? && args.map(&:proto) != @arg_types
@@ -43,9 +47,9 @@ class BlockProto < FunctionProto
     @instance ||= BlockProto.new([], [], nil)
     @instance.frame.proto = ObjectProto.instance
 
-    @instance.add_method(:arity, FunctionProto(@instance.frame.method(:_arity)))
-    @instance.add_method(:call,  FunctionProto(@instance.frame.method(:call_block2)))
-    @instance.add_method(:slice, FunctionProto(@instance.frame.method(:call_block2)))
+    @instance.add_method(:"arity", FunctionProto(@instance.frame.method(:_arity)))
+    @instance.add_method(:"call:", FunctionProto(@instance.frame.method(:call_block2)))
+    @instance.add_method(:"slice", FunctionProto(@instance.frame.method(:call_block2)))
     
     return @instance
   end
@@ -62,8 +66,9 @@ class BlockProto < FunctionProto
     @argnames, @expressions, @locals = argnames, expressions, locals
   end
 
-  def call_block(receiver, args)
+  def call_block(receiver, args, object_self = nil)
     locals = LocalsProto(@locals)
+    locals.set_local(:self, object_self)
 
     @argnames.each.with_index do |argname, i|
       locals.set_local(argname, args[i])
@@ -76,8 +81,9 @@ class BlockProto < FunctionProto
     return result
   end
 
-  def call_block2(receiver, args)
+  def call_block2(receiver, args, object_self = nil)
     locals = LocalsProto(receiver.frame.locals)
+    locals.set_local(:self, object_self)
 	
     receiver.frame.argnames.each.with_index do |argname, i|
       locals.set_local(argname, args[i])
@@ -92,7 +98,7 @@ class BlockProto < FunctionProto
 
   def frame_inspect(value)
     if value.frame == BlockProto.instance.frame
-      return Value("<block>")
+      return "<block>"
     end
     
     return "|#{value.frame.argnames}| #{value.frame.expressions}"

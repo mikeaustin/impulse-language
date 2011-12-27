@@ -2,18 +2,21 @@
 # parser/token.rb
 #
 
+
 class Token < Value
 
-  def initialize(value)
-    super(value)
-  end
-
-  def self.read_helper(stream, match, cast)
+  def self.read_buffer(stream, match)
     buffer = ""
     
     while stream.peek().chr.match(match)
       buffer << stream.getc()
     end rescue nil
+    
+    return buffer
+  end
+
+  def self.read_token(stream, match, cast)
+    buffer = self.read_buffer(stream, match)
     
     return self.new(buffer.send(cast))
   end
@@ -25,16 +28,12 @@ class LitNumberToken < Token
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/\d/)
 
-    while stream.peek().chr.match(/\d/)
-      buffer << stream.getc()
-    end rescue nil
+    buffer += self.read_buffer(stream, /\d/)
 
     if stream.peek().chr.match(/\./)
       buffer << stream.getc()
       
-      while stream.peek().chr.match(/\d/)
-        buffer << stream.getc()
-      end rescue nil
+      buffer += self.read_buffer(stream, /\d/)
 
       return self.new(buffer.to_f)
     end
@@ -50,10 +49,22 @@ class LitStringToken < Token
     return nil if !stream.peek().chr.match(/["]/)
     
     stream.getc()
-    token = self.read_helper(stream, /[^"]/, :to_s)
-    stream.getc()
-    
-    return token
+
+    while true
+      buffer += self.read_buffer(stream, /[^\\"]/)
+      
+      if stream.peek().chr == "\\"
+        stream.getc()
+        
+        buffer += stream.getc()
+      else
+        stream.getc()
+        
+        return self.new(buffer.to_s)
+      end
+    end
+        
+    return nil
   end
 
 end
@@ -65,7 +76,7 @@ class LitSymbolToken < Token
     
     stream.getc()
     
-    return self.read_helper(stream, /[a-zA-Z\d\+\-\*\/\<\>\=]/, :to_sym)
+    return self.read_token(stream, /[a-zA-Z\d\+\-\*\/\<\>\=\:]/, :to_sym)
   end
 
 end
@@ -75,15 +86,15 @@ class IdentifierToken < Token
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/[a-zA-Z\<\>]/)
 
-    token = self.read_helper(stream, /[a-zA-Z\d\-\<\>]/, :to_sym)
+    buffer += self.read_buffer(stream, /[a-zA-Z\d\-\<\>]/)
     
     if stream.peek().chr.match(/[:]/)
-      stream.getc();
+      buffer << stream.getc();
 
-      return KeywordToken.new(token.float)
+      return KeywordToken.new(buffer.to_sym)
     end
     
-    return token
+    return self.new(buffer.to_sym)
   end
 
 end
@@ -94,23 +105,92 @@ end
 
 class OperatorToken < Token
 
+  SYMBOLS = /[\+\-\*\/%\<\>\@\=\!]/
+
   def self.read(stream, buffer = "")
-    return nil if !stream.peek().chr.match(/[\+\-\*\/%\<\>\@\=]/)
+    return nil if !stream.peek().chr.match(SYMBOLS)
 
     char = stream.getc()
-    peek = stream.peek()
+
+    if stream.peek().chr.match(/[a-zA-Z]/)
+      stream.ungetc(char)
+
+      return nil
+    end
 
     stream.ungetc(char)
 
-    if peek.chr.match(/[a-zA-Z\d]/)
-      return IdentifierToken.read(stream)
+    return self.read_token(stream, SYMBOLS, :to_sym)
+  end
+
+end
+
+class CommentToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if stream.peek().chr != "/"
+    
+    char = stream.getc()
+    
+    if stream.peek().chr != "/"
+      stream.ungetc(char)
+      
+      return nil
     end
 
-    if char == "=" && !peek.chr.match(/[\+\-\*\/%\<\>\@\=]/)
-      return AssignToken.read(stream)
+    stream.getc()
+
+    while stream.peek.chr.match(/[^\n]/)
+      buffer << stream.getc()
+    end
+
+    return CommentToken.new(buffer.to_s)
+  end
+
+end
+
+class BlockCommentToken < CommentToken
+
+  def self.read(stream, buffer = "")
+    return nil if stream.peek().chr != "/"
+
+    char = stream.getc()
+    
+    if stream.peek().chr != "*"
+      stream.ungetc(char)
+      
+      return nil
     end
     
-    return self.read_helper(stream, /[\+\-\*\/%\<\>\@\=]/, :to_sym)
+    stream.getc()
+
+    while true
+      while stream.peek.chr.match(/[^\/\*]/)
+        buffer << stream.getc()
+      end
+
+      char = stream.getc()
+    
+      if char == "/" && stream.peek().chr == "*"
+        stream.ungetc(char)
+      
+        self.read(stream)
+      elsif char == "*" && stream.peek().chr == "/"
+        stream.getc()
+      
+        return BlockCommentToken.new(buffer.to_s)
+      else
+        #stream.ungetc(char)
+      end
+    end
+    
+    return BlockCommentToken.new(buffer.to_s)
+  end
+
+  def begin_block()
+  end
+  
+  def end_block()
   end
 
 end
@@ -119,8 +199,18 @@ class CommaToken < Token
 
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/[,]/)
-    
-    return self.read_helper(stream, /[,]/, :to_sym)
+
+    return self.read_token(stream, /[,]/, :to_sym)
+  end
+
+end
+
+class DotOperatorToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[\.]/)
+
+    return self.read_token(stream, /[\.]/, :to_sym)
   end
 
 end
@@ -149,6 +239,14 @@ class AssignToken < Token
 
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/[=]/)
+
+    char = stream.getc()
+    
+    if stream.peek().match(OperatorToken::SYMBOLS)
+      stream.ungetc(char)
+    
+      return nil
+    end
     
     return self.new(stream.getc().to_sym)
   end

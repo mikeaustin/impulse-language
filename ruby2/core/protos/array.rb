@@ -15,13 +15,17 @@ class ArrayProto < Frame
 
     @instance.add_method2(:"size", [])       { |receiver, args| Value(receiver.frame.size) }
 
-    @instance.add_method(:slice, FunctionProto(@instance.frame.method(:_slice)))
+    @instance.add_method(:slice,        FunctionProto(@instance.frame.method(:_slice)))
     @instance.add_method(:slice_assign, FunctionProto(@instance.frame.method(:_slice_assign)))
-    @instance.add_method(:"++", FunctionProto(@instance.frame.method(:_concatenate)))
-    @instance.add_method(:reverse, FunctionProto(@instance.frame.method(:_reverse)))
-    @instance.add_method(:map,   FunctionProto(@instance.frame.method(:_map)))
-    @instance.add_method(:fold,  FunctionProto(@instance.frame.method(:_fold)))
-    @instance.add_method(:join,  FunctionProto(@instance.frame.method(:_join)))
+    @instance.add_method(:"++",         FunctionProto(@instance.frame.method(:_concatenate)))
+    @instance.add_method(:reverse,      FunctionProto(@instance.frame.method(:_reverse)))
+    @instance.add_method(:"map:",       FunctionProto(@instance.frame.method(:_map)))
+    @instance.add_method(:"fold:",      FunctionProto(@instance.frame.method(:_fold)))
+    @instance.add_method(:"join:",      FunctionProto(@instance.frame.method(:_join)))
+
+    @instance.add_method2(:"==", [])     { |receiver, args| receiver.frame.equal(args[0].frame) }
+    @instance.add_method2(:"any:", [])   { |receiver, args| receiver.frame.any(receiver, args[0]) }
+    @instance.add_method2(:"all:", [])   { |receiver, args| receiver.frame.all(receiver, args[0]) }
     
     return @instance
   end
@@ -41,7 +45,7 @@ class ArrayProto < Frame
 
   def frame_inspect(value)
     if value.frame == ArrayProto.instance.frame
-      return Value("<array>")
+      return "<array>"
     end
     
     return "#{value.frame.array.inspect} + #{value.frame.hash.inspect}"
@@ -51,8 +55,38 @@ class ArrayProto < Frame
   # <array> methods
   #
 
+  def equal(other)
+    self.array.zip(other.array) do |item_a, item_b|
+      if item_a.equal(item_b).float == false
+        return Value(false)
+      end
+    end
+    
+    return Value(true)
+  end
+
   def size
     return self.array.size + self.hash.size
+  end
+
+  def find(block)
+    self.array.each do |item|
+      if block.frame._call(block, [item]).float == true
+        return item
+      end
+    end
+
+    return NilProto.instance
+  end
+
+  def any(receiver, block)
+    return Value(receiver.frame.find(block) != NilProto.instance)
+  end
+
+  def all(receiver, block)
+    not_block = FunctionProto(proc { |receiver, args| Value(!block.frame._call(block, args).float) })
+
+    return Value(self.find(not_block) == NilProto.instance)
   end
 
   def _slice(receiver, args)
@@ -62,20 +96,28 @@ class ArrayProto < Frame
     if index >= 1 && index <= array.size
       return Value(receiver.frame.array[index - 1])
     else
-      #return NilProto.instance
-      return Value(receiver.frame.hash[index] || NilProto.instance)
+      return receiver.frame.hash[index]
     end
   end
 
   def _slice_assign(receiver, args)
     array = receiver.frame.array
+    hash  = receiver.frame.hash
     index = args[0].float.to_i
+    value = args[1]
     
     if index >= 1 && index <= array.size
-      return Value(receiver.frame.array[index - 1] = args[1])
+      if value.frame == NothingProto.instance.frame
+        return Value(array.delete_at(index - 1))
+      else
+        return Value(array[index - 1] = value)
+      end
     else
-      #return NilProto.instance
-      return Value(receiver.frame.hash[index] = args[1])
+      if value == NothingProto.instance
+        return Value(hash.delete(index))
+      else
+        return Value(hash[index] = value)
+      end
     end
   end
 
@@ -124,8 +166,8 @@ class ArrayProto < Frame
   end
 
   def _join(receiver, args)
-
     array = receiver.frame.array
+    
     if args[0].proto.frame == StringProto.instance.frame
       separator = args[0].frame.string
 

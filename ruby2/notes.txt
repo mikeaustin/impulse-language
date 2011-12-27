@@ -1,10 +1,4 @@
 
-block = |a, b| a + b
-block [2, 3]
-
-list sort: |a, b| a < b
-
-
 "a,b,c" split: "," | self join: " " | reverse
 
 "a,b,c" | split "," | join " " | reverse

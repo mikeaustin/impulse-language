@@ -6,6 +6,7 @@ require './parser/token.rb'
 require './core/frame.rb'
 require './core/protos/string.rb'
 
+
 #
 # class IO
 #
@@ -27,9 +28,10 @@ end
 
 class Lexer < Frame
 
-  READERS = [OpenParenToken, CloseParenToken, OpenBracketToken, CloseBracketToken,
-             LitNumberToken, LitStringToken, LitSymbolToken, OperatorToken, IdentifierToken,
-             CommaToken, VerticalBarToken, DollarSignToken, AssignToken,
+  READERS = [CommentToken, BlockCommentToken, OpenParenToken, CloseParenToken, OpenBracketToken, CloseBracketToken,
+             LitNumberToken, LitStringToken, LitSymbolToken,
+             AssignToken, OperatorToken, IdentifierToken,
+             CommaToken, DotOperatorToken, VerticalBarToken, DollarSignToken,
              NewlineToken]
 
   def initialize(stream)

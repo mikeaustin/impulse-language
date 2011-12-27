@@ -1,6 +1,7 @@
 #
-# expression.rb
+# runtime/protos/expression.rb
 #
+
 
 def ExpressionProto(messages)
   return ExpressionProto.new(messages)
@@ -39,7 +40,6 @@ class ExpressionProto < Frame
       message.to_s
     end
     
-    #return messages.join(" ")
     return "(" + messages.join(" ") + ")"
   end
 

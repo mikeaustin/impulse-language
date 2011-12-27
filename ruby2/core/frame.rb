@@ -2,6 +2,7 @@
 # core/frame.rb
 #
 
+
 class Hash
 
   attr :parent, true
@@ -25,7 +26,7 @@ class Hash
     #  raise "Slot not found: " + self.class.name + "." + symbol.to_s
     end
 
-    return []
+    return nil
   end
 
 end
@@ -66,6 +67,10 @@ class Frame < Object
   def init_slots()
   end
 
+  def equal(other)
+    return Value(other && self == other)
+  end
+
   def set_local(symbol, value)
     return @frame_locals[symbol] = value
   end
@@ -77,10 +82,10 @@ class Frame < Object
   def find_local(symbol)
     value = @frame_locals.find(symbol)
     
-    if value != []
+    if value
       return value
     else
-      raise "Local not found: " + self.class.name + "." + symbol.to_s
+      puts "*** Runtime error: ##{symbol} not found in current scope"
     end
   end
 
@@ -107,10 +112,10 @@ class Frame < Object
   def send_(selector, receiver, args)
     block = find_method(selector)
     
-    if block != []
+    if block
       return block.frame._call(receiver, args)
     else
-      raise "*** Send failed: #{receiver}.#{selector}"
+      puts "*** Runtime error: #{receiver.inspect} does not respond to ##{selector}"
     end
     
     return nil

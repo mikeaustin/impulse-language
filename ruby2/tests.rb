@@ -27,19 +27,19 @@ messages = [AssignMessage(:y, Value(1))]
 assert ExpressionProto(messages), :==, 1
 
 # x pow: 2
-messages = [LocalMessage(:x), SendMessage(:pow, [Value(2)])]
+messages = [LocalMessage(:x), SendMessage(:"pow:", [Value(2)])]
 assert ExpressionProto(messages), :==, 25
 
 # (x add: 5) pow: (y add: 1)
 messages = [ExpressionProto([LocalMessage(:x), SendMessage(:"+", [Value(5)])]),
-            SendMessage(:pow, [ExpressionProto([LocalMessage(:y), SendMessage(:"+", [Value(1)])])])]
+            SendMessage(:"pow:", [ExpressionProto([LocalMessage(:y), SendMessage(:"+", [Value(1)])])])]
 assert ExpressionProto(messages), :==, 100
 
 # |y| (x add: 5) pow: (y add: 1)
 messages = [BlockMessage([:y], [ExpressionProto(messages)])]
 
 # block call: 2
-messages = [ExpressionProto(messages), SendMessage(:call, [Value(2)])]
+messages = [ExpressionProto(messages), SendMessage(:"call:", [Value(2)])]
 assert ExpressionProto(messages), :==, 1000
 
 # self
@@ -59,13 +59,13 @@ ExpressionProto(messages).eval_($lobby, [], $lobby)
 # method :foo, |x|
 #    $ print: x
 # end
-messages = [MethodMessage(:foo, BlockMessage([:x], [
+messages = [MethodMessage(:"foo:", BlockMessage([:x], [
                ExpressionProto([LocalMessage(:x)])
            ]))]
 output ExpressionProto(messages)
 ExpressionProto(messages).eval_($lobby, [], $lobby)
 
 # foo: 20
-messages = [SendMessage(:foo, [Value(20)])]
+messages = [SendMessage(:"foo:", [Value(20)])]
 assert ExpressionProto(messages), :==, 20
 

@@ -21,7 +21,7 @@ class Parser < Frame
   end
 
   def expect(token, message = "")
-    if !peek_token().instance_of?(token)
+    if !peek_token().is_a?(token)
       puts "*** Syntax Error: Unexpected token '#{peek_token()}'. #{message}"
       
       exit
@@ -31,7 +31,7 @@ class Parser < Frame
   end
 
   def option(token)
-    if !peek_token().instance_of?(token)
+    if !peek_token().is_a?(token)
       return nil
     end
     
@@ -39,7 +39,7 @@ class Parser < Frame
   end
 
   def keyword(symbol)
-    if !(peek_token().instance_of?(IdentifierToken) && peek_token().float == symbol)
+    if !(peek_token().is_a?(IdentifierToken) && peek_token().float == symbol)
       return nil
     end
     
@@ -47,7 +47,7 @@ class Parser < Frame
   end
 
   def repeat(token)
-    if peek_token().instance_of?(token)
+    if peek_token().is_a?(token)
       yield next_token()
     end
   end
@@ -74,6 +74,18 @@ class PrimaryParser < Parser
         return [Value(next_token().float)]
       when IdentifierToken
         identifier = next_token()
+        
+        if identifier.frame.proto == SymbolProto.instance && identifier.float == :"self"
+          messages = [LocalMessage(:self)]
+
+          if option(DotOperatorToken)
+            field = expect(IdentifierToken)
+            
+            messages += [LocalMessage(field.float)]
+          end
+          
+          return messages
+        end
         
         if option(AssignToken)
           messages = ExpressionParser(@lexer)
@@ -120,7 +132,7 @@ class MessageParser < Parser
         arguments = []
         
         expect(OpenBracketToken)
-        if !peek_token().instance_of? CloseBracketToken
+        if !peek_token().is_a? CloseBracketToken
           begin
             arguments << ExpressionProto(ExpressionParser(@lexer))
           end while option(CommaToken)
@@ -179,13 +191,18 @@ class StatementParser < Parser
       expression = ExpressionParser(@lexer)
       expect(CloseParenToken, "Expected ')'")
       
-      #messages += [ExpressionProto(expression)]
-      messages += expression
+      if expression == [nil]
+         messages << NothingProto.instance
+      else
+        messages += expression
+      end
     when OpenBracketToken
       messages += ArrayParser(@lexer)
     else
       messages += PrimaryParser(@lexer)
     end
+
+    option(CommentToken)
 
     begin
       while (message = MessageParser(@lexer)) != []
@@ -193,7 +210,13 @@ class StatementParser < Parser
       end
     end while option(VerticalBarToken) || option(DollarSignToken)
 
-    expect(NewlineToken, "Expected a message [2].")
+    option(CommentToken)
+
+    expect(NewlineToken, "Expected an expression [2].")
+    
+    if $file && peek_token() == nil
+      return nil
+    end
 
     if messages == []
       messages << nil
@@ -225,9 +248,12 @@ class ExpressionParser < Parser
       expect(OpenParenToken, "Expected '('")
       expression = ExpressionParser(@lexer)
       expect(CloseParenToken, "Expected ')'")
-      
-      #messages += [ExpressionProto(expression)]
-      messages += expression
+
+      if expression == [nil]
+         messages << NothingProto.instance
+      else
+        messages += expression
+      end
     when OpenBracketToken
       messages += ArrayParser(@lexer)
     else
@@ -263,7 +289,7 @@ class ArrayParser < Parser
 
     items = []
 
-    if !peek_token().instance_of? CloseBracketToken
+    if !peek_token().is_a? CloseBracketToken
       begin
         items << ExpressionProto(ExpressionParser(@lexer))
       end while option(CommaToken)
@@ -294,11 +320,11 @@ class BlockParser < Parser
 
     if keyword(:do)
       expect(NewlineToken)
-      print "] "
+      print "] " if !$file
 
       begin
         expressions << ExpressionProto(StatementParser(@lexer))
-        print "] "
+        print "] " if !$file
       end while !keyword(:end)
     else
       expressions << ExpressionProto(ExpressionParser(@lexer))

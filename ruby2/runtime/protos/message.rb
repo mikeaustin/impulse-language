@@ -1,6 +1,7 @@
 #
-# class MessageProto
+# runtime/protos/message.rb
 #
+
 
 def MessageProto(selector, args)
   return MessageProto.new(selector, args)
