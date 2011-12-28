@@ -31,6 +31,8 @@ end
 
 class Array
 
+  attr :_self, true
+
   def to_s()
     return self.map do |item| item.to_s end.join ", "
   end

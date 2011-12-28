@@ -50,9 +50,9 @@ class BlockProto < FunctionProto
     @instance ||= BlockProto.new([], [], nil)
     @instance.frame.proto = ObjectProto.instance
 
-    @instance.add_method(:"arity", FunctionProto(@instance.frame.method(:_arity)))
-    @instance.add_method(:"call:", FunctionProto(@instance.frame.method(:call_block2)))
-    @instance.add_method(:"slice", FunctionProto(@instance.frame.method(:call_block2)))
+    @instance.add_method2(:"arity", []) { |receiver, args| receiver.frame._arity }
+    @instance.add_method2(:"call:", []) { |receiver, args| receiver.frame._call(receiver, args) }
+    @instance.add_method2(:"slice", []) { |receiver, args| receiver.frame._call(receiver, args) }
     
     return @instance
   end
@@ -84,21 +84,6 @@ class BlockProto < FunctionProto
     return result
   end
 
-  def call_block2(receiver, args, object_self = nil)
-    locals = LocalsProto(receiver.frame.locals)
-    locals.set_local(:self, object_self)
-	
-    receiver.frame.argnames.each.with_index do |argname, i|
-      locals.set_local(argname, args[i])
-    end
-
-    result = receiver.frame.expressions.reduce(locals) do |receiver, expression|
-      expression.eval_(receiver, [], locals)
-    end
-    
-    return result
-  end
-
   def frame_inspect(value)
     if value.frame == BlockProto.instance.frame
       return "<block>"
@@ -107,8 +92,12 @@ class BlockProto < FunctionProto
     return "|#{value.frame.argnames}| #{value.frame.expressions}"
   end
 
-  def _arity(receiver, args)
-    return Value(receiver.frame.argnames.size)
+  #
+  # <block> methods
+  #
+
+  def _arity
+    return Value(@argnames.size)
   end
 
 end

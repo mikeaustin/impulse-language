@@ -10,11 +10,6 @@ class Hash
   def find(symbol)
     hash = self
 
-    #begin
-    #  value = hash[symbol]
-    #  hash  = hash.parent
-    #end while value == nil && hash != nil
-
     while hash && !hash.has_key?(symbol)
       value = hash[symbol]
       hash  = hash.parent
@@ -22,8 +17,6 @@ class Hash
     
     if hash && hash.has_key?(symbol)
       return hash[symbol]
-    #else
-    #  raise "Slot not found: " + self.class.name + "." + symbol.to_s
     end
 
     return nil
@@ -64,12 +57,10 @@ class Frame < Object
     return self.to_s()
   end
 
-  def init_slots()
-  end
-
   def equal(other)
     return Value(other && self == other)
   end
+
 
   def set_local(symbol, value)
     return @frame_locals[symbol] = value
@@ -88,6 +79,7 @@ class Frame < Object
       puts "*** Runtime error: ##{symbol} not found in current scope"
     end
   end
+
 
   def add_method(symbol, value)
     @frame_methods[symbol] = value
@@ -108,6 +100,7 @@ class Frame < Object
   def find_method(symbol)
     return frame_methods.find(symbol)
   end
+
 
   def send_(selector, receiver, args)
     block = find_method(selector)
