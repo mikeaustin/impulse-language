@@ -2,6 +2,9 @@
 # runtime/protos/message.rb
 #
 
+require './core/frame.rb'
+require './core/protos/object.rb'
+
 
 def MessageProto(selector, args)
   return MessageProto.new(selector, args)

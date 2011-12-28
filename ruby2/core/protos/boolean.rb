@@ -2,6 +2,9 @@
 # core/protos/boolean.rb
 #
 
+require './core/frame.rb'
+require './core/protos/object.rb'
+
 
 class BooleanProto < Frame
 

@@ -2,6 +2,9 @@
 # core/protos/block.rb
 #
 
+require './core/frame.rb'
+require './core/protos/object.rb'
+
 
 def FunctionProto(func, arg_types = [])
   return FunctionProto.new(func, arg_types)

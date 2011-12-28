@@ -62,6 +62,8 @@ end
 class PrimaryParser < Parser
 
   def parse()
+    messages = []
+    
     case peek_token()
       when LitNumberToken
         return [Value(next_token().float)]
@@ -70,31 +72,31 @@ class PrimaryParser < Parser
         
         return [StringProto.instance.frame.create(string)]
       when LitSymbolToken
-        #p ">>>", peek_token().float, "<<<"
         return [Value(next_token().float)]
       when IdentifierToken
         identifier = next_token()
         
         if identifier.frame.proto == SymbolProto.instance && identifier.float == :"self"
-          messages = [LocalMessage(:self)]
-
           if option(DotOperatorToken)
-            field = expect(IdentifierToken)
+            messages += [LocalMessage(:self)]
             
-            messages += [LocalMessage(field.float)]
+            identifier = expect(IdentifierToken)
           end
-          
-          return messages
         end
         
         if option(AssignToken)
-          messages = ExpressionParser(@lexer)
+          messages += ExpressionParser(@lexer)
+          
           return [AssignMessage(identifier.float, ExpressionProto(messages))]
         end
         
       	return [LocalMessage(identifier.float)]
       when VerticalBarToken
-        return [BlockParser.new(@lexer).frame.parse()]
+        return BlockParser.new(@lexer).frame.parse()
+      when OpenParenToken
+        return SubExpressionParser.new(@lexer).frame.parse()
+      when OpenBracketToken
+        return ArrayParser(@lexer)
     end
     
     return []
@@ -115,8 +117,7 @@ class MessageParser < Parser
       	return [SendMessage(next_token().float, [])]
       when KeywordToken
         keyword = next_token()
-        msg_args = []
-        msg_args << ExpressionProto(ExpressionParser(@lexer))
+        msg_args = [ExpressionProto(ExpressionParser(@lexer))]
 
         begin repeat(KeywordToken) do |keyword|
           msg_args << ExpressionProto(ExpressionParser(@lexer))
@@ -146,8 +147,8 @@ class MessageParser < Parser
         end
         
         return [SendMessage(:slice, arguments)]
-      when NewlineToken
-      	return []
+      #when NewlineToken
+      #	return []
     end
     
     return []
@@ -185,24 +186,9 @@ class StatementParser < Parser
   def parse()
     messages = []
 
-    case peek_token()
-    when OpenParenToken
-      expect(OpenParenToken, "Expected '('")
-      expression = ExpressionParser(@lexer)
-      expect(CloseParenToken, "Expected ')'")
-      
-      if expression == [nil]
-         messages << NothingProto.instance
-      else
-        messages += expression
-      end
-    when OpenBracketToken
-      messages += ArrayParser(@lexer)
-    else
-      messages += PrimaryParser(@lexer)
-    end
-
     option(CommentToken)
+
+    messages += PrimaryParser(@lexer)
 
     begin
       while (message = MessageParser(@lexer)) != []
@@ -228,6 +214,33 @@ class StatementParser < Parser
 end
 
 
+
+class SubExpressionParser < Parser
+
+  def parse()
+    messages = []
+    expression = []
+
+    expect(OpenParenToken, "Expected '('")
+    
+    if !peek_token().is_a? CloseParenToken
+      expression = ExpressionParser(@lexer)
+    end
+    
+    expect(CloseParenToken, "Expected ')'")
+
+    messages += expression
+
+    if messages == []
+       messages << NothingProto.instance
+    end
+    
+    return messages
+  end
+  
+end
+
+
 def ExpressionParser(lexer, messageParser = method(:MessageParser))
   return ExpressionParser.new(lexer, messageParser).frame.parse()
 end
@@ -241,37 +254,16 @@ class ExpressionParser < Parser
   end
 
   def parse()
-    messages = []
+    messages = PrimaryParser(@lexer)
 
-    case peek_token()
-    when OpenParenToken
-      expect(OpenParenToken, "Expected '('")
-      expression = ExpressionParser(@lexer)
-      expect(CloseParenToken, "Expected ')'")
-
-      if expression == [nil]
-         messages << NothingProto.instance
-      else
-        messages += expression
-      end
-    when OpenBracketToken
-      messages += ArrayParser(@lexer)
-    else
-      messages += PrimaryParser(@lexer)
+    if messages == []
+      expect(UnknownToken, "Expected an expression [3].")
     end
-    
-    #if messages == []
-    #  expect(Token, "Expected a message [3].")
-    #end
 
     while (message = @messageParser.call(@lexer)) != []
       messages += message
     end
 
-    if messages == []
-      messages << nil
-    end
-      
     return messages
   end
   
@@ -285,9 +277,9 @@ end
 class ArrayParser < Parser
 
   def parse()
-    expect(OpenBracketToken, "Expcected '['")
-
     items = []
+
+    expect(OpenBracketToken, "Expcected '['")
 
     if !peek_token().is_a? CloseBracketToken
       begin
@@ -307,7 +299,7 @@ class BlockParser < Parser
 
   def parse()
     argnames = []
-  
+
     expect(VerticalBarToken, "Expected '|'")
 
     begin repeat(IdentifierToken) do |argname|
@@ -320,17 +312,17 @@ class BlockParser < Parser
 
     if keyword(:do)
       expect(NewlineToken)
-      print "] " if !$file
+      print "| " if !$file
 
       begin
         expressions << ExpressionProto(StatementParser(@lexer))
-        print "] " if !$file
+        print "| " if !$file
       end while !keyword(:end)
     else
       expressions << ExpressionProto(ExpressionParser(@lexer))
     end
     
-    return BlockMessage(argnames, expressions)
+    return [BlockMessage(argnames, expressions)]
   end
   
 end

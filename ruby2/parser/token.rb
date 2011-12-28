@@ -2,6 +2,8 @@
 # parser/token.rb
 #
 
+require './core/value.rb'
+
 
 class Token < Value
 
@@ -20,6 +22,10 @@ class Token < Value
     
     return self.new(buffer.send(cast))
   end
+
+end
+
+class UnknownToken < Token
 
 end
 
@@ -165,7 +171,8 @@ class BlockCommentToken < CommentToken
     stream.getc()
 
     while true
-      while stream.peek.chr.match(/[^\/\*]/)
+      while stream.peek().chr.match(/[^\/\*]/)
+        print "| " if !$file && stream.peek().chr == "\n"
         buffer << stream.getc()
       end
 
@@ -178,19 +185,11 @@ class BlockCommentToken < CommentToken
       elsif char == "*" && stream.peek().chr == "/"
         stream.getc()
       
-        return BlockCommentToken.new(buffer.to_s)
-      else
-        #stream.ungetc(char)
+        break;
       end
     end
     
     return BlockCommentToken.new(buffer.to_s)
-  end
-
-  def begin_block()
-  end
-  
-  def end_block()
   end
 
 end

@@ -2,6 +2,8 @@
 # core/protos/object.rb
 #
 
+require './core/protos/nil.rb'
+
 
 class ObjectProto < Frame
 

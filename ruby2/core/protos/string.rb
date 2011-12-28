@@ -3,6 +3,7 @@
 #
 
 require './core/frame.rb'
+require './core/protos/object.rb'
 
 
 class StringProto < Frame
@@ -16,7 +17,9 @@ class StringProto < Frame
     @instance.add_method2(:"upper-case", [])      { |receiver, args| receiver.frame.upper_case }
     @instance.add_method2(:"lower-case", [])      { |receiver, args| receiver.frame.lower_case }
     @instance.add_method2(:"capitalize", [])      { |receiver, args| receiver.frame.capitalize }
+    @instance.add_method2(:"reverse", [])         { |receiver, args| receiver.frame.reverse }
     @instance.add_method2(:"split:", [@instance]) { |receiver, args| receiver.frame.split(args[0].frame) }
+
     @instance.add_method2(:"++", [@instance])     { |receiver, args| receiver.frame.concatenate(args[0].frame) }
 
     @instance.add_method2(:"==", [@instance])     { |receiver, args| receiver.frame.equal(args[0].frame) }
@@ -62,6 +65,10 @@ class StringProto < Frame
 
   def capitalize
     return Value(self.string[0].upcase + self.string[1..-1])
+  end
+
+  def reverse
+    StringProto.instance.frame.create(self.string.reverse)
   end
 
   def split(separator)

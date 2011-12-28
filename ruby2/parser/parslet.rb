@@ -5,22 +5,26 @@
 
 class Parselet < Frame
 
-  def initialize(parser)
-    @parser = parser
-  end
-
 end
 
 
-class StatementParslet < Parser
+class ArrayParser < Parslet
 
-  def parse()
-    messages = ExpressionParslet(@lexer)
+  def self.parse(parser)
+    parser.expect(OpenBracketToken, "Expcected '['")
 
-    expect(NewlineToken, "Expected a message [2].")
+    items = []
+
+    if !parser.peek_token().is_a? CloseBracketToken
+      begin
+        items << ExpressionProto(ExpressionParser(@lexer))
+      end while option(CommaToken)
+    end
     
-    return messages
+    parser.expect(CloseBracketToken, "Expected ']'")
+    
+    return [ArrayMessage(items)]
   end
-  
+
 end
 

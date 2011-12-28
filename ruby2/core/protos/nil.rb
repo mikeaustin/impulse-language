@@ -2,6 +2,8 @@
 # core/protos/nil.rb
 #
 
+require './core/frame.rb'
+
 
 class NilProto < Frame
 

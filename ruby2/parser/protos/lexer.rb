@@ -2,9 +2,9 @@
 # parser/protos/lexer.rb
 #
 
-require './parser/token.rb'
 require './core/frame.rb'
 require './core/protos/string.rb'
+require './parser/token.rb'
 
 
 #

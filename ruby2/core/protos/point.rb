@@ -2,6 +2,9 @@
 # core/protos/point.rb
 #
 
+require './core/frame.rb'
+require './core/protos/object.rb'
+
 
 class PointProto < Frame
 

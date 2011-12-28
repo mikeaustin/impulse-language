@@ -2,6 +2,12 @@
 # core/value.rb
 #
 
+require './core/protos/boolean.rb'
+require './core/protos/number.rb'
+require './core/protos/symbol.rb'
+require './core/protos/string.rb'
+
+
 def Value(value)
   return Value.new(value)
 end

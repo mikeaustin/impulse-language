@@ -2,6 +2,9 @@
 # runtime/protos/expression.rb
 #
 
+require './core/frame.rb'
+require './core/protos/object.rb'
+
 
 def ExpressionProto(messages)
   return ExpressionProto.new(messages)
