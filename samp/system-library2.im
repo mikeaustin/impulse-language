@@ -10,7 +10,8 @@
 
 object <object>
 
-   field slots, proto
+   field slots, reader: true
+   field proto, reader: true
 
    method create
       :slots = <map>.clone
@@ -36,7 +37,7 @@ object <object>
 
    method resend
       if :proto != nil
-         self.send message, args: args, context: self
+         self.send symbol, args: args, context: self
       end
    end
 
@@ -82,7 +83,7 @@ object <sequence>
       return array
    end
 
-   method fold: |block|
+   method fold |block|
       self.fold block, with: nil
    end
 

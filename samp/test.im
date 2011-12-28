@@ -2,7 +2,17 @@ print: "Squares of 1 through 10"
 squares = (1..10) map: |n| n * n
 print: squares
 
-(1..100000000) each: |n|
-   n * 5
+[1..100000000] each: |n|
+   yield n * 5
+end
+
+
+
+print "Squares of 1 through 10"
+squares = [1..10].map |n| n * n
+print squares
+
+[1..100000000].each |n|
+   yield n * 5
 end
 

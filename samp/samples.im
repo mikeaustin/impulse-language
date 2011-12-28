@@ -22,7 +22,38 @@ print: "add-one [10] =", add-one [10]
 factorial = |n| n == 0 ? 1 : n * factorial [n - 1]
 print: "factorial [5] =", factorial [5]
 
-factorial = |n|
+factorial = |n| do
    n == 0 ? 1 : n * factorial [n - 1]
+end
+
+factorial = |n| do
+   n == 0 ? 1 : n * factorial [n - 1]
+end
+
+
+
+canvas draw-text: "hello", size: 16px, weight: 'bold
+
+canvas.draw-text "hello", size: 16.px, weight: #bold
+
+
+method map: block
+  local array = []
+  
+  self each: |item| do
+    array append: block [item]
+  end
+  
+  return array
+end
+
+methhod map (block)
+  local array = []
+  
+  self.each(|item| do
+    array.append (block (item))
+  end
+  
+  return array
 end
 
