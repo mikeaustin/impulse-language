@@ -9,6 +9,8 @@ require './core/protos/number.rb'
 require './core/protos/string.rb'
 require './core/protos/symbol.rb'
 require './core/protos/array.rb'
+require './core/protos/range.rb'
+require './core/protos/set.rb'
 require './core/protos/block.rb'
 require './core/protos/point.rb'
 
@@ -33,6 +35,8 @@ class LobbyProto < Frame
     self.set_local(:"<string>", StringProto.instance)
     self.set_local(:"<symbol>", SymbolProto.instance)
     self.set_local(:"<array>",  ArrayProto.instance)
+    self.set_local(:"<range>",  RangeProto.instance)
+    self.set_local(:"<set>",    SetProto.instance)
     self.set_local(:"<block>",  BlockProto.instance)
     self.set_local(:"<point>",  PointProto.instance)
 

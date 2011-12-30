@@ -37,7 +37,15 @@ class LitNumberToken < Token
     buffer += self.read_buffer(stream, /\d/)
 
     if stream.peek().chr.match(/\./)
-      buffer << stream.getc()
+      char = stream.getc()
+      
+      if !stream.peek().chr.match(/\d/)
+        stream.ungetc(char)
+        
+        return self.new(buffer.to_i)
+      end
+      
+      buffer << char
       
       buffer += self.read_buffer(stream, /\d/)
 
@@ -111,7 +119,7 @@ end
 
 class OperatorToken < Token
 
-  SYMBOLS = /[\+\-\*\/%\<\>\@\=\!]/
+  SYMBOLS = /[\+\-\*\/%\<\>\@\=\!\|\&\\\^\.]/
 
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(SYMBOLS)
@@ -204,7 +212,7 @@ class CommaToken < Token
 
 end
 
-class DotOperatorToken < Token
+class DotOperatorToken < OperatorToken
 
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/[\.]/)
@@ -214,7 +222,7 @@ class DotOperatorToken < Token
 
 end
 
-class VerticalBarToken < Token
+class VerticalBarToken < OperatorToken
 
   def self.read(stream, buffer = "")
     return nil if !stream.peek().chr.match(/[|]/)

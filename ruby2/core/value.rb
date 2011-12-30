@@ -53,7 +53,15 @@ class Value
   #p other.frame.class if other
   #  return other && (@frame == other.frame)
   #end
+  
+  def hash
+    return [@frame, @float].hash
+  end
 
+  def eql?(other)
+    return @float == other.float && @frame && frame.equal(other.frame)
+  end
+  
   def eval_(receiver, args, locals)
     trace "Value::eval()"
     

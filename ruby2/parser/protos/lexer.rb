@@ -28,10 +28,11 @@ end
 
 class Lexer < Frame
 
-  READERS = [CommentToken, BlockCommentToken, OpenParenToken, CloseParenToken, OpenBracketToken, CloseBracketToken,
+  READERS = [CommentToken, BlockCommentToken,
+             OpenParenToken, CloseParenToken, OpenBracketToken, CloseBracketToken,
              LitNumberToken, LitStringToken, LitSymbolToken,
-             AssignToken, OperatorToken, IdentifierToken,
              CommaToken, DotOperatorToken, VerticalBarToken, DollarSignToken,
+             AssignToken, OperatorToken, IdentifierToken,
              NewlineToken]
 
   def initialize(stream)

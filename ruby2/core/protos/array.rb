@@ -3,6 +3,7 @@
 #
 
 require './core/protos/object.rb'
+require './core/protos/block.rb'
 
 
 class ArrayProto < Frame
@@ -13,11 +14,11 @@ class ArrayProto < Frame
   def self.instance()
     @instance ||= ArrayProto.new(ObjectProto.instance)
 
-    @instance.add_method2(:"size", [])   { |receiver, args| Value(receiver.frame.size) }
+    @instance.add_method2(:"size", [])         { |receiver, args| Value(receiver.frame.size) }
 
-    @instance.add_method(:"slice",        FunctionProto(@instance.frame.method(:_slice_)))
-    @instance.add_method(:"slice_assign", FunctionProto(@instance.frame.method(:_slice_assign_)))
-    @instance.add_method(:"++",           FunctionProto(@instance.frame.method(:_concatenate_)))
+    @instance.add_method2(:"slice", [])        { |receiver, args| receiver.frame.slice(args[0]) }
+    @instance.add_method2(:"slice_assign", []) { |receiver, args| receiver.frame.slice_assign(args[0], args[1]) }
+    @instance.add_method2(:"++", [@instance])  { |receiver, args| receiver.frame.concatenate(args[0]) }
     @instance.add_method(:"reverse",      FunctionProto(@instance.frame.method(:_reverse)))
 
     @instance.add_method(:"map:",         FunctionProto(@instance.frame.method(:_map_)))
@@ -100,43 +101,36 @@ class ArrayProto < Frame
     return Value(self.find(not_block) == NilProto.instance)
   end
 
-  def _slice_(receiver, args)
-    array = receiver.frame.array
-    index = args[0].float.to_i
-
-    if index >= 1 && index <= array.size
-      return Value(receiver.frame.array[index - 1])
-    else
-      return receiver.frame.hash[index]
+  def slice(index)
+    if index.float >= 1 && index.float <= self.array.size
+      return Value(self.array[index.float - 1])
     end
+
+    return self.hash[index.float]
   end
 
-  def _slice_assign_(receiver, args)
-    array = receiver.frame.array
-    hash  = receiver.frame.hash
-    index = args[0].float.to_i
-    value = args[1]
-    
-    if index >= 1 && index <= array.size
+  def slice_assign(index, value)
+    if index.float >= 1 && index.float <= self.array.size
       if value.frame == NothingProto.instance.frame
-        return Value(array.delete_at(index - 1))
-      else
-        return Value(array[index - 1] = value)
+        return Value(self.array.delete_at(index.float - 1))
       end
+
+      return Value(self.array[index.float - 1] = value)
     else
-      if value == NothingProto.instance
-        return Value(hash.delete(index))
-      else
-        return Value(hash[index] = value)
+      if value.frame == NothingProto.instance.frame
+        return Value(self.hash.delete(index.float))
       end
+
+      return Value(self.hash[index.float] = value)
     end
   end
 
-  def _concatenate_(receiver, args)
-    array = receiver.frame.array
-    other = args[0].frame.array
+  def concatenate(other)
+  p other.frame.proto.frame == ArrayProto.instance.frame
+    #array = receiver.frame.array
+    #other = args[0].frame.array
     
-    return ArrayProto.instance.frame.create(array + other)
+    return create(self.array + other.frame.array)
   end
 
   def _reverse(receiver, args)

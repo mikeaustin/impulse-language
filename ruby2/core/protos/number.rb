@@ -28,6 +28,7 @@ class NumberProto < Frame
     @instance.add_method2(:"odd", [])           { |receiver, args| Value(receiver.float % 2 != 0) }
 
     @instance.add_method2(:"@", [@instance])    { |receiver, args| PointValue.instance.frame._clone(receiver, args[0]) }
+    @instance.add_method2(:"..", [@instance])   { |receiver, args| RangeProto.instance.frame.create(receiver, args[0]) }
 
     @instance.add_method2(:"sin", [])           { |receiver, args| Value(Math.sin(receiver.float)) }
     @instance.add_method2(:"cos", [])           { |receiver, args| Value(Math.cos(receiver.float)) }

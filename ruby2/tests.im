@@ -43,6 +43,22 @@ $ print: "] library index: [\"mark twain\", \"john smith\"]", with: library inde
 
 
 
+$ add-object: #foo, with: |obj| do
+   obj add-field: #x, with: 5
+   
+   obj add-method: #x, with: || do
+      self.x
+   end
+
+   obj add-method: #x:, with: |x| do
+      self.x = x
+   end
+end
+
+$ print: "] foo x: 10", with: foo x: 10
+$ print: "] foo x", with: foo x
+
+
 /*
 (1..10) step: 2 $ each: |n| n * n
 (1..10) index $ each: |n| n * n

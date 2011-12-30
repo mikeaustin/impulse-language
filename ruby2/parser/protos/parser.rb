@@ -75,10 +75,11 @@ class PrimaryParser < Parser
         return [Value(next_token().float)]
       when IdentifierToken
         identifier = next_token()
+        self_message = []
         
-        if identifier.frame.proto == SymbolProto.instance && identifier.float == :"self"
+        if identifier.frame.proto.frame == SymbolProto.instance.frame && identifier.float == :"self"
           if option(DotOperatorToken)
-            messages += [LocalMessage(:self)]
+            self_message += [LocalMessage(:self)]
             
             identifier = expect(IdentifierToken)
           end
@@ -87,10 +88,10 @@ class PrimaryParser < Parser
         if option(AssignToken)
           messages += ExpressionParser(@lexer)
           
-          return [AssignMessage(identifier.float, ExpressionProto(messages))]
+          return self_message + [AssignMessage(identifier.float, ExpressionProto(messages))]
         end
         
-      	return [LocalMessage(identifier.float)]
+      	return self_message + [LocalMessage(identifier.float)]
       when VerticalBarToken
         return BlockParser.new(@lexer).frame.parse()
       when OpenParenToken
@@ -194,13 +195,14 @@ class StatementParser < Parser
       while (message = MessageParser(@lexer)) != []
         messages += message
       end
-    end while option(VerticalBarToken) || option(DollarSignToken)
+    end while option(DollarSignToken)
 
     option(CommentToken)
 
     expect(NewlineToken, "Expected an expression [2].")
     
-    if $file && peek_token() == nil
+    #if $file && peek_token() == nil
+    if $file && !peek_token()
       return nil
     end
 

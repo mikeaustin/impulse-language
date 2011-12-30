@@ -40,7 +40,8 @@ class Frame < Object
   def initialize(proto = nil)
     @proto, @frame_locals, @frame_methods = proto, {}, {}
     
-    if @proto != nil
+    #if @proto != nil
+    if @proto
       @frame_locals.parent = @proto.frame_locals
       @frame_methods.parent = @proto.frame_methods
     else
@@ -106,7 +107,7 @@ class Frame < Object
     block = find_method(selector)
     
     if block
-      return block.frame._call(receiver, args)
+      return block.frame._call(receiver, args, receiver)
     else
       puts "*** Runtime error: #{receiver.inspect} does not respond to ##{selector}"
     end
