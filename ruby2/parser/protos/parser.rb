@@ -53,15 +53,17 @@ class Parser < Frame
   end
 
   def precedence(operator)
-    case operator
-    when "*", "/", "%"
+    case operator.float
+    when :"*", :"/", :"%"
       return 5
-    when "+", "-"
+    when :"+", :"-"
       return 6
-    when ">", "<", ">=", "<="
+    when :">", :"<", :">=", :"<="
       return 8
-    when "=="
+    when :"=="
       return 9
+    else
+      return 0
     end
   end
 
@@ -119,13 +121,13 @@ class PrimaryParser < Parser
 end
 
 
-def MessageParser(lexer)
-  return MessageParser.new(lexer).frame.parse()
+def MessageParser(lexer, precedence = 0)
+  return MessageParser.new(lexer).frame.parse(precedence)
 end
 
 class MessageParser < Parser
 
-  def parse()
+  def parse(precedence)
     case peek_token()
       when IdentifierToken
       	return [SendMessage(next_token().float, [])]
@@ -140,7 +142,7 @@ class MessageParser < Parser
         return [SendMessage(keyword.float, msg_args)]
       when OperatorToken
         operator = expect(OperatorToken)
-        argument = ExpressionParser(@lexer, method(:BinaryMessageParser))
+        argument = ExpressionParser(@lexer, method(:BinaryMessageParser), precedence(operator))
         
         return [SendMessage(operator.float, [ExpressionProto(argument)])]
       when OpenBracketToken
@@ -171,21 +173,20 @@ class MessageParser < Parser
 end
 
 
-def BinaryMessageParser(lexer)
-  return BinaryMessageParser.new(lexer).frame.parse()
+def BinaryMessageParser(lexer, precedence = 0)
+  return BinaryMessageParser.new(lexer).frame.parse(precedence)
 end
 
 class BinaryMessageParser < Parser
 
-  def parse()
-    case peek_token()
-      when OperatorToken
-        return []
-      else
-        return MessageParser(@lexer)
-    end
+  def parse(operator_prec)
+    peek_token = peek_token()
     
-    return []
+    if peek_token.is_a?(OperatorToken) && precedence(peek_token) > operator_prec
+      return []
+    end
+
+    return MessageParser(@lexer)
   end
   
 end
@@ -229,10 +230,9 @@ class StatementParser < Parser
 end
 
 
-
 class SubExpressionParser < Parser
 
-  def parse()
+  def parse(precedence = 0)
     messages = []
     expression = []
 
@@ -245,7 +245,7 @@ class SubExpressionParser < Parser
     messages = PrimaryParser(@lexer)
 
     begin
-      while (message = MessageParser(@lexer)) != []
+      while (message = MessageParser(@lexer, precedence)) != []
         messages += message
       end
     end while option(DollarSignToken)
@@ -264,8 +264,8 @@ class SubExpressionParser < Parser
 end
 
 
-def ExpressionParser(lexer, messageParser = method(:MessageParser))
-  return ExpressionParser.new(lexer, messageParser).frame.parse()
+def ExpressionParser(lexer, messageParser = method(:MessageParser), precedence = 0)
+  return ExpressionParser.new(lexer, messageParser).frame.parse(precedence)
 end
 
 class ExpressionParser < Parser
@@ -276,14 +276,14 @@ class ExpressionParser < Parser
     @messageParser = messageParser
   end
 
-  def parse()
+  def parse(precedence)
     messages = PrimaryParser(@lexer)
 
     if messages == []
       expect(UnknownToken, "Expected an expression [3].")
     end
 
-    while (message = @messageParser.call(@lexer)) != []
+    while (message = @messageParser.call(@lexer, precedence)) != []
       messages += message
     end
 
