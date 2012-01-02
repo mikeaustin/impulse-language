@@ -14,6 +14,7 @@ class StringProto < Frame
     @instance ||= StringProto.new(ObjectProto.instance)
 
     @instance.add_method2(:"size", [])            { |receiver, args| receiver.frame.size }
+    @instance.add_method2(:"slice", [])           { |receiver, args| receiver.frame.slice(args[0]) }
     @instance.add_method2(:"upper-case", [])      { |receiver, args| receiver.frame.upper_case }
     @instance.add_method2(:"lower-case", [])      { |receiver, args| receiver.frame.lower_case }
     @instance.add_method2(:"capitalize", [])      { |receiver, args| receiver.frame.capitalize }
@@ -53,6 +54,18 @@ class StringProto < Frame
 
   def size
     return Value(self.string.size)
+  end
+
+  def slice(index)
+    if index.proto.frame == NumberProto.instance.frame
+      if index.float >= 1 && index.float <= self.string.size
+        return Value(self.string[index.float - 1])
+      end
+    elsif index.proto.frame == RangeProto.instance.frame
+      return Value(self.string[index.frame.range.first - 1 .. index.frame.range.last - 1])
+    end
+    
+    return NilProto.instance
   end
 
   def upper_case

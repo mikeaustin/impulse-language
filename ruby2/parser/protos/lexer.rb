@@ -42,21 +42,23 @@ class Lexer < Frame
   def peek_token()
     return @token if @token
 
-    return nil if @stream.peek() == nil
-
     while @stream.peek().chr.match(/[ \t]/)
       @stream.getc()
-    end rescue nil
+    end rescue return nil
     
     @token = READERS.reduce(nil) do |token, klass|
       token || klass.read(@stream)
     end
-    
+
     if !@token
       puts "*** Syntax Error: Invalid character '#{@stream.peek()}' after '#{@last_token.inspect}'"
-      
-      exit
+
+      while @stream.peek().chr.match(/[^\n]/)
+        @stream.getc()
+      end rescue return nil
     end
+
+    @last_token = @token
     
     return @token
   end
@@ -64,7 +66,6 @@ class Lexer < Frame
   def next_token()
     token = peek_token()
     
-    @last_token = @token
     @token = nil
     
     return token

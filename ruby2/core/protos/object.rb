@@ -14,14 +14,16 @@ class ObjectProto < Frame
   def init_slots()
     self.add_method(:"id",      FunctionProto(self.method(:id)))
     self.add_method(:"type",    FunctionProto(self.method(:type)))
-    self.add_method(:"is_a",    FunctionProto(self.method(:is_a)))
+    self.add_method(:"is-a:",   FunctionProto(self.method(:is_a)))
     self.add_method(:"assign",  FunctionProto(self.method(:assign_)))
     self.add_method(:"methods", FunctionProto(self.method(:_methods)))
     self.add_method2(:"add-object:", [SymbolProto.instance, BlockProto.instance]) {
                                       |receiver, args| self.add_object(receiver, args[0].float, args[1]) }
-    self.add_method2(:"add-method:", [SymbolProto.instance, BlockProto.instance]) {
-                                      |receiver, args| receiver.add_method(args[0].float, args[1]) }
-    self.add_method2(:"add-field:",  []) { |receiver, args| receiver.set_local(args[0].float, args[1]) }
+    self.add_method2(:"add-method:", [SymbolProto.instance, BlockProto.instance]) \
+                                         { |receiver, args| receiver.add_method(args[0].float, args[1]) }
+    self.add_method2(:"add-field:", [])  { |receiver, args| receiver.set_local(args[0].float, args[1]) }
+    self.add_method2(:"tee:",  [])       { |receiver, args| tee(receiver, args[0]) }
+    self.add_method2(:"with:",   [])       { |receiver, args| do_(receiver, args[0]) }
   end
 
   def frame_inspect(value)
@@ -58,6 +60,16 @@ class ObjectProto < Frame
   	self._methods(receiver.proto, args) if receiver.proto
   	
   	return nil
+  end
+
+  def tee(receiver, block)
+    block.frame._call(block, [receiver])
+
+    return receiver
+  end
+
+  def do_(receiver, block)
+    return block.frame._call(block, [receiver])
   end
 
   def add_object(receiver, symbol, block)

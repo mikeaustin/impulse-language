@@ -24,7 +24,7 @@ class Parser < Frame
     if !peek_token().is_a?(token)
       puts "*** Syntax Error: Unexpected token '#{peek_token()}'. #{message}"
       
-      exit
+      return nil
     end
 
     return next_token()
@@ -52,6 +52,19 @@ class Parser < Frame
     end
   end
 
+  def precedence(operator)
+    case operator
+    when "*", "/", "%"
+      return 5
+    when "+", "-"
+      return 6
+    when ">", "<", ">=", "<="
+      return 8
+    when "=="
+      return 9
+    end
+  end
+
 end
 
 
@@ -63,7 +76,7 @@ class PrimaryParser < Parser
 
   def parse()
     messages = []
-    
+
     case peek_token()
       when LitNumberToken
         return [Value(next_token().float)]
@@ -200,7 +213,7 @@ class StatementParser < Parser
     option(CommentToken)
 
     expect(NewlineToken, "Expected an expression [2].")
-    
+
     #if $file && peek_token() == nil
     if $file && !peek_token()
       return nil
@@ -225,13 +238,21 @@ class SubExpressionParser < Parser
 
     expect(OpenParenToken, "Expected '('")
     
-    if !peek_token().is_a? CloseParenToken
-      expression = ExpressionParser(@lexer)
-    end
+    #if !peek_token().is_a? CloseParenToken
+    #  expression = ExpressionParser(@lexer)
+    #end
+
+    messages = PrimaryParser(@lexer)
+
+    begin
+      while (message = MessageParser(@lexer)) != []
+        messages += message
+      end
+    end while option(DollarSignToken)
     
     expect(CloseParenToken, "Expected ')'")
 
-    messages += expression
+    #messages += expression
 
     if messages == []
        messages << NothingProto.instance

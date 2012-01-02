@@ -22,6 +22,21 @@ class Hash
     return nil
   end
 
+  def find_hash(symbol)
+    hash = self
+
+    while hash && !hash.has_key?(symbol)
+      value = hash[symbol]
+      hash  = hash.parent
+    end
+    
+    if hash && hash.has_key?(symbol)
+      return hash
+    end
+
+    return nil
+  end
+
 end
 
 
@@ -64,6 +79,12 @@ class Frame < Object
 
 
   def set_local(symbol, value)
+    frame = @frame_locals.find_hash(symbol)
+
+    if frame
+      return frame[symbol] = value
+    end
+    
     return @frame_locals[symbol] = value
   end
 

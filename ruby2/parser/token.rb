@@ -12,7 +12,7 @@ class Token < Value
     
     while stream.peek().chr.match(match)
       buffer << stream.getc()
-    end rescue nil
+    end #rescue nil
     
     return buffer
   end
