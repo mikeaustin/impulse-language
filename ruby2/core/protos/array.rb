@@ -135,8 +135,15 @@ class ArrayProto < Frame
   end
 
   def map(block)
-    result = self.array.map do |item|
-      block.frame._call(block, [item])
+    if block.frame.arity.float == 2
+      result = []
+      self.array[0].frame.range.zip(array[1].frame.range) do |items|
+        result << block.frame._call(block, [Value(items[0]), Value(items[1])])
+      end
+    else
+      result = self.array.map do |item|
+        block.frame._call(block, [item])
+      end
     end
     
     return create(result)
