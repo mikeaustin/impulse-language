@@ -28,9 +28,13 @@ class SymbolProto < Frame
     end
   end
 
+  def arity
+    return Value(-3)
+  end
+
   def _call(receiver, args, object_self = nil)
   #p receiver.float
-    return args[0].send_(receiver.float, args[1..-1])
+    return args[0].send_(receiver.float, args[1..-1], object_self)
   end
 
   def _slice(receiver, args)

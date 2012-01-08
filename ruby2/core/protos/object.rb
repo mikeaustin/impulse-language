@@ -16,7 +16,10 @@ class ObjectProto < Frame
     self.add_method(:"type",    FunctionProto(self.method(:type)))
     self.add_method(:"is-a:",   FunctionProto(self.method(:is_a)))
     self.add_method(:"assign",  FunctionProto(self.method(:assign_)))
-    self.add_method(:"methods", FunctionProto(self.method(:_methods)))
+    self.add_method2(:"methods", [])     { |receiver, args| self._methods(receiver) }
+    self.add_method2(:"send:",       []) { |receiver, args| self.send_(receiver, args) }
+    self.add_method2(:"add-module:", [SymbolProto.instance, BlockProto.instance], ["symbol, function"], "Adds a module definition the the current scope") {
+                                      |receiver, args| self.add_module(receiver, args[0].float, args[1]) }
     self.add_method2(:"add-object:", [SymbolProto.instance, BlockProto.instance]) {
                                       |receiver, args| self.add_object(receiver, args[0].float, args[1]) }
     self.add_method2(:"add-method:", [SymbolProto.instance, BlockProto.instance]) \
@@ -50,14 +53,16 @@ class ObjectProto < Frame
     return receiver.set_slot(args[0].float, args[1])
   end
 
-  def _methods(receiver, args)
+  def _methods(receiver)
   	puts receiver.inspect if !receiver.frame_methods.empty?
   	
-  	receiver.frame_methods.keys.each do |selector|
-  	  puts "  #{selector}"
+  	receiver.frame_methods.each do |selector, function|
+  	  arg_names = function.frame.arg_names.join(", ")
+  	  
+  	  puts "  #{selector} #{arg_names}\r\t\t\t\t#{function.frame.summary_doc}"
   	end
   	
-  	self._methods(receiver.proto, args) if receiver.proto
+  	self._methods(receiver.proto) if receiver.proto
   	
   	return nil
   end
@@ -70,6 +75,19 @@ class ObjectProto < Frame
 
   def do_(receiver, block)
     return block.frame._call(block, [receiver])
+  end
+
+  def send_(receiver, args)
+    return receiver.send_(args[0].float, args[1] ? args[1].frame.array : [], $lobby)
+  end
+
+  def add_module(receiver, symbol, block)
+    object = Frame.new(ObjectProto.instance)
+    block.frame._call(block, [object])
+    
+    receiver.add_module(symbol, object)
+    
+    return nil
   end
 
   def add_object(receiver, symbol, block)

@@ -48,3 +48,33 @@ Range  100..1000
 
 Bytes
 
+
+
+
+
+
+"abc" send: #upper-case, args: []
+"abc" with: |c| c upper-case
+"abc" with: #upper-case
+"abc" upper-case
+
+
+array = <array> with-size: 100, fill: false
+
+array = <array> with-size: 65..122
+
+
+lobby add-object: #<array> => |object| do
+
+   object add-method: #foo => |x| do
+      ...
+   end
+
+end
+
+<file> open: "foo" => |file| do
+   ...
+end
+
+<association>
+

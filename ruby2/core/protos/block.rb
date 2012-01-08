@@ -14,11 +14,14 @@ class FunctionProto < Frame
 
   attr :func, true
   attr :arg_types, true
+  attr :arg_names, true
+  attr :summary_doc, true
   
   def initialize(func, arg_types)
     super(ObjectProto.instance)
     
     @func, @arg_types = func, arg_types
+    @arg_names = []
   end
 
   def _call(receiver, args, object_self = nil)

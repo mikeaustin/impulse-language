@@ -27,6 +27,8 @@ class NumberProto < Frame
     @instance.add_method2(:"even", [])          { |receiver, args| Value(receiver.float % 2 == 0) }
     @instance.add_method2(:"odd", [])           { |receiver, args| Value(receiver.float % 2 != 0) }
 
+    @instance.add_method2(:"as-bit", [])        { |receiver, args| Value(1 << receiver.float - 1) }
+
     @instance.add_method2(:"@", [@instance])    { |receiver, args| PointValue.instance.frame._clone(receiver, args[0]) }
     @instance.add_method2(:"..", [@instance])   { |receiver, args| RangeProto.instance.frame.create(receiver, args[0]) }
 

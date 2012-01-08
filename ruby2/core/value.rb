@@ -85,8 +85,8 @@ class Value
     return Value(@float == other.float && @frame.equal(other.frame))
   end
 
-  def send_(selector, args)
-    return @frame.send_(selector, self, args)
+  def send_(selector, args, locals)
+    return @frame.send_(selector, self, args, locals)
   end
 
   def set_local(symbol, value)
@@ -99,6 +99,14 @@ class Value
 
   def find_local(symbol)
     return @frame.find_local(symbol)
+  end
+
+  def add_module(symbol, value)
+    return @frame.add_module(symbol, value)
+  end
+
+  def find_module(symbol)
+    return @frame.find_module(symbol)
   end
 
   def add_method(symbol, value)

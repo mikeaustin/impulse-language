@@ -60,7 +60,8 @@ $ print: "] foo x", with: foo x
 
 $ print: "] \"0b\" ++ (0..1 $ sample: 8 $ join: \"\")", with: "0b" ++ (0..1 $ sample: 8 $ join: "")
 
-"FooBar" $ tee: |n| ($ print: n upper-case) $ lower-case
+upper = nil
+"FooBar" $ tee: |n| upper = n upper-case $ lower-case
 
 "foobar" with: |str| str[1] upper-case ++ str[2..str size]
 
@@ -78,20 +79,19 @@ square = |x| x * x
    array fold: |string, next| string ++ "," ++ next
 end
 
+"abc" send: #upper-case, args: []
 "abc" with: |c| c upper-case
 "abc" with: #upper-case
 "abc" upper-case
-
-// "abc" send: #upper-case, args: []
 
 
 
 // Unoptimized version
 
-doors = [false] ** 100
+doors = [false] ** 16
 
-1..100 $ each: |i| do
-   i..100 $ each: |j| do
+1..16 $ each: |i| do
+   i..16 $ each: |j| do
       doors[j] = doors[j] not
    end, step: i
 end
@@ -100,21 +100,33 @@ $ print: "] doors", with: doors
 
 // Optimized version
 
-doors = [false] ** 100
+doors = [false] ** 16
 
-1..100 sqrt $ each: |i| do
+1..16 sqrt $ each: |i| do
    doors[i * i] = true
 end
 
-1..100 sqrt $ each: |i| doors[i * i] = true
+//1..100 sqrt $ each: |i| doors[i * i] = true
 
-(1..10) % 2 $ map: |n| n * n
+//(1..10) % 2 $ map: |n| n * n
 
 // Vectorized version
 
 // doors = [false] ** 100
 
 // doors[(1..n) % i] = doors[(1..n) % i] not
+
+
+
+$ add-module: #<string>, with: |string| do
+
+   string add-method: #capitalize-trait, with: || do
+      self[1] upper-case ++ self[2..self size]
+   end
+
+end
+
+$ print: "\"foo\" capitalize-trait", with: "foo" capitalize-trait
 
 
 

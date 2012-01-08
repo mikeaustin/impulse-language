@@ -45,6 +45,7 @@ class Frame < Object
   attr :proto, true
   attr :frame_locals, true
   attr :frame_methods, true
+  attr :frame_modules, true
 
   def self.new(*args)
     result = super(*args)
@@ -53,7 +54,7 @@ class Frame < Object
   end
 
   def initialize(proto = nil)
-    @proto, @frame_locals, @frame_methods = proto, {}, {}
+    @proto, @frame_modules, @frame_locals, @frame_methods = proto, {}, {}, {}
     
     #if @proto != nil
     if @proto
@@ -103,14 +104,38 @@ class Frame < Object
   end
 
 
+  def add_module(symbol, value)
+    @frame_modules[symbol] = value
+    
+    return nil
+  end
+
+  def find_module(symbol)
+    frame = self
+
+    while frame && !frame.frame_modules.has_key?(symbol)
+      value = frame.frame_modules[symbol]
+      hash  = frame.proto
+    end
+    
+    if frame && frame.frame_modules.has_key?(symbol)
+      return frame.frame_modules[symbol]
+    end
+
+    return nil
+  end
+
+
   def add_method(symbol, value)
     @frame_methods[symbol] = value
     
     return nil
   end
 
-  def add_method2(symbol, arg_types, &block)
+  def add_method2(symbol, arg_types, arg_names = [], summary_doc = nil, &block)
     @frame_methods[symbol] = FunctionProto(block, arg_types)
+    @frame_methods[symbol].frame.summary_doc = summary_doc
+    @frame_methods[symbol].frame.arg_names = arg_names
     
     return nil
   end
@@ -124,8 +149,8 @@ class Frame < Object
   end
 
 
-  def send_(selector, receiver, args)
-    block = find_method(selector)
+  def send_(selector, receiver, args, locals)
+    block = find_method(selector) || locals.find_module(:"<string>").frame.find_method(selector)
     
     if block
       return block.frame._call(receiver, args, receiver)

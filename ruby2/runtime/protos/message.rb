@@ -55,7 +55,7 @@ class SendMessage < MessageProto
       value.eval_(locals, [], locals)
     end
 
-    result = receiver && receiver.send_(@selector, messageArgs)
+    result = receiver && receiver.send_(@selector, messageArgs, locals)
 
     return result
   end
