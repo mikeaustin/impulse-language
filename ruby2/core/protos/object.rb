@@ -42,7 +42,7 @@ class ObjectProto < Frame
   end
 
   def type(receiver, args)
-    return receiver.proto
+    return receiver.frame_proto
   end
 
   def is_a(receiver, args)
@@ -62,7 +62,7 @@ class ObjectProto < Frame
   	  puts "  #{selector} #{arg_names}\r\t\t\t\t#{function.frame.summary_doc}"
   	end
   	
-  	self._methods(receiver.proto) if receiver.proto
+  	self._methods(receiver.proto) if receiver.frame_proto
   	
   	return nil
   end

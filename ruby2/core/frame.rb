@@ -27,7 +27,7 @@ end
 
 class Frame < Object
 
-  attr :proto, true
+  attr :frame_proto, true
   attr :frame_locals, true
   attr :frame_methods, true
   attr :frame_modules, true
@@ -39,7 +39,7 @@ class Frame < Object
   end
 
   def initialize(proto = nil)
-    @proto, @frame_modules, @frame_locals, @frame_methods = proto, {}, {}, {}
+    @frame_proto, @frame_modules, @frame_locals, @frame_methods = proto, {}, {}, {}
   end
 
   def frame_inspect(value)
@@ -55,7 +55,7 @@ class Frame < Object
   end
 
   def frame_is_a(proto)
-    self.proto.frame == proto.frame
+    self.frame_proto.frame == proto.frame
   end
 
   def find_symbol(symbol, hash_name)
@@ -63,7 +63,7 @@ class Frame < Object
     
     while frame && !frame.send(hash_name).has_key?(symbol)
       value = frame.send(hash_name)[symbol]
-      frame = frame.proto
+      frame = frame.frame_proto
     end
     
     if frame && frame.send(hash_name).has_key?(symbol)

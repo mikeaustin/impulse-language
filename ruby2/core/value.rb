@@ -36,15 +36,15 @@ class Value
     end
   end
 
-  def proto()
-    return @frame.proto
+  def frame_proto
+    return @frame.frame_proto
   end
 
-  def frame_locals()
+  def frame_locals
     return @frame.frame_locals
   end
 
-  def frame_methods()
+  def frame_methods
     return @frame.frame_methods
   end
 

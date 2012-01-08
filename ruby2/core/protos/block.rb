@@ -59,7 +59,7 @@ class BlockProto < FunctionProto
 
   def self.instance()
     @instance ||= BlockProto.new([], [], nil)
-    @instance.frame.proto = ObjectProto.instance
+    @instance.frame.frame_proto = ObjectProto.instance
 
     @instance.add_method2(:"arity", []) { |receiver, args| receiver.frame.arity }
     @instance.add_method2(:"call:", []) { |receiver, args| receiver.frame._call(receiver, args) }
@@ -72,7 +72,7 @@ class BlockProto < FunctionProto
     super(self.method(:call_block), [])
 
     if !expressions.empty?
-      self.proto = BlockProto.instance
+      self.frame_proto = BlockProto.instance
     end
     
     @argnames, @expressions, @locals = argnames, expressions, locals
