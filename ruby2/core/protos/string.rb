@@ -57,15 +57,15 @@ class StringProto < Frame
   end
 
   def slice(index)
-    if index.proto.frame == NumberProto.instance.frame
+    if index.frame_is_a(NumberProto.instance)
       if index.float >= 1 && index.float <= self.string.size
         return Value(self.string[index.float - 1])
       end
-    elsif index.proto.frame == RangeProto.instance.frame
+    elsif index.frame_is_a(RangeProto.instance)
       return Value(self.string[index.frame.range.first - 1 .. index.frame.range.last - 1])
     end
     
-    return NilProto.instance
+    return NothingProto.instance
   end
 
   def upper_case

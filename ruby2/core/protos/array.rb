@@ -164,13 +164,7 @@ class ArrayProto < Frame
   end
 
   def join(string)
-    if string.proto.frame == StringProto.instance.frame
-      return Value(self.array.join(string.frame.string))
-    elsif args[0].proto.frame == BlockProto.instance.frame
-      #block = args[0]
-      
-      #BlockProto.instance.frame._call(block, [item])
-    end
+    return Value(self.array.join(string.frame.string))
   end
 
   def each_pair(block)

@@ -92,7 +92,7 @@ class PrimaryParser < Parser
         identifier = next_token()
         self_message = []
         
-        if identifier.frame.proto.frame == SymbolProto.instance.frame && identifier.float == :"self"
+        if identifier.frame_is_a(SymbolProto.instance) && identifier.float == :"self"
           if option(DotOperatorToken)
             self_message += [LocalMessage(:self)]
             

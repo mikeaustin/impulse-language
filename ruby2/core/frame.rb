@@ -3,25 +3,10 @@
 #
 
 
-class Hash
+class XHash
 
   attr :parent, true
   
-  def find(symbol)
-    hash = self
-
-    while hash && !hash.has_key?(symbol)
-      value = hash[symbol]
-      hash  = hash.parent
-    end
-    
-    if hash && hash.has_key?(symbol)
-      return hash[symbol]
-    end
-
-    return nil
-  end
-
   def find_hash(symbol)
     hash = self
 
@@ -55,15 +40,6 @@ class Frame < Object
 
   def initialize(proto = nil)
     @proto, @frame_modules, @frame_locals, @frame_methods = proto, {}, {}, {}
-    
-    #if @proto != nil
-    if @proto
-      @frame_locals.parent = @proto.frame_locals
-      @frame_methods.parent = @proto.frame_methods
-    else
-      @frame_locals.parent = nil
-      @frame_methods.parent = nil
-    end
   end
 
   def frame_inspect(value)
@@ -78,12 +54,31 @@ class Frame < Object
     return Value(other && self == other)
   end
 
+  def frame_is_a(proto)
+    self.proto.frame == proto.frame
+  end
+
+  def find_symbol(symbol, hash_name)
+    frame = self
+    
+    while frame && !frame.send(hash_name).has_key?(symbol)
+      value = frame.send(hash_name)[symbol]
+      frame = frame.proto
+    end
+    
+    if frame && frame.send(hash_name).has_key?(symbol)
+      return frame
+    end
+    
+    return nil
+  end
+
 
   def set_local(symbol, value)
-    frame = @frame_locals.find_hash(symbol)
-
+    frame = find_symbol(symbol, :frame_locals)
+    
     if frame
-      return frame[symbol] = value
+      return frame.frame_locals[symbol] = value
     end
     
     return @frame_locals[symbol] = value
@@ -94,13 +89,15 @@ class Frame < Object
   end
 
   def find_local(symbol)
-    value = @frame_locals.find(symbol)
+    frame = find_symbol(symbol, :frame_locals)
     
-    if value
-      return value
+    if frame
+      return frame.frame_locals[symbol]
     else
       puts "*** Runtime error: ##{symbol} not found in current scope"
     end
+    
+    return nil
   end
 
 
@@ -111,17 +108,12 @@ class Frame < Object
   end
 
   def find_module(symbol)
-    frame = self
-
-    while frame && !frame.frame_modules.has_key?(symbol)
-      value = frame.frame_modules[symbol]
-      hash  = frame.proto
-    end
+    frame = find_symbol(symbol, :frame_modules)
     
-    if frame && frame.frame_modules.has_key?(symbol)
+    if frame
       return frame.frame_modules[symbol]
     end
-
+    
     return nil
   end
 
@@ -145,7 +137,13 @@ class Frame < Object
   end
 
   def find_method(symbol)
-    return frame_methods.find(symbol)
+    frame = find_symbol(symbol, :frame_methods)
+
+    if frame
+      return frame.frame_methods[symbol]
+    end
+    
+    return nil
   end
 
 

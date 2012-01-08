@@ -27,8 +27,8 @@ class FunctionProto < Frame
   def _call(receiver, args, object_self = nil)
     trace "FunctionProto::eval()"
 
-    no_match = @arg_types.zip(args) do |type, arg|
-      break true if arg.proto.frame != type.frame
+    no_match = @arg_types.zip(args) do |proto, arg|
+      break true if !arg.frame_is_a(proto)
     end
       
     if no_match
@@ -73,8 +73,6 @@ class BlockProto < FunctionProto
 
     if !expressions.empty?
       self.proto = BlockProto.instance
-      self.frame_locals.parent = self.proto.frame_locals
-      self.frame_methods.parent = self.proto.frame_methods
     end
     
     @argnames, @expressions, @locals = argnames, expressions, locals

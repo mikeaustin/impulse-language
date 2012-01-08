@@ -46,7 +46,7 @@ class ObjectProto < Frame
   end
 
   def is_a(receiver, args)
-    return Value(receiver.proto.frame == args[0].frame)
+    return Value(receiver.frame_is_a(args[0]))
   end
 
   def assign_(receiver, args)

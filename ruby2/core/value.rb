@@ -85,6 +85,10 @@ class Value
     return Value(@float == other.float && @frame.equal(other.frame))
   end
 
+  def frame_is_a(proto)
+    return @frame.frame_is_a(proto)
+  end
+
   def send_(selector, args, locals)
     return @frame.send_(selector, self, args, locals)
   end
