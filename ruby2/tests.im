@@ -28,10 +28,10 @@ $ print: "] result == [\"Twain, Mark\", \"Smith, John\"]", with: result == ["Twa
 
 
 
-$ add-object: #library, with: |library| do
-   library add-field: #join-string, with: ", "
+$ add-object: #library, type: <object>, with: || do
+   self add-field: #join-string, with: ", "
    
-   library add-method: #index:, with: |names| do
+   self add-method: #index:, with: |names| do
       result = names map: |name| do
          name split: " " $ map: #capitalize $ reverse $ join: self.join-string
       end
@@ -42,14 +42,14 @@ $ print: "] library index: [\"mark twain\", \"john smith\"]", with: library inde
 
 
 
-$ add-object: #foo, with: |obj| do
-   obj add-field: #x, with: 5
+$ add-object: #foo, type: <object>, with: || do
+   self add-field: #x, with: 5
    
-   obj add-method: #x, with: || do
+   self add-method: #x, with: || do
       self.x
    end
 
-   obj add-method: #x:, with: |x| do
+   self add-method: #x:, with: |x| do
       self.x = x
    end
 end
@@ -118,9 +118,9 @@ end
 
 
 
-$ add-module: #<string>, with: |string| do
+$ add-module: #<string>, with: || do
 
-   string add-method: #capitalize-trait, with: || do
+   self add-method: #capitalize-trait, with: || do
       self[1] upper-case ++ self[2..self size]
    end
 

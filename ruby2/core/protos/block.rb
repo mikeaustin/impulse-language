@@ -28,7 +28,7 @@ class FunctionProto < Frame
     trace "FunctionProto::eval()"
 
     no_match = @arg_types.zip(args) do |proto, arg|
-      break true if !arg.frame_is_a(proto)
+      break true if proto && !arg.frame_is_a(proto)
     end
       
     if no_match
@@ -37,7 +37,7 @@ class FunctionProto < Frame
       return nil
     end
     
-    if func.arity == -3
+    if func.arity == -3 || func.arity == 3
       return func.call(receiver, args, object_self);
     else
       return func.call(receiver, args);
@@ -80,7 +80,7 @@ class BlockProto < FunctionProto
 
   def call_block(receiver, args, object_self = nil)
     locals = LocalsProto(@locals)
-    locals.set_local(:self, object_self) if object_self
+    locals.add_local(:"self", object_self) if object_self
 
     @argnames.each.with_index do |argname, i|
       locals.set_local(argname, args[i])

@@ -48,6 +48,10 @@ class Value
     return @frame.frame_methods
   end
 
+  def frame_modules
+    return @frame.frame_modules
+  end
+
   #def ==(other)
   #p self.frame.class
   #p other.frame.class if other
@@ -91,6 +95,10 @@ class Value
 
   def send_(selector, args, locals)
     return @frame.send_(selector, self, args, locals)
+  end
+
+  def add_local(symbol, value)
+    return @frame.add_local(symbol, value)
   end
 
   def set_local(symbol, value)

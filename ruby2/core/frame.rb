@@ -2,27 +2,7 @@
 # core/frame.rb
 #
 
-
-class XHash
-
-  attr :parent, true
-  
-  def find_hash(symbol)
-    hash = self
-
-    while hash && !hash.has_key?(symbol)
-      value = hash[symbol]
-      hash  = hash.parent
-    end
-    
-    if hash && hash.has_key?(symbol)
-      return hash
-    end
-
-    return nil
-  end
-
-end
+#require './core/value.rb'
 
 
 class Frame < Object
@@ -73,7 +53,14 @@ class Frame < Object
     return nil
   end
 
+  #
+  # Locals methods
+  #
 
+  def add_local(symbol, value)
+    return @frame_locals[symbol] = value
+  end
+  
   def set_local(symbol, value)
     frame = find_symbol(symbol, :frame_locals)
     
@@ -100,6 +87,9 @@ class Frame < Object
     return nil
   end
 
+  #
+  # Modules methods
+  #
 
   def add_module(symbol, value)
     @frame_modules[symbol] = value
@@ -117,6 +107,9 @@ class Frame < Object
     return nil
   end
 
+  #
+  # Methods methods
+  #
 
   def add_method(symbol, value)
     @frame_methods[symbol] = value
@@ -146,10 +139,21 @@ class Frame < Object
     return nil
   end
 
+  #
+  # Message methods
+  #
 
   def send_(selector, receiver, args, locals)
-    block = find_method(selector) || locals.find_module(:"<string>").frame.find_method(selector)
+    block = find_method(selector)
     
+    if !block
+      module_ = locals.find_module(receiver.frame_proto.inspect.to_sym)
+
+      if module_
+         block = module_.frame.find_method(selector)
+      end
+    end
+
     if block
       return block.frame._call(receiver, args, receiver)
     else

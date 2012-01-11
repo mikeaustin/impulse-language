@@ -242,6 +242,26 @@ class DollarSignToken < Token
 
 end
 
+class ColonColonToken < Token
+
+  def self.read(stream, buffer = "")
+    return nil if !stream.peek().chr.match(/[:]/)
+
+    char = stream.getc()
+    
+    if !stream.peek().chr.match(/[:]/)
+      stream.unget(char)
+      
+      return nil
+    end
+    
+    stream.getc();
+    
+    return self.new("::")
+  end
+
+end
+
 class AssignToken < Token
 
   def self.read(stream, buffer = "")

@@ -68,5 +68,10 @@ def LocalsProto(frame)
 end
 
 class LocalsProto < Frame
+
+  def frame_inspect(value)
+    return "<locals>"
+  end
+
 end
 

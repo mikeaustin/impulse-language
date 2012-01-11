@@ -31,7 +31,7 @@ class Lexer < Frame
   READERS = [CommentToken, BlockCommentToken,
              OpenParenToken, CloseParenToken, OpenBracketToken, CloseBracketToken,
              LitNumberToken, LitStringToken, LitSymbolToken,
-             CommaToken, DotOperatorToken, VerticalBarToken, DollarSignToken,
+             CommaToken, DotOperatorToken, VerticalBarToken, DollarSignToken, ColonColonToken,
              AssignToken, OperatorToken, IdentifierToken,
              NewlineToken]
 

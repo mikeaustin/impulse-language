@@ -43,8 +43,8 @@ messages = [ExpressionProto(messages), SendMessage(:"call:", [Value(2)])]
 assert ExpressionProto(messages), :==, 1000
 
 # self
-$lobby.set_local(:self, $lobby)
-messages = [LocalMessage(:self)]
+$lobby.set_local(:"self", $lobby)
+messages = [LocalMessage(:"self")]
 assert ExpressionProto(messages), :==, $lobby
 
 # object :button, |button|

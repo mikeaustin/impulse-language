@@ -23,6 +23,8 @@ class Parser < Frame
   def expect(token, message = "")
     if !peek_token().is_a?(token)
       puts "*** Syntax Error: Unexpected token '#{peek_token()}'. #{message}"
+
+      next_token()
       
       return nil
     end
@@ -44,6 +46,14 @@ class Parser < Frame
     end
     
     next_token()
+  end
+
+  def peek_keyword(symbol)
+    if !(peek_token().is_a?(IdentifierToken) && peek_token().float == symbol)
+      return nil
+    end
+    
+    peek_token()
   end
 
   def repeat(token)
@@ -79,6 +89,14 @@ class PrimaryParser < Parser
   def parse()
     messages = []
 
+    if peek_keyword(:method)
+      return MethodParser.new(@lexer).frame.parse()
+    elsif peek_keyword(:object)
+      return ObjectParser.new(@lexer).frame.parse()
+    elsif peek_keyword(:field)
+      return FieldParser.new(@lexer).frame.parse()
+    end
+
     case peek_token()
       when LitNumberToken
         return [Value(next_token().float)]
@@ -94,7 +112,7 @@ class PrimaryParser < Parser
         
         if identifier.frame_is_a(SymbolProto.instance) && identifier.float == :"self"
           if option(DotOperatorToken)
-            self_message += [LocalMessage(:self)]
+            self_message += [LocalMessage(:"self")]
             
             identifier = expect(IdentifierToken)
           end
@@ -348,5 +366,90 @@ class BlockParser < Parser
     return [BlockMessage(argnames, expressions)]
   end
   
+end
+
+
+class ObjectParser < Parser
+
+  def parse()
+    argnames = [:"obj"]
+    proto = nil
+    
+    if keyword(:object)
+      name = expect(IdentifierToken)
+
+      if option(ColonColonToken)
+        proto = expect(IdentifierToken)
+      end
+
+      expect(NewlineToken)
+      print "| " if !$file
+
+      expressions = []
+
+      begin
+        expressions << ExpressionProto(StatementParser(@lexer))
+        print "| " if !$file
+      end while !keyword(:end)
+      
+      return [SendMessage(:"add-object:", [Value(name), ObjectProto.instance, BlockMessage(argnames, expressions)])]
+    end
+  end
+
+end
+
+
+class FieldParser < Parser
+
+  def parse()
+    if keyword(:field)
+      name = expect(IdentifierToken)
+
+      messages = []
+
+      if option(AssignToken)
+        messages += ExpressionParser(@lexer)
+          
+        return [LocalMessage(:"self"), SendMessage(:"add-field:", [Value(name), ExpressionProto(messages)])]
+      end
+
+      return [LocalMessage(:"self"), SendMessage(:"add-field:", [Value(name), NilProto.instance])]
+    end
+  end
+  
+end
+
+
+class MethodParser < Parser
+
+  def parse()
+    argnames = []
+    
+    if keyword(:method)
+      case peek_token()
+      when IdentifierToken
+        name = next_token().float
+      when KeywordToken
+        name = next_token().float
+        
+        begin repeat(IdentifierToken) do |argname|
+          argnames << argname.float
+        end end while option(CommaToken)
+      end
+
+      expect(NewlineToken)
+      print "| " if !$file
+
+      expressions = []
+
+      begin
+        expressions << ExpressionProto(StatementParser(@lexer))
+        print "| " if !$file
+      end while !keyword(:end)
+      
+      return [LocalMessage(:"self"), SendMessage(:"add-method:", [Value(name), BlockMessage(argnames, expressions)])]
+    end
+  end
+
 end
 
