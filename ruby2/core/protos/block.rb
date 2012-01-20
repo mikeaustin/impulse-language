@@ -68,6 +68,16 @@ class BlockProto < FunctionProto
     return @instance
   end
 
+  def create(argnames, expression, locals)
+    object = self.class.new(Value(self));
+    
+    object.argnames = argnames
+    object.expression = expression
+    object.locals = locals
+    
+    return object
+  end
+
   def initialize(argnames, expressions, locals)
     super(self.method(:call_block), [])
 

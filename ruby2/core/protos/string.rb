@@ -21,11 +21,20 @@ class StringProto < Frame
     @instance.add_method2(:"reverse", [])         { |receiver, args| receiver.frame.reverse }
     @instance.add_method2(:"split:", [@instance]) { |receiver, args| receiver.frame.split(args[0].frame) }
 
-    @instance.add_method2(:"++", [@instance])     { |receiver, args| receiver.frame.concatenate(args[0].frame) }
+    @instance.add_method2(:"each:", [])           { |receiver, args| self.instance.frame.each(receiver, args[0].frame) }
+
+    #@instance.add_method2(:"++", [@instance])     { |receiver, args| receiver.frame.concatenate(args[0].frame) }
+    @instance.add_method2(:"++", [])              { |receiver, args| receiver.frame.concatenate(args[0]) }
 
     @instance.add_method2(:"==", [@instance])     { |receiver, args| receiver.frame.equal(args[0].frame) }
 
     return @instance
+  end
+
+  def initialize(proto)
+    super(proto)
+    
+    self.string = "todo"
   end
 
   def create(string)
@@ -93,8 +102,14 @@ class StringProto < Frame
     return ArrayProto.instance.frame.create(result)
   end
 
+  def each(receiver, block)
+    receiver.frame.string.each_char do |char|
+      block._call(block, [char])
+    end
+  end
+
   def concatenate(other)
-    return StringProto.instance.frame.create(self.string + other.string)
+    return StringProto.instance.frame.create(self.string + other.to_s)
   end
 
 end

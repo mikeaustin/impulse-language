@@ -17,7 +17,7 @@ class ObjectProto < Frame
     self.add_method(:"is-a:",   FunctionProto(self.method(:is_a)))
     self.add_method(:"assign",  FunctionProto(self.method(:assign_)))
     self.add_method2(:"methods", [])     { |receiver, args| self._methods(receiver) }
-    self.add_method2(:"send:",       []) { |receiver, args| self.send_(receiver, args) }
+    self.add_method2(:"send:",       []) { |receiver, args| self._send(receiver, args) }
     self.add_method2(:"add-module:", [SymbolProto.instance, BlockProto.instance], ["symbol, function"], "Adds a module definition the the current scope") \
                                          { |receiver, args| self.add_module(receiver, args[0].float, args[1]) }
     self.add_method2(:"add-object:", [SymbolProto.instance, nil, BlockProto.instance]) \
@@ -34,7 +34,7 @@ class ObjectProto < Frame
       return "<object>"
     end
     
-    return super()
+    return super(value)
   end
 
   def id(receiver, args)
@@ -77,7 +77,7 @@ class ObjectProto < Frame
     return block.frame._call(block, [receiver])
   end
 
-  def send_(receiver, args)
+  def _send(receiver, args)
     return receiver.send_(args[0].float, args[1] ? args[1].frame.array : [], $lobby)
   end
 
@@ -92,7 +92,7 @@ class ObjectProto < Frame
   end
 
   def add_object(receiver, symbol, proto, block)
-    object = Frame.new(ObjectProto.instance)
+    object = proto.frame.class.new(proto)
 
     block.frame._call(block, [], object)
 

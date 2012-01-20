@@ -58,8 +58,12 @@ parser = StatementParser.new(lexer)
 
 print "] " if !$file
 while messages = parser.frame.parse()
-  result = ExpressionProto(messages).eval_($lobby, [], $lobby)
-
+  if messages != []
+    result = ExpressionProto(messages).eval_($lobby, [], $lobby)
+  else
+    result = nil
+  end
+  
   if result && !$file
     print "= ", result.inspect(), "\n"
   end

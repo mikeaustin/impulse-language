@@ -28,7 +28,7 @@ class ArrayProto < Frame
     @instance.add_method2(:"count:", [])       { |receiver, args| receiver.frame.count(args[0]) }
     @instance.add_method2(:"**", [])           { |receiver, args| receiver.frame.repeat(args[0]) }
 
-    @instance.add_method2(:"==", [])           { |receiver, args| receiver.frame.equal(args[0].frame) }
+    @instance.add_method2(:"==", [])           { |receiver, args| receiver.frame.equal(args[0]) }
     @instance.add_method2(:"any:", [])         { |receiver, args| receiver.frame.any(args[0]) }
     @instance.add_method2(:"all:", [])         { |receiver, args| receiver.frame.all(args[0]) }
     
@@ -69,7 +69,7 @@ class ArrayProto < Frame
   #
 
   def equal(other)
-    self.array.zip(other.array) do |item_a, item_b|
+    self.array.zip(other.frame.array) do |item_a, item_b|
       if item_a.equal(item_b).float == false
         return Value(false)
       end

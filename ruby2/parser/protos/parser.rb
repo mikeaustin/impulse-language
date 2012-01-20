@@ -233,15 +233,10 @@ class StatementParser < Parser
 
     expect(NewlineToken, "Expected an expression [2].")
 
-    #if $file && peek_token() == nil
     if $file && !peek_token()
       return nil
     end
 
-    if messages == []
-      messages << nil
-    end
-      
     return messages
   end
   
@@ -336,6 +331,30 @@ class ArrayParser < Parser
 end
 
 
+class BodyParser < Parser
+
+  def parse()
+    expect(NewlineToken)
+    print "| " if !$file
+
+    expressions = []
+
+    begin
+      messages = StatementParser(@lexer)
+        
+      if messages != []
+        expressions << ExpressionProto(messages)
+      end
+        
+      print "| " if !$file
+    end while !keyword(:end)
+      
+    return expressions
+  end
+  
+end
+
+
 class BlockParser < Parser
 
   def parse()
@@ -352,15 +371,9 @@ class BlockParser < Parser
     expressions = []
 
     if keyword(:do)
-      expect(NewlineToken)
-      print "| " if !$file
-
-      begin
-        expressions << ExpressionProto(StatementParser(@lexer))
-        print "| " if !$file
-      end while !keyword(:end)
+      expressions = BodyParser.new(@lexer).frame.parse()
     else
-      expressions << ExpressionProto(ExpressionParser(@lexer))
+      expressions = [ExpressionProto(ExpressionParser(@lexer))]
     end
     
     return [BlockMessage(argnames, expressions)]
@@ -373,26 +386,20 @@ class ObjectParser < Parser
 
   def parse()
     argnames = [:"obj"]
-    proto = nil
+    proto_name = nil
     
     if keyword(:object)
       name = expect(IdentifierToken)
 
       if option(ColonColonToken)
-        proto = expect(IdentifierToken)
+        proto_name = expect(IdentifierToken)
       end
 
-      expect(NewlineToken)
-      print "| " if !$file
+      expressions = BodyParser.new(@lexer).frame.parse()
 
-      expressions = []
-
-      begin
-        expressions << ExpressionProto(StatementParser(@lexer))
-        print "| " if !$file
-      end while !keyword(:end)
+      proto = (proto_name && LocalMessage(proto_name.float)) || ObjectProto.instance
       
-      return [SendMessage(:"add-object:", [Value(name), ObjectProto.instance, BlockMessage(argnames, expressions)])]
+      return [SendMessage(:"add-object:", [Value(name), proto, BlockMessage(argnames, expressions)])]
     end
   end
 
@@ -437,16 +444,8 @@ class MethodParser < Parser
         end end while option(CommaToken)
       end
 
-      expect(NewlineToken)
-      print "| " if !$file
+      expressions = BodyParser.new(@lexer).frame.parse()
 
-      expressions = []
-
-      begin
-        expressions << ExpressionProto(StatementParser(@lexer))
-        print "| " if !$file
-      end while !keyword(:end)
-      
       return [LocalMessage(:"self"), SendMessage(:"add-method:", [Value(name), BlockMessage(argnames, expressions)])]
     end
   end

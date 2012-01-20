@@ -126,7 +126,7 @@ $ add-module: #<string>, with: || do
 
 end
 
-$ print: "\"foo\" capitalize-trait", with: "foo" capitalize-trait
+$ print: "] \"foo\" capitalize-trait", with: "foo" capitalize-trait
 
 
 
