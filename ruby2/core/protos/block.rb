@@ -25,6 +25,7 @@ class FunctionProto < Frame
   end
 
   def _call(receiver, args, object_self = nil)
+p receiver
     trace "FunctionProto::eval()"
 
     no_match = @arg_types.zip(args) do |proto, arg|

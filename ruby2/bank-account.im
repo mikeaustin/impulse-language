@@ -1,0 +1,103 @@
+//
+// bank-account.im
+//
+
+object <bank-account>
+
+   field balance = 0
+
+   method deposit: amount
+      self.balance = self.balance + amount
+   end
+
+   method withdraw: amount
+      self.balance = self.balance - amount
+   end
+
+end
+
+account = <bank-account>
+
+account deposit: 100
+account withdraw: 50
+
+$ print: "] account", with: account balance
+
+/*
+$ add-object: #<bank-account>, with: |object| do
+   object add-field: #balance, with: 100
+   
+   object add-method: #deposit-amount:, with: |amount| do
+      //self.balance = self.balance + amount
+      self balance: self balance + amount
+   end
+
+end
+
+<bank-account> deposit-amount: 50
+
+$ print: <bank-account> balance
+
+method balance
+   self.x
+end
+*/
+
+/*
+method deposit: amount
+   self.balance = self.balance + amount
+end
+*/
+
+/*
+object <bank-account>
+
+  include <logger>, rename: [log: => add-log:]
+
+  object <acct-type>
+     const checking = 1
+     const savings  = 2
+  end
+
+  object <log-type>
+     const inquiry  = 1 as-bit
+     const deposit  = 2 as-bit
+     const withdraw = 3 as-bit
+  end
+
+  field act-type = <acct-type> checking
+  field balance  = 0,  :reader, :required
+  field log      = [], :reader
+
+  method deposit: amount
+     self.balance = self.balance + amount
+     self add-log: [<log-type> deposit, "${<date> today}: Deposited ${amount}"]
+  end
+  
+  method withdraw: amount
+     if amount > self.balance
+        raise “Insufficient funds”
+     end
+     
+     self.balance = self.balance - amount
+     self add-log: [<log-type> withdraw, "${<date> today}: Withdrew ${amount}"]
+  end
+
+  method print-log: type
+     self.log map: |item| do
+        if item[1] == type then item
+     end $ each: |item| do
+        <io> print: item[1] ++ " " ++ item[2]
+     end
+  end
+
+end
+
+include <bank-account>.<log-type>
+
+local account = <bank-account> [#balance => 100]
+account withdraw: 10
+
+account print-log: <log-type> deposit
+*/
+
