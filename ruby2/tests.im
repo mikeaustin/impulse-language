@@ -33,7 +33,8 @@ $ add-object: #library, type: <object>, with: || do
    
    self add-method: #index:, with: |names| do
       result = names map: |name| do
-         name split: " " $ map: #capitalize $ reverse $ join: self.join-string
+         //name split: " " $ map: #capitalize $ reverse $ join: self.join-string
+         name split: " " $ map: #capitalize $ reverse $ join: ", "
       end
    end
 end
@@ -79,7 +80,7 @@ square = |x| x * x
    array fold: |string, next| string ++ "," ++ next
 end
 
-"abc" send: #upper-case, args: []
+"abc" send: #upper-case []
 "abc" with: |c| c upper-case
 "abc" with: #upper-case
 "abc" upper-case

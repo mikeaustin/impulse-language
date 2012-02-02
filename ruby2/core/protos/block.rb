@@ -6,26 +6,32 @@ require './core/frame.rb'
 require './core/protos/object.rb'
 
 
-def FunctionProto(func, arg_types = [])
-  return FunctionProto.new(func, arg_types)
+def FunctionProto(function, arg_types = [])
+  return FunctionProto.instance.frame.create(function, arg_types)
 end
 
 class FunctionProto < Frame
 
-  attr :func, true
+  attr :function, true
   attr :arg_types, true
   attr :arg_names, true
   attr :summary_doc, true
-  
-  def initialize(func, arg_types)
-    super(ObjectProto.instance)
-    
-    @func, @arg_types = func, arg_types
-    @arg_names = []
-  end
 
+  def self.instance()
+    @instance ||= FunctionProto.new(ObjectProto.instance)
+  end
+  
+  def create(function, arg_types)
+    object = self.class.new(Value(self))
+    
+    object.frame.function = function
+    object.frame.arg_types = arg_types
+    object.frame.arg_names = []
+
+    return object
+  end
+  
   def _call(receiver, args, object_self = nil)
-p receiver
     trace "FunctionProto::eval()"
 
     no_match = @arg_types.zip(args) do |proto, arg|
@@ -38,29 +44,27 @@ p receiver
       return nil
     end
     
-    if func.arity == -3 || func.arity == 3
-      return func.call(receiver, args, object_self);
+    if function.arity == -3 || function.arity == 3
+      return function.call(receiver, args, object_self);
     else
-      return func.call(receiver, args);
+      return function.call(receiver, args);
     end
   end
 
 end
 
 
-def BlockProto(argnames, expressions, locals)
-  return BlockProto.new(argnames, expressions, locals)
+def BlockProto(arg_names, expressions, locals)
+  return BlockProto.instance.frame.create(arg_names, expressions, locals)
 end
 
 class BlockProto < FunctionProto
 
-  attr :argnames, true
   attr :expressions, true
   attr :locals, true
 
   def self.instance()
-    @instance ||= BlockProto.new([], [], nil)
-    @instance.frame.frame_proto = ObjectProto.instance
+    @instance ||= BlockProto.new(ObjectProto.instance)
 
     @instance.add_method2(:"arity", []) { |receiver, args| receiver.frame.arity }
     @instance.add_method2(:"call:", []) { |receiver, args| receiver.frame._call(receiver, args) }
@@ -69,31 +73,21 @@ class BlockProto < FunctionProto
     return @instance
   end
 
-  def create(argnames, expression, locals)
-    object = self.class.new(Value(self));
+  def create(arg_names, expressions, locals)
+    object = super(self.method(:_call), []);
     
-    object.argnames = argnames
-    object.expression = expression
-    object.locals = locals
+    object.frame.arg_names = arg_names
+    object.frame.expressions = expressions
+    object.frame.locals = locals
     
     return object
   end
 
-  def initialize(argnames, expressions, locals)
-    super(self.method(:call_block), [])
-
-    if !expressions.empty?
-      self.frame_proto = BlockProto.instance
-    end
-    
-    @argnames, @expressions, @locals = argnames, expressions, locals
-  end
-
-  def call_block(receiver, args, object_self = nil)
+  def _call(receiver, args, object_self = nil)
     locals = LocalsProto(@locals)
     locals.add_local(:"self", object_self) if object_self
-
-    @argnames.each.with_index do |argname, i|
+    
+    @arg_names.each.with_index do |argname, i|
       locals.set_local(argname, args[i])
     end
 
@@ -109,7 +103,7 @@ class BlockProto < FunctionProto
       return "<block>"
     end
     
-    return "|#{value.frame.argnames}| #{value.frame.expressions}"
+    return "|#{value.frame.arg_names}| #{value.frame.expressions}"
   end
 
   #
@@ -117,7 +111,7 @@ class BlockProto < FunctionProto
   #
 
   def arity
-    return Value(@argnames.size)
+    return Value(@arg_names.size)
   end
 
 end

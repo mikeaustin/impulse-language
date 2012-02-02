@@ -7,15 +7,31 @@ require './core/protos/object.rb'
 
 
 def MessageProto(selector, args)
-  return MessageProto.new(selector, args)
+  #return MessageProto.new(selector, args)
+  return MessageProto.instance.frame.create(selector, args)
 end
 
 class MessageProto < Frame
 
   attr :selector, true
   attr :args, true
+
+  def self.instance
+    @instance ||= self.new(ObjectProto.instance)
+    
+    return @instance
+  end
+
+  def create(selector, args)
+    object = self.class.new(Value(self))
+    
+    object.frame.selector = selector
+    object.frame.args = args
+    
+    return object
+  end
   
-  def initialize(selector, args)
+  def xinitialize(selector, args)
     super(ObjectProto.instance)
 
     @selector, @args = selector, args
@@ -39,12 +55,19 @@ end
 
 
 def SendMessage(selector, args)
-  return SendMessage.new(selector, args)
+  #return SendMessage.new(selector, args)
+  return SendMessage.instance.frame.create(selector, args)
 end
 
 class SendMessage < MessageProto
 
-  def initialize(selector, args)
+  def create(selector, args)
+    object = super(selector, args)
+    
+    return object
+  end    
+
+  def xinitialize(selector, args)
     super(selector, args)
   end
 
@@ -64,12 +87,18 @@ end
 
 
 def AssignMessage(symbol, args)
-  return AssignMessage.new(symbol, args)
+  return AssignMessage.instance.frame.create(symbol, args)
 end
 
 class AssignMessage < MessageProto
 
-  def initialize(symbol, args)
+  def create(symbol, args)
+    object = super(:assign, [Value(symbol), args])
+    
+    return object
+  end    
+
+  def xinitialize(symbol, args)
     super(:assign, [Value(symbol), args])
   end
 
@@ -86,12 +115,19 @@ end
 
 
 def LocalMessage(selector)
-  return LocalMessage.new(selector)
+  #return LocalMessage.new(selector)
+  return LocalMessage.instance.frame.create(selector)
 end
 
 class LocalMessage < MessageProto
 
-  def initialize(selector)
+  def create(selector)
+    object = super(selector, [])
+    
+    return object
+  end
+
+  def xinitialize(selector)
     super(selector, [])
   end
 
@@ -105,12 +141,18 @@ end
 
 
 def ArrayMessage(items)
-  return ArrayMessage.new(items)
+  return ArrayMessage.instance.frame.create(items)
 end
 
 class ArrayMessage < MessageProto
 
-  def initialize(items)
+  def create(items)
+    object = super(:array, [items])
+    
+    return object
+  end    
+
+  def xinitialize(items)
     super(:array, [items])
   end
 
@@ -126,7 +168,7 @@ end
 
 
 def BlockMessage(argnames, expressions)
-  return BlockMessage.new(argnames, expressions)
+  return BlockMessage.instance.frame.create(argnames, expressions)
 end
 
 class BlockMessage < MessageProto
@@ -134,7 +176,15 @@ class BlockMessage < MessageProto
   attr :expressions, true
   attr :argnames, true
 
-  def initialize(argnames, expressions)
+  def create(argnames, expressions)
+    object = super(:block, [argnames, expressions])
+
+    object.frame.argnames, object.frame.expressions = argnames, expressions
+
+    return object
+  end
+
+  def xinitialize(argnames, expressions)
     super(:block, [argnames, expressions])
     
     @argnames, @expressions = argnames, expressions
@@ -154,12 +204,18 @@ end
 
 
 def ObjectMessage(symbol, block)
-  return ObjectMessage.new(symbol, block)
+  return ObjectMessage.instance.frame.create(symbol, block)
 end
 
 class ObjectMessage < MessageProto
 
-  def initialize(symbol, block)
+  def create(symbol, block)
+    object = super(:object, [block])
+
+    return object
+  end
+
+  def xinitialize(symbol, block)
     super(:object, [block])
   end
 
@@ -176,12 +232,18 @@ end
 
 
 def MethodMessage(symbol, block)
-  return MethodMessage.new(symbol, block)
+  return MethodMessage.instance.frame.create(symbol, block)
 end
 
 class MethodMessage < MessageProto
 
-  def initialize(symbol, block)
+  def create(symbol, block)
+    object = super(:method, [symbol, block])
+
+    return object
+  end
+
+  def xinitialize(symbol, block)
     super(:method, [symbol, block])
   end
 

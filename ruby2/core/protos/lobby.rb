@@ -14,6 +14,8 @@ require './core/protos/set.rb'
 require './core/protos/block.rb'
 require './core/protos/point.rb'
 
+require './runtime/protos/message.rb'
+
 
 def LobbyProto()
   return LobbyProto.new()
@@ -30,15 +32,18 @@ class LobbyProto < Frame
     self.set_local(:"nil",   NilProto.instance)
     self.set_local(:"true",  Value(true))
     self.set_local(:"false", Value(false))
-    self.set_local(:"<object>", ObjectProto.instance)
-    self.set_local(:"<number>", NumberProto.instance)
-    self.set_local(:"<string>", StringProto.instance)
-    self.set_local(:"<symbol>", SymbolProto.instance)
-    self.set_local(:"<array>",  ArrayProto.instance)
-    self.set_local(:"<range>",  RangeProto.instance)
-    self.set_local(:"<set>",    SetProto.instance)
-    self.set_local(:"<block>",  BlockProto.instance)
-    self.set_local(:"<point>",  PointProto.instance)
+    
+    self.set_local(:"<object>",  ObjectProto.instance)
+    self.set_local(:"<number>",  NumberProto.instance)
+    self.set_local(:"<string>",  StringProto.instance)
+    self.set_local(:"<symbol>",  SymbolProto.instance)
+    self.set_local(:"<array>",   ArrayProto.instance)
+    self.set_local(:"<range>",   RangeProto.instance)
+    self.set_local(:"<set>",     SetProto.instance)
+    self.set_local(:"<block>",   BlockProto.instance)
+    self.set_local(:"<point>",   PointProto.instance)
+
+    self.set_local(:"<message>", MessageProto.instance)
 
     self.set_local(:"lobby",    Value(self))
   end

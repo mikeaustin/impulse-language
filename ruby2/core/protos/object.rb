@@ -78,7 +78,8 @@ class ObjectProto < Frame
   end
 
   def _send(receiver, args)
-    return receiver.send_(args[0].float, args[1] ? args[1].frame.array : [], $lobby)
+    return receiver.send_(args[0].frame.selector, args[0].frame.args, $lobby)
+    #return receiver.send_(args[0].float, args[1] ? args[1].frame.array : [], $lobby)
   end
 
   def add_module(receiver, symbol, block)
