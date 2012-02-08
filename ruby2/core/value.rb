@@ -66,7 +66,7 @@ class Value
     return @float == other.float && @frame && frame.equal(other.frame)
   end
   
-  def eval_(receiver, args, locals)
+  def eval_(receiver, locals)
     trace "Value::eval()"
     
     #if @frame == NumberValue.instance.frame
@@ -74,7 +74,7 @@ class Value
       return self
     end
 
-    return @frame.eval_(receiver, args, locals)
+    return @frame.eval_(receiver, locals)
   end
 
   def raw_value()

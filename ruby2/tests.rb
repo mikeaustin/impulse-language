@@ -4,7 +4,7 @@
 
 
 def assert(expression, operator, expected)
-  if expression.eval_($lobby, [], $lobby).raw_value.send(operator, expected)
+  if expression.eval_($lobby, $lobby).raw_value.send(operator, expected)
     print "\x1b[32m\x1b[1mpass\x1b[0m"
   else
     print "\x1b[31m\x1b[1mfail\x1b[0m"
@@ -54,7 +54,7 @@ messages = [ObjectMessage(:button, BlockMessage([:button], [
                ExpressionProto([LocalMessage(:button), AssignMessage(:foo, Value(100))])
            ]))]
 output ExpressionProto(messages)
-ExpressionProto(messages).eval_($lobby, [], $lobby)
+ExpressionProto(messages).eval_($lobby, $lobby)
 
 # method :foo, |x|
 #    $ print: x
@@ -63,7 +63,7 @@ messages = [MethodMessage(:"foo:", BlockMessage([:x], [
                ExpressionProto([LocalMessage(:x)])
            ]))]
 output ExpressionProto(messages)
-ExpressionProto(messages).eval_($lobby, [], $lobby)
+ExpressionProto(messages).eval_($lobby, $lobby)
 
 # foo: 20
 messages = [SendMessage(:"foo:", [Value(20)])]

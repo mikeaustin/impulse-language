@@ -20,11 +20,11 @@ class ExpressionProto < Frame
     @messages = messages
   end
   
-  def eval_(receiver, args, locals)
+  def eval_(receiver, locals)
     trace "ExpressionProto::eval()"
     
     result = @messages.reduce(locals) do |receiver, value|
-      value && value.eval_(receiver, [], locals)
+      value && value.eval_(receiver, locals)
     end
 
     return result

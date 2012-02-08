@@ -32,7 +32,7 @@ class FunctionProto < Frame
   end
   
   def _call(receiver, args, object_self = nil)
-    trace "FunctionProto::eval()"
+    trace "FunctionProto::call()"
 
     no_match = @arg_types.zip(args) do |proto, arg|
       break true if proto && !arg.frame_is_a(proto)
@@ -93,7 +93,7 @@ class BlockProto < FunctionProto
     end
 
     result = @expressions.reduce(locals) do |receiver, expression|
-      expression.eval_(receiver, [], locals)
+      expression.eval_(receiver, locals)
     end
     
     return result

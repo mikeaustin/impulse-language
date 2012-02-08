@@ -71,11 +71,11 @@ class SendMessage < MessageProto
     super(selector, args)
   end
 
-  def eval_(receiver, args, locals)
+  def eval_(receiver, locals)
     trace "MessageProto::eval()"
 
     messageArgs = @args.map do |value|
-      value.eval_(locals, [], locals)
+      value.eval_(locals, locals)
     end
 
     result = receiver && receiver.send_(@selector, messageArgs, locals)
@@ -102,9 +102,9 @@ class AssignMessage < MessageProto
     super(:assign, [Value(symbol), args])
   end
 
-  def eval_(receiver, args, locals)
+  def eval_(receiver, locals)
     symbol = @args[0].float
-    value  = @args[1].eval_(locals, [], locals)
+    value  = @args[1].eval_(locals, locals)
     
     #if value
   	  return receiver.set_local(symbol, value)
@@ -131,7 +131,7 @@ class LocalMessage < MessageProto
     super(selector, [])
   end
 
-  def eval_(receiver, args, locals)
+  def eval_(receiver, locals)
     trace "LocalMessage::eval()"
 
     return receiver.find_local(@selector)
@@ -156,9 +156,9 @@ class ArrayMessage < MessageProto
     super(:array, [items])
   end
 
-  def eval_(receiver, args, locals)
+  def eval_(receiver, locals)
     messageArgs = @args[0].map do |value|
-      value.eval_(locals, [], locals)
+      value.eval_(locals, locals)
     end
 
     return ArrayProto.instance.frame.create(messageArgs)
@@ -190,7 +190,7 @@ class BlockMessage < MessageProto
     @argnames, @expressions = argnames, expressions
   end
 
-  def eval_(receiver, args, locals)
+  def eval_(receiver, locals)
     return BlockProto(@argnames, @expressions, locals)
   end
 
@@ -219,8 +219,8 @@ class ObjectMessage < MessageProto
     super(:object, [block])
   end
 
-  def eval_(receiver, args, locals)
-	block = @args[0].eval_(locals, [], locals)
+  def eval_(receiver, locals)
+	block = @args[0].eval_(locals, locals)
 	
     object = Frame.new(ObjectProto.instance)
     block.frame._call(receiver, [object])
@@ -247,8 +247,8 @@ class MethodMessage < MessageProto
     super(:method, [symbol, block])
   end
 
-  def eval_(receiver, args, locals)
-    block = @args[1].eval_(locals, [], locals)
+  def eval_(receiver, locals)
+    block = @args[1].eval_(locals, locals)
     
     receiver.add_method(@args[0], block)
     

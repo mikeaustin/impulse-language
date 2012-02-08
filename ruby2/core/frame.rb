@@ -163,7 +163,7 @@ class Frame < Object
     return nil
   end
 
-  def eval_(receiver, args, locals)
+  def eval_(receiver, locals)
     return Value(self)
   end
   
