@@ -67,6 +67,7 @@ class BlockProto < FunctionProto
     @instance ||= BlockProto.new(ObjectProto.instance)
 
     @instance.add_method2(:"arity", []) { |receiver, args| receiver.frame.arity }
+    @instance.add_method2(:"call",  []) { |receiver, args| receiver.frame._call(receiver, args) }
     @instance.add_method2(:"call:", []) { |receiver, args| receiver.frame._call(receiver, args) }
     @instance.add_method2(:"slice", []) { |receiver, args| receiver.frame._call(receiver, args) }
     
