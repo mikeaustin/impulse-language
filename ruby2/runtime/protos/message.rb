@@ -282,10 +282,8 @@ class PatternMessage < MessageProto
   
   def eval_(receiver, locals)
     #return receiver.set_local(@args[0].frame.selector, @args[1].eval_(locals, locals))
-#p @args[0]
     bindings = @args[0].frame.match(@args[0], @args[1].eval_(locals, locals), locals)
-#p bindings
-p bindings
+
     if !bindings
       puts "*** Match error: #{@args[0]}"
       
