@@ -33,6 +33,7 @@ class Lexer < Frame
              LitNumberToken, LitStringToken, LitSymbolToken,
              CommaToken, DotOperatorToken, VerticalBarToken, DollarSignToken, ColonColonToken,
              AssignToken, OperatorToken, IdentifierToken,
+             #OperatorToken, IdentifierToken,
              NewlineToken]
 
   def initialize(stream)

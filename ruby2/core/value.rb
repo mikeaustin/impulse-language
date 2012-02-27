@@ -36,6 +36,14 @@ class Value
     end
   end
 
+  def to_s()
+    return @frame && @frame.frame_to_s(self)
+  end
+
+  def inspect()
+    return @frame && @frame.frame_inspect(self)
+  end
+
   def frame_proto
     return @frame.frame_proto
   end
@@ -77,6 +85,10 @@ class Value
     return @frame.eval_(receiver, locals)
   end
 
+  def match(value, locals)
+    return @frame.match(self, value, locals)
+  end
+
   def raw_value()
     if @frame == NumberValue.instance.frame
       return self.float
@@ -97,6 +109,10 @@ class Value
     return @frame.send_(selector, self, args, locals)
   end
 
+  #
+  # Locals methods
+  #
+
   def add_local(symbol, value)
     return @frame.add_local(symbol, value)
   end
@@ -113,6 +129,10 @@ class Value
     return @frame.find_local(symbol)
   end
 
+  #
+  # Modules methods
+  #
+
   def add_module(symbol, value)
     return @frame.add_module(symbol, value)
   end
@@ -120,6 +140,10 @@ class Value
   def find_module(symbol)
     return @frame.find_module(symbol)
   end
+
+  #
+  # Methods methods
+  #
 
   def add_method(symbol, value)
     return @frame.add_method(symbol, value)
@@ -131,14 +155,6 @@ class Value
   
   def get_method(symbol)
     return @frame.get_method(symbol)
-  end
-
-  def to_s()
-    return @frame && @frame.frame_to_s(self)
-  end
-
-  def inspect()
-    return @frame && @frame.frame_inspect(self)
   end
 
 end

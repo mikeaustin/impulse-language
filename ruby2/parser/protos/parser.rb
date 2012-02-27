@@ -64,6 +64,8 @@ class Parser < Frame
 
   def precedence(operator)
     case operator.float
+    when :"::"
+      return 0
     when :"*", :"/", :"%"
       return 5
     when :"+", :"-"
@@ -117,13 +119,20 @@ class PrimaryParser < Parser
             identifier = expect(IdentifierToken)
           end
         end
-        
+=begin        
         if option(AssignToken)
           messages += ExpressionParser(@lexer)
           
           return self_message + [AssignMessage(identifier.float, ExpressionProto(messages))]
         end
-        
+=end
+=begin
+        if option(ColonColonToken)
+          messages2 = ExpressionParser(@lexer)
+
+          return [TypeMessage(LocalMessage(identifier.float), ExpressionProto(messages2))]
+        end
+=end
       	return self_message + [LocalMessage(identifier.float)]
       when VerticalBarToken
         return BlockParser.new(@lexer).frame.parse()
@@ -181,8 +190,6 @@ class MessageParser < Parser
         end
         
         return [SendMessage(:slice, arguments)]
-      #when NewlineToken
-      #	return []
     end
     
     return []
@@ -229,6 +236,18 @@ class StatementParser < Parser
       end
     end while option(DollarSignToken)
 
+    if option(ColonColonToken)
+      messages2 = ExpressionParser(@lexer)
+
+      messages = [TypeMessage(messages[0], ExpressionProto(messages2))]
+    end
+
+    if option(AssignToken)
+      messages2 = ExpressionParser(@lexer)
+
+      messages = [PatternMessage(messages[0], ExpressionProto(messages2))]
+    end
+
     option(CommentToken)
 
     expect(NewlineToken, "Expected an expression [2].")
@@ -236,7 +255,7 @@ class StatementParser < Parser
     if $file && !peek_token()
       return nil
     end
-
+#p messages
     return messages
   end
   
@@ -251,10 +270,6 @@ class SubExpressionParser < Parser
 
     expect(OpenParenToken, "Expected '('")
     
-    #if !peek_token().is_a? CloseParenToken
-    #  expression = ExpressionParser(@lexer)
-    #end
-
     messages = PrimaryParser(@lexer)
 
     begin
@@ -264,8 +279,6 @@ class SubExpressionParser < Parser
     end while option(DollarSignToken)
     
     expect(CloseParenToken, "Expected ')'")
-
-    #messages += expression
 
     if messages == []
        messages << NothingProto.instance
@@ -300,6 +313,12 @@ class ExpressionParser < Parser
       messages += message
     end
 
+    if option(ColonColonToken)
+      messages2 = ExpressionParser(@lexer)
+
+      messages = [TypeMessage(messages[0], ExpressionProto(messages2))]
+    end
+
     return messages
   end
   
@@ -319,13 +338,41 @@ class ArrayParser < Parser
 
     if !peek_token().is_a? CloseBracketToken
       begin
-        items << ExpressionProto(ExpressionParser(@lexer))
+        expr = ExpressionParser(@lexer)
+        
+        if expr.size > 1
+          items << ExpressionProto(expr)
+        else
+          items << expr[0]
+        end
+        #items << ExpressionProto(ExpressionParser(@lexer))
       end while option(CommaToken)
     end
     
     expect(CloseBracketToken, "Expected ']'")
     
     return [ArrayMessage(items)]
+  end
+
+end
+
+
+class FileParser < Parser
+
+  def parse()
+    expressions = []
+
+    parser = StatementParser.new(@lexer)
+
+    begin
+      messages = parser.frame.parse()
+
+      if messages != [] && messages != nil
+        expressions << ExpressionProto(messages)
+      end
+    end while messages
+    
+    return expressions
   end
 
 end

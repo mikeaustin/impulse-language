@@ -137,6 +137,10 @@ class LocalMessage < MessageProto
     return receiver.find_local(@selector)
   end
 
+  def match(receiver, value, locals)
+    return { receiver.frame.selector => value }
+  end
+
 end
 
 
@@ -146,15 +150,11 @@ end
 
 class ArrayMessage < MessageProto
 
-  def create(items)
-    object = super(:array, [items])
+  def create(values)
+    object = super(:array, [values])
     
     return object
   end    
-
-  def xinitialize(items)
-    super(:array, [items])
-  end
 
   def eval_(receiver, locals)
     messageArgs = @args[0].map do |value|
@@ -162,6 +162,18 @@ class ArrayMessage < MessageProto
     end
 
     return ArrayProto.instance.frame.create(messageArgs)
+  end
+
+  def match(receiver, value, locals)
+    items  = receiver.frame.args[0]
+    values = value.frame.array
+    
+    bindings = items.zip(values).reduce({}) do |bindings, (item, value)|
+      match = item.match(value, locals)
+      match ? bindings.merge(match) : (return nil)
+    end
+
+    return bindings;
   end
 
 end
@@ -251,6 +263,67 @@ class MethodMessage < MessageProto
     block = @args[1].eval_(locals, locals)
     
     receiver.add_method(@args[0], block)
+    
+    return nil
+  end
+
+end
+
+
+def PatternMessage(lvalue, value)
+  return PatternMessage.instance.frame.create(lvalue, value)
+end
+
+class PatternMessage < MessageProto
+
+  def create(lvalue, value)
+    return super(:pattern, [lvalue, value])
+  end
+  
+  def eval_(receiver, locals)
+    #return receiver.set_local(@args[0].frame.selector, @args[1].eval_(locals, locals))
+#p @args[0]
+    bindings = @args[0].frame.match(@args[0], @args[1].eval_(locals, locals), locals)
+#p bindings
+p bindings
+    if !bindings
+      puts "*** Match error: #{@args[0]}"
+      
+      return nil
+    end
+    
+    bindings.each do |symbol, value|
+      receiver.set_local(symbol, value)
+    end
+    
+    nil
+  end
+
+end
+
+
+def TypeMessage(symbol, value)
+  return TypeMessage.instance.frame.create(symbol, value)
+end
+
+class TypeMessage < MessageProto
+
+  def create(symbol, value)
+    return super(:type, [symbol, value])
+  end
+
+  def eval_(receiver, locals)
+    proto = @args[1].eval_(locals, locals)
+
+    return Value(@args[0].eval_(locals, locals).frame_proto.frame == proto.frame)
+  end
+
+  def match(receiver, value, locals)
+    proto = @args[1].eval_(locals, locals)
+
+    if value.frame_is_a(proto)
+      return @args[0].match(value, locals)
+    end
     
     return nil
   end

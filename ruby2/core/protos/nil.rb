@@ -11,7 +11,7 @@ class NilProto < Frame
     return @instance ||= NilProto.new()
   end
 
-  def send_(selector, receiver, args)
+  def send_(selector, receiver, args, locals)
     return NilProto.instance
   end
 

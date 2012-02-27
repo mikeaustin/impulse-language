@@ -56,6 +56,12 @@ end
 lexer  = Lexer.new($file ? File.open($file) : STDIN)
 parser = StatementParser.new(lexer)
 
+#$file = true
+#lexer2 = Lexer.new(File.open("tests.im"))
+#messages = FileParser.new(lexer2).frame.parse()
+#ExpressionProto(messages).eval_($lobby, $lobby)
+#$file = nil
+
 print "] " if !$file
 while messages = parser.frame.parse()
   if messages != []

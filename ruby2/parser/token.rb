@@ -250,14 +250,14 @@ class ColonColonToken < Token
     char = stream.getc()
     
     if !stream.peek().chr.match(/[:]/)
-      stream.unget(char)
+      stream.ungetc(char)
       
       return nil
     end
     
     stream.getc();
     
-    return self.new("::")
+    return self.new("::".to_sym)
   end
 
 end

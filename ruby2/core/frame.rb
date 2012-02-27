@@ -30,6 +30,14 @@ class Frame < Object
     return self.to_s()
   end
 
+  def match(receiver, value, locals)
+    if receiver.equal(value).float
+      return {}
+    end
+    
+    return nil
+  end
+
   def equal(other)
     return Value(other && self == other)
   end
